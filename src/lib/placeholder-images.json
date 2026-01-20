@@ -1,3 +1,124 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "user1",
+      "description": "Avatar for Ana Silva",
+      "imageUrl": "https://images.unsplash.com/photo-1592621385612-4d7129426394?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHx3b21hbiUyMHNtaWxpbmd8ZW58MHx8fHwxNzY4ODU2MTAwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "woman smiling"
+    },
+    {
+      "id": "user2",
+      "description": "Avatar for Bruno Costa",
+      "imageUrl": "https://images.unsplash.com/photo-1535890696255-dd5bcd79e6df?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxtYW4lMjBvdXRkb29yc3xlbnwwfHx8fDE3Njg3Njg1MDl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "man outdoors"
+    },
+    {
+      "id": "user3",
+      "description": "Avatar for Carla Dias",
+      "imageUrl": "https://images.unsplash.com/photo-1689343074357-0c724bdd93ec?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8d29tYW4lMjBnYXJkZW58ZW58MHx8fHwxNzY4Nzg1NDgyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "woman garden"
+    },
+    {
+      "id": "user4",
+      "description": "Avatar for Daniel Farias",
+      "imageUrl": "https://images.unsplash.com/photo-1594283255808-ee728c775ba6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxtYW4lMjB3aXRoJTIwZG9nfGVufDB8fHx8MTc2ODg3NzE4M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "man with dog"
+    },
+    {
+      "id": "user5",
+      "description": "Avatar for Fernanda Lima",
+      "imageUrl": "https://images.unsplash.com/photo-1668656379942-920e753667b3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHx3b21hbiUyMHdpdGglMjBjYXR8ZW58MHx8fHwxNzY4ODc3MTgzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "woman with cat"
+    },
+    {
+      "id": "listing1_main",
+      "description": "Main image for Cantinho Aconchegante",
+      "imageUrl": "https://images.unsplash.com/photo-1658893136904-63914a6b372c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxjb3p5JTIwbGl2aW5ncm9vbXxlbnwwfHx8fDE3Njg4MjQ3ODR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "cozy livingroom"
+    },
+    {
+      "id": "listing1_gallery1",
+      "description": "Gallery image for Cantinho Aconchegante",
+      "imageUrl": "https://images.unsplash.com/photo-1610461643300-a876423a9cd3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxkb2clMjBzbGVlcGluZ3xlbnwwfHx8fDE3Njg4NzcxODN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "dog sleeping"
+    },
+    {
+      "id": "listing1_gallery2",
+      "description": "Gallery image for Cantinho Aconchegante",
+      "imageUrl": "https://images.unsplash.com/photo-1626705887832-935f3669a6e7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8Z3JlZW4lMjBiYWNreWFyZHxlbnwwfHx8fDE3Njg4NzcxODN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "green backyard"
+    },
+    {
+      "id": "listing2_main",
+      "description": "Main image for Apartamento Pet-Friendly",
+      "imageUrl": "https://images.unsplash.com/photo-1664372623516-0b1540d6771e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxtb2Rlcm4lMjBhcGFydG1lbnR8ZW58MHx8fHwxNzY4ODI0NzgzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "modern apartment"
+    },
+    {
+      "id": "listing2_gallery1",
+      "description": "Gallery image for Apartamento Pet-Friendly",
+      "imageUrl": "https://images.unsplash.com/photo-1683031165846-772129b8ad34?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxjYXQlMjB3aW5kb3d8ZW58MHx8fHwxNzY4ODIyMTg5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "cat window"
+    },
+    {
+      "id": "listing2_gallery2",
+      "description": "Gallery image for Apartamento Pet-Friendly",
+      "imageUrl": "https://images.unsplash.com/photo-1523731407965-2430cd12f5e4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxjaXR5JTIwdmlld3xlbnwwfHx8fDE3Njg4NzcxODN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "city view"
+    },
+    {
+      "id": "listing3_main",
+      "description": "Main image for Casa com Piscina",
+      "imageUrl": "https://images.unsplash.com/photo-1724688078741-6d89e587e809?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8aG91c2UlMjBwb29sfGVufDB8fHx8MTc2ODgyNDc4M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "house pool"
+    },
+    {
+      "id": "listing3_gallery1",
+      "description": "Gallery image for Casa com Piscina",
+      "imageUrl": "https://images.unsplash.com/photo-1629143392929-f9a20031add1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxkb2clMjBzd2ltbWluZ3xlbnwwfHx8fDE3Njg4NzcxODR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "dog swimming"
+    },
+    {
+      "id": "listing3_gallery2",
+      "description": "Gallery image for Casa com Piscina",
+      "imageUrl": "https://images.unsplash.com/photo-1518882174711-1de40238921b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxkb2dzJTIwcGxheWluZ3xlbnwwfHx8fDE3Njg4NzcxODN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "dogs playing"
+    },
+    {
+      "id": "listing4_main",
+      "description": "Main image for Refúgio Tranquilo para Gatos",
+      "imageUrl": "https://images.unsplash.com/photo-1610714520720-ba92ae46e0e2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxjYXQlMjBmcmllbmRseXxlbnwwfHx8fDE3Njg4NzcxODN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "cat friendly"
+    },
+    {
+      "id": "listing4_gallery1",
+      "description": "Gallery image for Refúgio Tranquilo para Gatos",
+      "imageUrl": "https://images.unsplash.com/photo-1545249390-6bdfa286032f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxjYXQlMjB0b3lzfGVufDB8fHx8MTc2ODg3NzE4M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "cat toys"
+    },
+    {
+      "id": "listing4_gallery2",
+      "description": "Gallery image for Refúgio Tranquilo para Gatos",
+      "imageUrl": "https://images.unsplash.com/photo-1768040978599-28c26470bef0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxjYXQlMjBuYXBwaW5nfGVufDB8fHx8MTc2ODg3NzE4M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "cat napping"
+    },
+    {
+      "id": "listing5_main",
+      "description": "Main image for Lar Doce Lar no Campo",
+      "imageUrl": "https://images.unsplash.com/photo-1568285022189-681328dab5f5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxjb3VudHJ5c2lkZSUyMGhvdXNlfGVufDB8fHx8MTc2ODg3NzE4M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "countryside house"
+    },
+    {
+      "id": "listing5_gallery1",
+      "description": "Gallery image for Lar Doce Lar no Campo",
+      "imageUrl": "https://images.unsplash.com/photo-1592072409464-0bb5a72d00d9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxkb2clMjBydW5uaW5nJTIwZmllbGR8ZW58MHx8fHwxNzY4ODc3MTgzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "dog running field"
+    },
+    {
+      "id": "listing5_gallery2",
+      "description": "Gallery image for Lar Doce Lar no Campo",
+      "imageUrl": "https://images.unsplash.com/photo-1553531009-c4605f302b47?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxmYXJtJTIwYW5pbWFsc3xlbnwwfHx8fDE3Njg4MjMzNTR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "farm animals"
+    }
+  ]
 }
