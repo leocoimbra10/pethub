@@ -41,35 +41,41 @@ export default function Home() {
   return (
     <>
       <div className="container mx-auto px-4 py-8 md:py-16">
-        <section className="text-center py-12 md:py-20 bg-secondary rounded-xl border-2 border-black shadow-[8px_8px_0px_#000]">
-          <h1 className="text-4xl md:text-7xl font-bold font-headline tracking-tight text-black">
-            Airbnbicho
-          </h1>
-          <p className="mt-4 text-lg md:text-xl max-w-2xl mx-auto text-black font-medium">
-            Seu pet em boas mãos. Encontre o anfitrião perfeito para seu melhor amigo.
-          </p>
-          <div className="mt-8 flex flex-col items-center justify-center gap-4 max-w-2xl mx-auto px-4">
-            <Button className="w-full max-w-sm bg-accent hover:bg-accent/90 text-accent-foreground" size="lg">
-                <MapPin className="mr-2 h-5 w-5" />
-                Encontrar Hosts Perto de Mim
-            </Button>
-            <div className="flex items-center gap-2 text-black w-full max-w-sm">
-                <div className="flex-grow border-t-2 border-black"></div>
-                <span className="text-sm font-bold">OU</span>
-                <div className="flex-grow border-t-2 border-black"></div>
+        <section 
+          className="relative text-center py-12 md:py-20 rounded-xl border-2 border-black shadow-[8px_8px_0px_#000] bg-cover bg-center overflow-hidden"
+          style={{ backgroundImage: "url('https://images.unsplash.com/photo-1548199973-03cce0bbc87b?q=80&w=2069&auto=format&fit=crop')" }}
+        >
+          <div className="absolute inset-0 bg-black/40 rounded-xl"></div>
+          <div className="relative z-10 px-4">
+            <h1 className="text-4xl md:text-7xl font-bold font-headline tracking-tight text-white [text-shadow:_4px_4px_0_rgb(0_0_0_/_1)]">
+              Airbnbicho
+            </h1>
+            <p className="mt-4 text-lg md:text-xl max-w-2xl mx-auto text-white font-bold [text-shadow:_2px_2px_0_rgb(0_0_0_/_0.8)]">
+              Seu pet em boas mãos. Encontre o anfitrião perfeito para seu melhor amigo.
+            </p>
+            <div className="mt-8 flex flex-col items-center justify-center gap-4 max-w-2xl mx-auto">
+              <Button className="w-full max-w-sm bg-accent hover:bg-accent/90 text-accent-foreground" size="lg">
+                  <MapPin className="mr-2 h-5 w-5" />
+                  Encontrar Hosts Perto de Mim
+              </Button>
+              <div className="flex items-center gap-2 text-white w-full max-w-sm">
+                  <div className="flex-grow border-t-2 border-white/50"></div>
+                  <span className="text-sm font-bold">OU</span>
+                  <div className="flex-grow border-t-2 border-white/50"></div>
+              </div>
+              <form className="flex flex-col sm:flex-row items-center justify-center gap-2 w-full max-w-sm">
+                  <Input
+                    type="text"
+                    placeholder="Digite a cidade..."
+                    className="w-full bg-card"
+                  />
+                  <Link href="/search" className="w-full sm:w-auto">
+                      <Button type="submit" className="w-full bg-primary" size="lg">
+                          <Search className="h-5 w-5" />
+                      </Button>
+                  </Link>
+              </form>
             </div>
-            <form className="flex flex-col sm:flex-row items-center justify-center gap-2 w-full max-w-sm">
-                <Input
-                  type="text"
-                  placeholder="Digite a cidade..."
-                  className="w-full bg-card"
-                />
-                <Link href="/search" className="w-full sm:w-auto">
-                    <Button type="submit" className="w-full bg-primary" size="lg">
-                        <Search className="h-5 w-5" />
-                    </Button>
-                </Link>
-            </form>
           </div>
         </section>
       </div>
