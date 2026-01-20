@@ -6,12 +6,12 @@ import { useEffect, useState } from "react";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "REPLACE_WITH_YOUR_API_KEY",
-  authDomain: "REPLACE_WITH_YOUR_AUTH_DOMAIN",
-  projectId: "REPLACE_WITH_YOUR_PROJECT_ID",
-  storageBucket: "REPLACE_WITH_YOUR_STORAGE_BUCKET",
-  messagingSenderId: "REPLACE_WITH_YOUR_MESSAGING_SENDER_ID",
-  appId: "REPLACE_WITH_YOUR_APP_ID"
+  apiKey: "AIzaSyBcdD9I6ea20Y69Yj5ffn8R3ctlLXSY1uo",
+  authDomain: "studio-1786811890-24060.firebaseapp.com",
+  projectId: "studio-1786811890-24060",
+  storageBucket: "studio-1786811890-24060.firebasestorage.app",
+  messagingSenderId: "182469140897",
+  appId: "1:182469140897:web:422316ce2238c00fa8ebe0"
 };
 
 // Initialize Firebase

@@ -4,14 +4,12 @@ import Link from 'next/link';
 import {
   PawPrint,
   Menu,
-  Search,
-  LayoutDashboard,
   Heart,
   User as UserIcon,
   LogOut,
   Sun,
   Moon,
-  LogIn,
+  LayoutDashboard
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
@@ -34,16 +32,17 @@ import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 
+// New UX Writing for nav links
 const mainNav = [
-  { href: '/search', label: 'Buscar Anfitriões' },
-  { href: '/dashboard', label: 'Minhas Reservas' },
+  { href: '/search', label: 'Achar um Lar 🏠' },
+  { href: '/#como-rola', label: 'Como rola? 🤔' },
 ];
 
-const UserNav = () => {
-  const { setTheme } = useTheme();
+const UserActions = () => {
   const { user, loading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
+  const { setTheme } = useTheme();
 
   const handleLogout = async () => {
     try {
@@ -60,24 +59,21 @@ const UserNav = () => {
   };
 
   if (loading) {
-    return <div className="h-11 w-11 rounded-full bg-muted animate-pulse" />;
+    return <div className="h-9 w-24 rounded-md bg-muted animate-pulse" />;
   }
-  
+
   if (!user) {
     return (
-      <Link href="/login">
-        <Button>
-          <LogIn className="mr-2 h-4 w-4" />
-          Login
-        </Button>
-      </Link>
+        <Link href="/login" className="font-bold text-gray-600 hover:text-primary transition-colors">
+            Entrar na Toca 🐾
+        </Link>
     );
   }
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-11 w-11 rounded-full !shadow-none active:translate-x-0 active:translate-y-0">
+        <Button variant="ghost" className="relative h-11 w-11 rounded-full !shadow-none active:translate-x-0 active:translate-y-0 p-0">
           <Avatar className="h-11 w-11 border-2 border-black">
             <AvatarImage src={user.photoURL || "https://picsum.photos/seed/user-avatar/100/100"} data-ai-hint="person" alt="Avatar do usuário" />
             <AvatarFallback>{user.email?.[0].toUpperCase()}</AvatarFallback>
@@ -97,16 +93,12 @@ const UserNav = () => {
         <Link href="/dashboard">
           <DropdownMenuItem>
             <LayoutDashboard className="mr-2 h-4 w-4" />
-            <span>Dashboard</span>
+            <span>Minhas Reservas</span>
           </DropdownMenuItem>
         </Link>
         <DropdownMenuItem>
           <Heart className="mr-2 h-4 w-4" />
           <span>Favoritos</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem>
-          <UserIcon className="mr-2 h-4 w-4" />
-          <span>Perfil</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuSub>
@@ -134,66 +126,73 @@ const UserNav = () => {
 };
 
 export default function Header() {
-  
   return (
-    <header className="sticky top-0 z-50 w-full border-b-2 border-black bg-background">
-      <div className="container flex h-20 items-center">
-        <div className="mr-4 hidden md:flex">
-          <Link href="/" className="mr-6 flex items-center space-x-2">
-            <PawPrint className="h-8 w-8 text-primary" />
-            <span className="hidden font-bold sm:inline-block font-headline text-2xl">
-              Airbnbicho
-            </span>
-          </Link>
-          <nav className="flex items-center space-x-6 text-sm font-bold">
-            {mainNav.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="transition-colors hover:text-primary text-base"
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
+    <header className="sticky top-0 z-50 w-full border-b-2 border-black bg-white">
+      <div className="container flex h-20 items-center justify-between">
+        {/* Left Side: Logo + Mobile Trigger */}
+        <div className="flex items-center gap-4">
+            <Sheet>
+                <SheetTrigger asChild>
+                    <Button variant="ghost" size="icon" className="md:hidden">
+                    <Menu className="h-6 w-6" />
+                    <span className="sr-only">Toggle Menu</span>
+                    </Button>
+                </SheetTrigger>
+                <SheetContent side="left">
+                    <Link href="/" className="flex items-center space-x-2 mb-8">
+                        <PawPrint className="h-8 w-8 text-primary" />
+                        <span className="font-bold font-headline text-2xl">Airbnbicho</span>
+                    </Link>
+                    <nav className="flex flex-col space-y-4">
+                    {mainNav.map((item) => (
+                        <Link
+                        key={item.href}
+                        href={item.href}
+                        className="transition-colors hover:text-primary font-bold text-lg"
+                        >
+                        {item.label}
+                        </Link>
+                    ))}
+                    </nav>
+                    <div className="absolute bottom-8 left-8 right-8 flex flex-col gap-4">
+                         <Link href="/login#register" className="w-full">
+                            <Button className="w-full bg-accent hover:bg-accent/90 text-accent-foreground rounded-2xl">
+                                Quero dar Colo ❤️
+                            </Button>
+                         </Link>
+                         <UserActions />
+                    </div>
+                </SheetContent>
+            </Sheet>
+             <Link href="/" className="flex items-center space-x-2">
+                <PawPrint className="h-8 w-8 text-primary" />
+                <span className="hidden font-bold sm:inline-block font-headline text-2xl">
+                    Airbnbicho
+                </span>
+            </Link>
         </div>
 
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="md:hidden">
-              <Menu className="h-6 w-6" />
-              <span className="sr-only">Toggle Menu</span>
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left">
-            <Link href="/" className="mr-6 flex items-center space-x-2">
-              <PawPrint className="h-6 w-6 text-primary" />
-              <span className="font-bold font-headline">Airbnbicho</span>
+        {/* Center: Desktop Nav */}
+        <nav className="hidden md:flex flex-1 items-center justify-center space-x-6">
+          {mainNav.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="font-bold text-gray-600 transition-colors hover:text-primary text-base"
+            >
+              {item.label}
             </Link>
-            <div className="mt-6 flex flex-col space-y-4">
-              {mainNav.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="transition-colors hover:text-primary font-bold text-lg"
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </div>
-          </SheetContent>
-        </Sheet>
-        
-        <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
-          <div className="w-full flex-1 md:w-auto md:flex-none">
-             <Button variant="outline" className="hidden md:flex w-full justify-start text-sm text-muted-foreground bg-card">
-                <Search className="mr-2 h-4 w-4" />
-                Buscar anfitriões...
-             </Button>
-          </div>
-          <nav className="flex items-center">
-            <UserNav />
-          </nav>
+          ))}
+        </nav>
+
+        {/* Right Side: Desktop Actions */}
+        <div className="hidden md:flex items-center justify-end gap-4">
+          <UserActions />
+           <Link href="/login#register">
+            <Button className="bg-accent hover:bg-accent/90 text-accent-foreground rounded-2xl">
+                Quero dar Colo ❤️
+            </Button>
+           </Link>
         </div>
       </div>
     </header>

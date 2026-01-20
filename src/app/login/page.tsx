@@ -17,7 +17,7 @@ import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "fire
 import { PawPrint } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -25,6 +25,12 @@ export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);
   const { toast } = useToast();
   const router = useRouter();
+
+  useEffect(() => {
+    if (window.location.hash === '#register') {
+      setIsLogin(false);
+    }
+  }, []);
 
   const handleAuth = async () => {
     try {

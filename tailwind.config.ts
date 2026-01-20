@@ -17,7 +17,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        body: ['Inter', 'sans-serif'],
+        body: ['Nunito', 'sans-serif'],
         headline: ['Archivo Black', 'sans-serif'],
       },
       boxShadow: {

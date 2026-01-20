@@ -80,7 +80,7 @@ export default function Home() {
         </section>
       </div>
 
-      <section className="py-16 bg-background">
+      <section id="como-rola" className="py-16 bg-background">
           <div className="container mx-auto px-4">
               <h2 className="text-4xl font-bold font-headline text-center mb-12">Como Funciona?</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
@@ -197,7 +197,7 @@ export default function Home() {
               <h2 className="text-4xl md:text-5xl font-bold font-headline text-black max-w-2xl mx-auto">Ama bichos? Ganhe dinheiro hospedando em casa!</h2>
               <p className="mt-4 text-lg text-black font-medium max-w-xl mx-auto">Junte-se à nossa comunidade de anfitriões e ofereça um lar temporário para pets enquanto seus tutores viajam.</p>
               <div className="mt-8">
-                  <Link href="#">
+                  <Link href="/login#register">
                     <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground">Quero ser Anfitrião</Button>
                   </Link>
               </div>
