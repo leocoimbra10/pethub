@@ -29,17 +29,41 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useState, useEffect } from 'react';
+import { useAuth, auth } from '@/lib/firebase';
+import { signOut } from 'firebase/auth';
+import { useRouter } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
 
 const mainNav = [
   { href: '/search', label: 'Buscar Anfitriões' },
   { href: '/dashboard', label: 'Minhas Reservas' },
 ];
 
-const UserNav = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
+const UserNav = () => {
   const { setTheme } = useTheme();
+  const { user, loading } = useAuth();
+  const router = useRouter();
+  const { toast } = useToast();
 
-  if (!isAuthenticated) {
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      toast({ title: "Você foi desconectado." });
+      router.push('/');
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Erro ao sair",
+        description: error.message,
+      });
+    }
+  };
+
+  if (loading) {
+    return <div className="h-11 w-11 rounded-full bg-muted animate-pulse" />;
+  }
+  
+  if (!user) {
     return (
       <Link href="/login">
         <Button>
@@ -55,25 +79,27 @@ const UserNav = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-11 w-11 rounded-full !shadow-none active:translate-x-0 active:translate-y-0">
           <Avatar className="h-11 w-11 border-2 border-black">
-            <AvatarImage src="https://picsum.photos/seed/user-avatar/100/100" data-ai-hint="person" alt="Avatar do usuário" />
-            <AvatarFallback>U</AvatarFallback>
+            <AvatarImage src={user.photoURL || "https://picsum.photos/seed/user-avatar/100/100"} data-ai-hint="person" alt="Avatar do usuário" />
+            <AvatarFallback>{user.email?.[0].toUpperCase()}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">Usuário</p>
+            <p className="text-sm font-medium leading-none">{user.displayName || 'Usuário'}</p>
             <p className="text-xs leading-none text-muted-foreground">
-              usuario@email.com
+              {user.email}
             </p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <LayoutDashboard className="mr-2 h-4 w-4" />
-          <span>Dashboard</span>
-        </DropdownMenuItem>
+        <Link href="/dashboard">
+          <DropdownMenuItem>
+            <LayoutDashboard className="mr-2 h-4 w-4" />
+            <span>Dashboard</span>
+          </DropdownMenuItem>
+        </Link>
         <DropdownMenuItem>
           <Heart className="mr-2 h-4 w-4" />
           <span>Favoritos</span>
@@ -98,7 +124,7 @@ const UserNav = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
           </DropdownMenuPortal>
         </DropdownMenuSub>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={handleLogout}>
           <LogOut className="mr-2 h-4 w-4" />
           <span>Sair</span>
         </DropdownMenuItem>
@@ -108,17 +134,7 @@ const UserNav = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
 };
 
 export default function Header() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-    // In a real app, you'd check for an active session here.
-    // For this MVP, we'll toggle it for demonstration.
-    const timer = setTimeout(() => setIsAuthenticated(true), 2000);
-    return () => clearTimeout(timer);
-  }, []);
-
+  
   return (
     <header className="sticky top-0 z-50 w-full border-b-2 border-black bg-background">
       <div className="container flex h-20 items-center">
@@ -176,7 +192,7 @@ export default function Header() {
              </Button>
           </div>
           <nav className="flex items-center">
-            {isClient && <UserNav isAuthenticated={isAuthenticated} />}
+            <UserNav />
           </nav>
         </div>
       </div>
