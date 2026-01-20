@@ -15,7 +15,7 @@ export default function DashboardPage() {
 
   const renderBookingList = (bookingList: Booking[]) => {
     if (bookingList.length === 0) {
-      return <p className="text-muted-foreground text-center py-8">Nenhuma reserva encontrada.</p>;
+      return <p className="font-bold text-center py-8">Nenhuma reserva encontrada.</p>;
     }
 
     return (
@@ -32,12 +32,12 @@ export default function DashboardPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
-      <h1 className="text-3xl md:text-4xl font-bold font-headline mb-8">
+      <h1 className="text-3xl md:text-5xl font-bold font-headline mb-8 text-center">
         Minhas Reservas
       </h1>
 
       <Tabs defaultValue="upcoming" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 md:w-[400px]">
+        <TabsList className="grid w-full grid-cols-2 md:w-[400px] mx-auto">
           <TabsTrigger value="upcoming">Próximas</TabsTrigger>
           <TabsTrigger value="past">Anteriores</TabsTrigger>
         </TabsList>

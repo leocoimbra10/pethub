@@ -53,8 +53,8 @@ const UserNav = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-          <Avatar className="h-10 w-10">
+        <Button variant="ghost" className="relative h-11 w-11 rounded-full !shadow-none active:translate-x-0 active:translate-y-0">
+          <Avatar className="h-11 w-11 border-2 border-black">
             <AvatarImage src="https://picsum.photos/seed/user-avatar/100/100" data-ai-hint="person" alt="Avatar do usuário" />
             <AvatarFallback>U</AvatarFallback>
           </Avatar>
@@ -120,21 +120,21 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center">
+    <header className="sticky top-0 z-50 w-full border-b-2 border-black bg-background">
+      <div className="container flex h-20 items-center">
         <div className="mr-4 hidden md:flex">
           <Link href="/" className="mr-6 flex items-center space-x-2">
-            <PawPrint className="h-6 w-6 text-primary" />
-            <span className="hidden font-bold sm:inline-block font-headline">
+            <PawPrint className="h-8 w-8 text-primary" />
+            <span className="hidden font-bold sm:inline-block font-headline text-2xl">
               Airbnbicho
             </span>
           </Link>
-          <nav className="flex items-center space-x-6 text-sm font-medium">
+          <nav className="flex items-center space-x-6 text-sm font-bold">
             {mainNav.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="transition-colors hover:text-primary"
+                className="transition-colors hover:text-primary text-base"
               >
                 {item.label}
               </Link>
@@ -159,7 +159,7 @@ export default function Header() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="transition-colors hover:text-primary"
+                  className="transition-colors hover:text-primary font-bold text-lg"
                 >
                   {item.label}
                 </Link>
@@ -170,7 +170,7 @@ export default function Header() {
         
         <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
           <div className="w-full flex-1 md:w-auto md:flex-none">
-             <Button variant="outline" className="hidden md:flex w-full justify-start text-sm text-muted-foreground">
+             <Button variant="outline" className="hidden md:flex w-full justify-start text-sm text-muted-foreground bg-card">
                 <Search className="mr-2 h-4 w-4" />
                 Buscar anfitriões...
              </Button>

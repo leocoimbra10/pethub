@@ -28,15 +28,15 @@ export default function SearchPage() {
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
       <div className="mb-8 text-center">
-        <h1 className="text-3xl md:text-4xl font-bold font-headline">Anfitriões disponíveis</h1>
-        <p className="text-muted-foreground mt-2">Encontramos {allListings.length} lugares incríveis para seu pet.</p>
+        <h1 className="text-3xl md:text-5xl font-bold font-headline">Anfitriões disponíveis</h1>
+        <p className="font-bold mt-2">Encontramos {allListings.length} lugares incríveis para seu pet.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-12">
+      <div className="grid grid-cols-1 md:grid-cols-[320px_1fr] gap-12">
         <aside className="hidden md:block">
-          <Card className="sticky top-24 shadow-lg">
+          <Card className="sticky top-24">
             <CardHeader>
-              <CardTitle>Filtros</CardTitle>
+              <CardTitle className="font-headline text-2xl">Filtros</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-4">
@@ -49,7 +49,7 @@ export default function SearchPage() {
                     onValueChange={setPriceRange}
                   />
                 </div>
-                <div className="text-center text-muted-foreground">
+                <div className="text-center font-bold">
                   Até R$ {priceRange[0]},00 / noite
                 </div>
               </div>
@@ -60,7 +60,7 @@ export default function SearchPage() {
                   {amenitiesList.map(amenity => (
                     <div key={amenity} className="flex items-center space-x-2">
                       <Checkbox id={amenity} />
-                      <Label htmlFor={amenity} className="font-normal text-muted-foreground">{amenity}</Label>
+                      <Label htmlFor={amenity} className="font-bold">{amenity}</Label>
                     </div>
                   ))}
                 </div>
@@ -72,12 +72,12 @@ export default function SearchPage() {
         </aside>
 
         <main>
-          <div className="relative mb-8 md:hidden">
+          <div className="relative mb-8">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
               type="text"
-              placeholder="Busque por cidade..."
-              className="pl-12 w-full"
+              placeholder="Busque por cidade, anfitrião..."
+              className="pl-12 w-full bg-card"
             />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-8">

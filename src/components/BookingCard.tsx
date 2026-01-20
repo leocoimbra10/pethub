@@ -19,7 +19,7 @@ export default function BookingCard({ booking, listing, host }: BookingCardProps
   const endDate = format(booking.endDate, "dd 'de' MMM, yyyy", { locale: ptBR });
 
   return (
-    <Card className="overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300">
+    <Card className="overflow-hidden bg-card">
       <div className="md:flex">
         <div className="md:flex-shrink-0">
           <div className="relative h-48 w-full md:w-48">
@@ -28,7 +28,7 @@ export default function BookingCard({ booking, listing, host }: BookingCardProps
               alt={listing.title}
               fill
               style={{ objectFit: 'cover' }}
-              className="rounded-t-lg md:rounded-l-lg md:rounded-t-none"
+              className="border-b-2 md:border-b-0 md:border-r-2 border-black"
               data-ai-hint="cozy livingroom"
             />
           </div>
@@ -36,29 +36,29 @@ export default function BookingCard({ booking, listing, host }: BookingCardProps
         <div className="p-6 flex-grow">
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-sm text-muted-foreground flex items-center gap-1">
+              <p className="text-sm font-bold flex items-center gap-1">
                 <MapPin className="h-4 w-4" /> {listing.city}
               </p>
               <Link href={`/hosts/${listing.id}`}>
                 <h3 className="text-xl font-bold font-headline hover:text-primary transition-colors">{listing.title}</h3>
               </Link>
-              <p className="text-muted-foreground">Anfitrião: {host.name}</p>
+              <p className="font-bold">Anfitrião: {host.name}</p>
             </div>
-            <div className="text-right">
-              <p className="text-sm text-muted-foreground">Total</p>
+            <div className="text-right flex-shrink-0 ml-4">
+              <p className="text-sm font-bold">Total</p>
               <p className="text-lg font-bold text-primary">
                 R$ {booking.totalPrice.toFixed(2).replace('.', ',')}
               </p>
             </div>
           </div>
-          <Separator className="my-4" />
+          <Separator className="my-4 border-black" />
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div className="flex items-center gap-2 text-muted-foreground">
+            <div className="flex items-center gap-2 font-bold">
               <Calendar className="h-5 w-5" />
               <span>{startDate} - {endDate}</span>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline">
+              <Button variant="secondary">
                 <MessageSquare className="h-4 w-4 mr-2" />
                 Mensagem
               </Button>

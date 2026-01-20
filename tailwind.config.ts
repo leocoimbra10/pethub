@@ -17,9 +17,12 @@ export default {
     },
     extend: {
       fontFamily: {
-        body: ['Nunito', 'sans-serif'],
-        headline: ['Nunito', 'sans-serif'],
-        code: ['monospace'],
+        body: ['Inter', 'sans-serif'],
+        headline: ['Archivo Black', 'sans-serif'],
+      },
+      boxShadow: {
+        'neo': '4px 4px 0px #000',
+        'neo-sm': '2px 2px 0px #000',
       },
       colors: {
         background: 'hsl(var(--background))',
