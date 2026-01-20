@@ -44,7 +44,7 @@ export default function HostDetailPage({ params }: { params: { id: string } }) {
       </div>
       
       {/* Image Gallery */}
-      <div className="grid grid-cols-1 md:grid-cols-2 md:grid-rows-2 gap-2 h-[50vh] rounded-xl overflow-hidden mb-8 shadow-lg">
+      <div className="grid grid-cols-1 md:grid-cols-2 md:grid-rows-2 gap-2 h-[50vh] rounded-3xl overflow-hidden mb-8 shadow-lg">
           <div className="relative md:row-span-2">
             <Image src={listing.mainImage} alt={listing.title} fill style={{objectFit: "cover"}} className="hover:scale-105 transition-transform duration-300" data-ai-hint="cozy livingroom"/>
           </div>
@@ -59,12 +59,12 @@ export default function HostDetailPage({ params }: { params: { id: string } }) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
         <div className="lg:col-span-2">
           {/* Host Info */}
-          <div className="flex justify-between items-center pb-6 border-b">
-            <div>
+          <div className="flex justify-between items-start pb-6 border-b -mt-16">
+            <div className="pt-16">
               <h2 className="text-2xl font-bold font-headline">Hospedado por {host.name}</h2>
               <p className="text-muted-foreground">Anfitrião desde 2021</p>
             </div>
-            <Avatar className="h-16 w-16">
+            <Avatar className="h-32 w-32 border-8 border-background shadow-lg">
               <AvatarImage src={host.photo} alt={host.name} data-ai-hint="person happy"/>
               <AvatarFallback>{host.name.charAt(0)}</AvatarFallback>
             </Avatar>

@@ -11,7 +11,7 @@ export default function Home() {
 
   return (
     <div className="container mx-auto px-4 py-8 md:py-16">
-      <section className="text-center py-12 md:py-24 bg-card rounded-xl shadow-md">
+      <section className="text-center py-12 md:py-24 bg-card rounded-3xl shadow-md">
         <h1 className="text-4xl md:text-6xl font-bold font-headline tracking-tight text-primary">
           Airbnbicho
         </h1>
@@ -20,11 +20,11 @@ export default function Home() {
         </p>
         <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 max-w-lg mx-auto px-4">
           <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
               type="text"
               placeholder="Busque por cidade..."
-              className="pl-10 w-full"
+              className="pl-12 w-full"
             />
           </div>
           <Link href="/search" className="w-full sm:w-auto">
