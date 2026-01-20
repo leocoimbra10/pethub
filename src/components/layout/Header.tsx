@@ -34,8 +34,8 @@ import { useToast } from '@/hooks/use-toast';
 
 // New UX Writing for nav links
 const mainNav = [
-  { href: '/search', label: 'Achar um Lar 🏠' },
-  { href: '/#como-rola', label: 'Como rola? 🤔' },
+  { href: '/search', label: 'Achar um Lar' },
+  { href: '/#como-rola', label: 'Como rola?' },
 ];
 
 const UserActions = () => {
@@ -65,7 +65,7 @@ const UserActions = () => {
   if (!user) {
     return (
         <Link href="/login" className="font-bold text-gray-600 hover:text-primary transition-colors">
-            Entrar na Toca 🐾
+            Entrar na Toca
         </Link>
     );
   }
@@ -128,12 +128,12 @@ const UserActions = () => {
 export default function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b-2 border-black bg-white">
-      <div className="container flex h-20 items-center justify-between">
+      <div className="container flex h-20 items-center">
         {/* Left Side: Logo + Mobile Trigger */}
-        <div className="flex items-center gap-4">
+        <div className="flex flex-1 items-center justify-start">
             <Sheet>
                 <SheetTrigger asChild>
-                    <Button variant="ghost" size="icon" className="md:hidden">
+                    <Button variant="ghost" size="icon" className="md:hidden mr-4">
                     <Menu className="h-6 w-6" />
                     <span className="sr-only">Toggle Menu</span>
                     </Button>
@@ -157,10 +157,12 @@ export default function Header() {
                     <div className="absolute bottom-8 left-8 right-8 flex flex-col gap-4">
                          <Link href="/login#register" className="w-full">
                             <Button className="w-full bg-accent hover:bg-accent/90 text-accent-foreground rounded-2xl">
-                                Quero dar Colo ❤️
+                                Quero dar Colo <Heart className="h-4 w-4" />
                             </Button>
                          </Link>
-                         <UserActions />
+                         <div className="text-center">
+                           <UserActions />
+                         </div>
                     </div>
                 </SheetContent>
             </Sheet>
@@ -173,7 +175,7 @@ export default function Header() {
         </div>
 
         {/* Center: Desktop Nav */}
-        <nav className="hidden md:flex flex-1 items-center justify-center space-x-6">
+        <nav className="hidden md:flex items-center justify-center space-x-6">
           {mainNav.map((item) => (
             <Link
               key={item.href}
@@ -186,11 +188,11 @@ export default function Header() {
         </nav>
 
         {/* Right Side: Desktop Actions */}
-        <div className="hidden md:flex items-center justify-end gap-4">
+        <div className="hidden md:flex flex-1 items-center justify-end gap-4">
           <UserActions />
            <Link href="/login#register">
             <Button className="bg-accent hover:bg-accent/90 text-accent-foreground rounded-2xl">
-                Quero dar Colo ❤️
+                Quero dar Colo <Heart className="h-4 w-4" />
             </Button>
            </Link>
         </div>
