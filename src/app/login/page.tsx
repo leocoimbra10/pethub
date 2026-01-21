@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Button } from "@/components/ui/button";
@@ -11,10 +12,15 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { auth, useAuth } from "@/lib/firebase";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithRedirect } from "firebase/auth";
-import { Loader, PawPrint } from "lucide-react";
+import { 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword, 
+  GoogleAuthProvider, 
+  signInWithPopup 
+} from "firebase/auth";
+import { Loader, PawPrint, TriangleAlert } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
@@ -29,10 +35,17 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLogin, setIsLogin] = useState(true);
-  const { toast } = useToast();
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const { user, loading } = useAuth();
 
+  useEffect(() => {
+    if (user && !loading) {
+      console.log("Usuário logado! Redirecionando...");
+      router.push('/dashboard');
+    }
+  }, [user, loading, router]);
+  
   useEffect(() => {
     if (typeof window !== 'undefined' && window.location.hash === '#register') {
       setIsLogin(false);
@@ -40,33 +53,30 @@ export default function LoginPage() {
   }, []);
 
   const handleAuth = async () => {
+    setError(null);
     try {
       if (isLogin) {
         await signInWithEmailAndPassword(auth, email, password);
-        toast({ title: "Login realizado com sucesso." });
       } else {
         await createUserWithEmailAndPassword(auth, email, password);
-        toast({ title: "Conta criada com sucesso." });
       }
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Erro de autenticação",
-        description: error.message,
-      });
+      // The useEffect will handle the redirect
+    } catch (err: any) {
+      console.error("Erro de autenticação:", err);
+      setError(err.message);
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    const provider = new GoogleAuthProvider();
+  const handleGoogleLogin = async () => {
+    setError(null);
     try {
-      await signInWithRedirect(auth, provider);
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Erro de autenticação",
-        description: error.message,
-      });
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      console.log("Login sucesso:", result.user);
+      // The useEffect will handle the redirect
+    } catch (err: any) {
+      console.error("Erro Login:", err);
+      setError(err.message);
     }
   };
 
@@ -74,27 +84,16 @@ export default function LoginPage() {
     return (
       <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">
         <Loader className="h-16 w-16 animate-spin text-primary" />
+        <p className="font-bold text-lg ml-4">Verificando...</p>
       </div>
     );
   }
 
   if (user) {
     return (
-      <div className="flex items-center justify-center min-h-[calc(100vh-8rem)] py-12 px-4">
-        <Card className="w-full max-w-md bg-lime-200 border-lime-400">
-          <CardHeader>
-            <CardTitle>Login bem-sucedido!</CardTitle>
-            <CardDescription>Você está logado como:</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="font-bold text-lg break-all">{user.email}</p>
-          </CardContent>
-          <CardFooter>
-            <Button className="w-full" onClick={() => router.push('/dashboard')}>
-              Ir para meu Dashboard
-            </Button>
-          </CardFooter>
-        </Card>
+      <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">
+        <Loader className="h-16 w-16 animate-spin text-primary" />
+        <p className="font-bold text-lg ml-4">Logado! Redirecionando...</p>
       </div>
     );
   }
@@ -115,6 +114,13 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
+           {error && (
+            <Alert variant="destructive">
+              <TriangleAlert className="h-4 w-4" />
+              <AlertTitle>Erro de Autenticação</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
           <div className="grid gap-2">
             <Label htmlFor="email" className="font-bold">Email</Label>
             <Input id="email" type="email" placeholder="seu@email.com" required className="bg-card" value={email} onChange={(e) => setEmail(e.target.value)} />
@@ -131,7 +137,7 @@ export default function LoginPage() {
               <span className="flex-shrink mx-4 font-bold text-sm">OU</span>
               <div className="flex-grow border-t-2 border-black"></div>
           </div>
-          <Button variant="outline" className="w-full bg-card" onClick={handleGoogleSignIn}>
+          <Button variant="outline" className="w-full bg-card" onClick={handleGoogleLogin}>
             <GoogleIcon className="mr-2 h-4 w-4" />
             Entrar com Google
           </Button>
@@ -146,3 +152,4 @@ export default function LoginPage() {
     </div>
   );
 }
+
