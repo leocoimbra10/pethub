@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuth, auth } from '@/lib/firebase';
+import { useAuth, auth, firestore } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { Loader } from 'lucide-react';
@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { signOut } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
+import { seedHosts } from '@/lib/seed-hosts';
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
@@ -33,6 +34,22 @@ export default function DashboardPage() {
         variant: 'destructive',
         title: 'Erro ao sair',
         description: error.message,
+      });
+    }
+  };
+
+  const handleSeed = async () => {
+    const success = await seedHosts(firestore);
+    if (success) {
+      toast({
+        title: 'Sucesso!',
+        description: '5 cuidadores de teste foram criados no banco de dados.',
+      });
+    } else {
+      toast({
+        variant: 'destructive',
+        title: 'Erro',
+        description: 'Não foi possível criar os cuidadores de teste.',
       });
     }
   };
@@ -81,6 +98,18 @@ export default function DashboardPage() {
               Sair da Toca
             </Button>
           </CardFooter>
+        </Card>
+        
+        <Card className="bg-card mt-8">
+            <CardHeader>
+                <CardTitle>Ferramentas de Desenvolvimento</CardTitle>
+                <CardDescription>Use este botão para popular o banco de dados com cuidadores de teste.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Button onClick={handleSeed} variant="secondary">
+                   🛠️ Gerar Cuidadores Teste
+                </Button>
+            </CardContent>
         </Card>
       </div>
     </div>
