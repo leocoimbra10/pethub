@@ -202,54 +202,47 @@ export default function ChatPage() {
                             <Loader className="h-6 w-6 animate-spin mx-auto" />
                         </div>
                     ) : chatsList.length > 0 ? (
-                        <>
-                            {chatsList.map(c => {
-                                const otherParticipantName = getOtherParticipantName(c);
-                                const isActive = c.id === chatId;
-                                return (
-                                <div
-                                    key={c.id}
-                                    onClick={() => router.push(`/chat/${c.id}`)}
-                                    className={cn(
-                                    'flex items-center gap-3 p-3 cursor-pointer transition-all duration-200 border-2 border-black rounded-xl',
-                                    isActive
-                                        ? 'bg-black text-white shadow-[2px_2px_0px_#FF007F]'
-                                        : 'bg-white text-black shadow-[4px_4px_0px_#000] hover:shadow-[6px_6px_0px_#000] hover:-translate-x-1 hover:-translate-y-1'
-                                    )}
-                                >
-                                    <div
-                                    className={cn(
-                                        'w-12 h-12 shrink-0 flex items-center justify-center rounded-lg border-2 border-black font-black text-lg',
-                                        getAvatarColor(otherParticipantName),
-                                        isActive ? 'border-white text-black' : 'text-black'
-                                    )}
-                                    >
-                                    {otherParticipantName?.charAt(0).toUpperCase()}
-                                    </div>
-                                    <div className="flex-1 min-w-0 overflow-hidden">
-                                    <div className="flex justify-between items-baseline">
-                                        <h3
-                                        className={cn(
-                                            'font-bold truncate',
-                                            isActive ? 'text-white' : 'text-black'
-                                        )}
-                                        >
-                                        {otherParticipantName}
-                                        </h3>
-                                    </div>
-                                    <p
-                                        className={cn(
-                                        'text-sm truncate font-medium',
-                                        isActive ? 'text-gray-300' : 'text-gray-500'
-                                        )}
-                                    >
-                                        {c.lastMessage || "Iniciar conversa..."}
-                                    </p>
-                                    </div>
+                        <div className="space-y-3 p-1">
+                        {chatsList.map((c) => {
+                            const isActive = c.id === chatId;
+                            const otherParticipantName = getOtherParticipantName(c);
+                            
+                            return (
+                            <div
+                                key={c.id}
+                                onClick={() => router.push(`/chat/${c.id}`)}
+                                className={cn(
+                                    "relative flex items-center gap-3 p-3 cursor-pointer transition-all duration-200 border-2 border-black rounded-xl",
+                                    isActive 
+                                    ? 'bg-black text-white shadow-[2px_2px_0px_#FF007F]'
+                                    : 'bg-white text-black shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:-translate-y-[2px] hover:shadow-[6px_6px_0px_rgba(0,0,0,1)]'
+                                )}
+                            >
+                                <div className={cn(
+                                'w-12 h-12 shrink-0 flex items-center justify-center rounded-lg border-2 border-black font-black text-lg',
+                                isActive ? 'bg-gray-800 text-white' : getAvatarColor(otherParticipantName) + ' text-black'
+                                )}>
+                                {otherParticipantName?.charAt(0).toUpperCase()}
                                 </div>
-                                );
-                            })}
-                        </>
+
+                                <div className="flex-1 min-w-0">
+                                <div className="flex justify-between items-baseline">
+                                    <h3 className={cn('font-bold truncate', isActive ? 'text-white' : 'text-black')}>
+                                    {otherParticipantName}
+                                    </h3>
+                                </div>
+                                <p className={cn('text-sm truncate font-medium', isActive ? 'text-gray-400' : 'text-gray-500')}>
+                                    {c.lastMessage || "Toque para conversar"}
+                                </p>
+                                </div>
+                                
+                                {isActive && (
+                                <div className="absolute right-3 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#FF007F]"></div>
+                                )}
+                            </div>
+                            );
+                        })}
+                        </div>
                     ) : (
                         <div className="p-4 text-center text-muted-foreground">
                             <MessageSquare className="h-8 w-8 mx-auto mb-2"/>
