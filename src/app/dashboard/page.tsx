@@ -43,7 +43,6 @@ export default function DashboardPage() {
   useEffect(() => {
     if (user) {
       setLoadingReservas(true);
-      // Removed orderBy to prevent potential Firestore index errors during debug
       const q = query(collection(firestore, "reservas"), where("userId", "==", user.uid));
       
       const unsubscribe = onSnapshot(q, 
@@ -52,6 +51,7 @@ export default function DashboardPage() {
           querySnapshot.forEach((doc) => {
             userReservas.push({ id: doc.id, ...doc.data() } as Reserva);
           });
+          console.log("Reservas encontradas:", userReservas);
           setReservas(userReservas);
           setLoadingReservas(false);
         },
