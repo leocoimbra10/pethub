@@ -87,7 +87,7 @@ export default function RegisterPage() {
           </div>
           <CardTitle className="text-3xl font-headline">Criar conta</CardTitle>
           <CardDescription className="font-bold text-black">
-            Crie uma conta para encontrar um cuidador para seu pet.
+            Como você quer ser chamado?
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">

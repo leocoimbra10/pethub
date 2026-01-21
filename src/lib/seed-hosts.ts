@@ -5,24 +5,24 @@ import { collection, addDoc, Firestore } from 'firebase/firestore';
 const hostsData = [
   {
     nome: 'Tia Juju',
-    foto: 'https://images.unsplash.com/photo-1592621385612-4d7129426394?q=80&w=1080&auto=format&fit=crop',
-    preco: 150,
+    photo: 'https://images.unsplash.com/photo-1548532928-574c3774576e?q=80&w=1080&auto=format&fit=crop',
+    preco: 135,
     cidade: 'São Paulo',
     avaliacao: 4.9,
-    descricao: 'Amor e carinho de sobra para seu pet. Quintal grande e seguro.',
+    descricao: 'Amor e carinho de sobra para seu pet. Quintal grande e seguro para cães e gatos.',
     houseImages: [
-        'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?q=80&w=1080&auto=format&fit=crop',
-        'https://images.unsplash.com/photo-1542882583-363e8a0ef245?q=80&w=1080&auto=format&fit=crop',
-        'https://images.unsplash.com/photo-1615875605825-5eb9bb5fea22?q=80&w=1080&auto=format&fit=crop'
+        'https://images.unsplash.com/photo-1556020685-ae41abfc9365?q=80&w=1080&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1080&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1588879342410-53c895b87b76?q=80&w=1080&auto=format&fit=crop'
     ]
   },
   {
-    nome: 'Cantinho do Bob',
-    foto: 'https://images.unsplash.com/photo-1594283255808-ee728c775ba6?q=80&w=1080&auto=format&fit=crop',
+    nome: 'Carlos Alberto',
+    photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1080&auto=format&fit=crop',
     preco: 120,
     cidade: 'Rio de Janeiro',
     avaliacao: 4.8,
-    descricao: 'Ambiente familiar e tranquilo. Passeios diários na praia.',
+    descricao: 'Ambiente familiar e tranquilo. Sou apaixonado por animais e ofereço passeios diários na praia.',
     houseImages: [
         'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?q=80&w=1080&auto=format&fit=crop',
         'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=1080&auto=format&fit=crop',
@@ -30,25 +30,25 @@ const hostsData = [
     ]
   },
   {
-    nome: 'Gato Feliz',
-    foto: 'https://images.unsplash.com/photo-1668656379942-920e753667b3?q=80&w=1080&auto=format&fit=crop',
-    preco: 130,
-    cidade: 'Curitiba',
+    nome: 'Ana Silva',
+    photo: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1080&auto=format&fit=crop',
+    preco: 140,
+    cidade: 'São Paulo',
     avaliacao: 5.0,
-    descricao: 'Especialista em gatos. Um paraíso de arranhadores e brinquedos.',
+    descricao: 'Especialista em gatos. Um paraíso de arranhadores e brinquedos, totalmente seguro e telado.',
     houseImages: [
         'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=1080&auto=format&fit=crop',
         'https://images.unsplash.com/photo-1516594798947-7b7a67e63b60?q=80&w=1080&auto=format&fit=crop',
-        'https://images.unsplash.com/photo-1574163277703-4e0d5a0a383a?q=80&w=1080&auto=format&fit=crop'
+        'https://images.unsplash.com/photo-1596203063545-728b14f8a37b?q=80&w=1080&auto=format&fit=crop'
     ]
   },
   {
-    nome: 'Dog Aventuras',
-    foto: 'https://images.unsplash.com/photo-1535890696255-dd5bcd79e6df?q=80&w=1080&auto=format&fit=crop',
-    preco: 180,
-    cidade: 'Belo Horizonte',
+    nome: 'Beto "Dog Walker"',
+    photo: 'https://images.unsplash.com/photo-1552058544-f2b08422138a?q=80&w=1080&auto=format&fit=crop',
+    preco: 90,
+    cidade: 'Rio de Janeiro',
     avaliacao: 4.7,
-    descricao: 'Para cães cheios de energia! Trilhas e muita diversão.',
+    descricao: 'Para cães cheios de energia! Muitas trilhas, passeios e diversão em grupo.',
     houseImages: [
         'https://images.unsplash.com/photo-1505691938895-1758d7feb511?q=80&w=1080&auto=format&fit=crop',
         'https://images.unsplash.com/photo-1480074568708-e7b720bb3f09?q=80&w=1080&auto=format&fit=crop',
@@ -56,12 +56,12 @@ const hostsData = [
     ]
   },
   {
-    nome: 'Lar Doce Pet',
-    foto: 'https://images.unsplash.com/photo-1689343074357-0c724bdd93ec?q=80&w=1080&auto=format&fit=crop',
-    preco: 145,
-    cidade: 'Porto Alegre',
+    nome: 'Lar Doce Pet da Sônia',
+    photo: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=1080&auto=format&fit=crop',
+    preco: 115,
+    cidade: 'São Paulo',
     avaliacao: 4.9,
-    descricao: 'Seu pet como parte da nossa família. Conforto e segurança.',
+    descricao: 'Seu pet como parte da nossa família. Conforto, segurança e muito carinho para eles.',
     houseImages: [
         'https://images.unsplash.com/photo-1501183638710-841dd1904471?q=80&w=1080&auto=format&fit=crop',
         'https://images.unsplash.com/photo-1572120360610-d971b9d7767c?q=80&w=1080&auto=format&fit=crop',
@@ -79,6 +79,6 @@ export async function seedHosts(firestore: Firestore) {
     return true;
   } catch (error) {
     console.error('Error seeding hosts: ', error);
-    return false;
+    throw error;
   }
 }
