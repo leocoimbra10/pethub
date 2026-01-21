@@ -191,42 +191,44 @@ export default function ChatPage() {
                     ) : chatsList.length > 0 ? (
                         <div className="flex flex-col gap-3 p-2 mt-4">
                           {chatsList.map((c) => {
-                            // 1. Definição do Estado
                             const isActive = String(c.id) === String(params.id);
                             const otherParticipantName = getOtherParticipantName(c);
-                        
-                            // 2. Estilos Forçados com !important
-                            // ESTILO BASE (Comum a todos): Borda preta sólida, arredondado, flexbox
-                            const baseStyle = "relative flex items-center gap-3 p-4 cursor-pointer transition-all duration-200 rounded-xl !border-2 !border-solid !border-black";
-                            
-                            // ESTILO ATIVO (Roxo, sem sombra)
-                            const activeStyle = "!bg-[#8B5CF6] !text-white translate-x-[2px] translate-y-[2px]";
-                            
-                            // ESTILO INATIVO (Branco, Sombra Preta)
-                            const inactiveStyle = "!bg-white !text-black shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[6px_6px_0px_rgba(0,0,0,1)]";
-                        
+
                             return (
                               <div
                                 key={c.id}
                                 onClick={() => router.push(`/chat/${c.id}`)}
-                                className={`${baseStyle} ${isActive ? activeStyle : inactiveStyle}`}
+                                // AQUI ESTÁ O SEGRED: Usamos 'style' para forçar o visual
+                                style={{
+                                  border: "2px solid black",                         // Borda Preta Garantida
+                                  backgroundColor: isActive ? "#8B5CF6" : "white",   // Fundo Roxo ou Branco
+                                  color: isActive ? "white" : "black",               // Texto Branco ou Preto
+                                  boxShadow: isActive ? "none" : "4px 4px 0px 0px black", // Sombra Dura
+                                  transform: isActive ? "translate(2px, 2px)" : "none"    // Efeito de clique
+                                }}
+                                // Mantemos apenas classes de layout (espaçamento/flex) no Tailwind
+                                className="relative flex items-center gap-3 p-4 cursor-pointer rounded-xl transition-all duration-200 hover:bg-gray-50"
                               >
                                 {/* AVATAR */}
-                                <div className={`
-                                  w-12 h-12 shrink-0 flex items-center justify-center rounded-lg !border-2 !border-black font-black text-lg
-                                  ${isActive ? '!bg-white !text-[#8B5CF6]' : '!bg-[#FACC15] !text-black'}
-                                `}>
+                                <div 
+                                  className="w-12 h-12 shrink-0 flex items-center justify-center rounded-lg font-black text-lg"
+                                  style={{
+                                    border: "2px solid black",
+                                    backgroundColor: isActive ? "white" : "#FACC15", // Amarelo se inativo
+                                    color: isActive ? "#8B5CF6" : "black"
+                                  }}
+                                >
                                   {otherParticipantName?.charAt(0).toUpperCase()}
                                 </div>
-                        
+
                                 {/* INFO */}
                                 <div className="flex-1 min-w-0">
                                   <div className="flex justify-between items-baseline">
-                                    <h3 className={`font-bold truncate text-base ${isActive ? '!text-white' : '!text-black'}`}>
+                                    <h3 className="font-bold truncate text-base" style={{ color: isActive ? 'white' : 'black' }}>
                                       {otherParticipantName}
                                     </h3>
                                   </div>
-                                  <p className={`text-xs truncate font-medium ${isActive ? '!text-purple-100' : '!text-gray-500'}`}>
+                                  <p className="text-xs truncate font-medium" style={{ color: isActive ? '#E9D5FF' : '#6B7280' }}>
                                     {c.lastMessage || "Toque para conversar"}
                                   </p>
                                 </div>
