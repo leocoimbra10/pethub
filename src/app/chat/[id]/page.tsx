@@ -180,50 +180,58 @@ export default function ChatPage() {
   return (
     <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto h-[calc(100vh-12rem)] bg-card border-2 border-black rounded-2xl shadow-neo flex overflow-hidden">
-            <div className="w-1/3 border-r-2 border-black flex flex-col">
+            <div className="w-1/3 border-r-2 border-black flex flex-col bg-muted/30">
                 <header className="p-4 border-b-2 border-black">
                     <h2 className="text-2xl font-bold font-headline">Minhas Conversas</h2>
                 </header>
-                <div className="flex-1 overflow-y-auto">
+                <div className="flex-1 overflow-y-auto space-y-2 p-3">
                     {loadingChatsList ? (
                         <div className="p-4 text-center">
                             <Loader className="h-6 w-6 animate-spin mx-auto" />
                         </div>
                     ) : chatsList.length > 0 ? (
-                        <nav className="divide-y divide-border/10">
+                        <>
                             {chatsList.map(c => {
                                 const otherParticipantName = getOtherParticipantName(c);
+                                const isActive = c.id === chatId;
                                 return (
                                     <Link href={`/chat/${c.id}`} key={c.id}>
-                                        <div className={cn(
-                                            "flex items-center gap-4 p-4 cursor-pointer transition-colors",
-                                            c.id === chatId 
-                                                ? 'bg-primary/10 border-l-4 border-primary' 
-                                                : 'hover:bg-muted'
-                                        )}>
-                                            <Avatar className="h-12 w-12 shrink-0">
-                                                <AvatarFallback className={cn(
-                                                    c.id === chatId && "bg-primary/20 text-primary-foreground font-bold"
+                                        <div
+                                            className={cn(
+                                                'relative flex items-center gap-3 p-4 rounded-2xl transition-all duration-200 cursor-pointer border',
+                                                isActive
+                                                ? 'bg-white shadow-lg border-purple-100 ring-1 ring-purple-50 z-10' 
+                                                : 'hover:bg-gray-50 border-transparent hover:border-gray-100'
+                                            )}
+                                        >
+                                            <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-violet-600 to-indigo-500 flex items-center justify-center text-white font-bold text-lg shadow-md shrink-0">
+                                                {otherParticipantName.charAt(0).toUpperCase() || '?'}
+                                            </div>
+
+                                            <div className="flex-1 min-w-0 flex flex-col justify-center">
+                                                <h3 className={cn(
+                                                    'text-sm font-bold truncate',
+                                                    isActive ? 'text-gray-900' : 'text-gray-700'
                                                 )}>
-                                                    {otherParticipantName.charAt(0).toUpperCase()}
-                                                </AvatarFallback>
-                                            </Avatar>
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex justify-between items-center">
-                                                    <h3 className="font-bold truncate">{otherParticipantName}</h3>
-                                                    <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">
-                                                        {c.updatedAt ? formatDistanceToNow(c.updatedAt.toDate(), { addSuffix: true, locale: ptBR }) : ''}
-                                                    </span>
-                                                </div>
-                                                <p className="text-sm text-muted-foreground truncate">
-                                                    {c.lastMessage || "Toque para iniciar a conversa"}
+                                                    {otherParticipantName}
+                                                </h3>
+                                                <p className="text-xs text-gray-500 truncate mt-0.5 max-w-[140px]">
+                                                    {c.lastMessage || "Toque para iniciar..."}
                                                 </p>
                                             </div>
+                                            
+                                            <span className="absolute top-4 right-4 text-[10px] font-semibold text-gray-400">
+                                                 {c.updatedAt ? formatDistanceToNow(c.updatedAt.toDate(), { addSuffix: true, locale: ptBR }) : ''}
+                                            </span>
+                                            
+                                            {isActive && (
+                                                <div className="absolute right-4 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-purple-500"></div>
+                                            )}
                                         </div>
                                     </Link>
                                 )
                             })}
-                        </nav>
+                        </>
                     ) : (
                         <div className="p-4 text-center text-muted-foreground">
                             <MessageSquare className="h-8 w-8 mx-auto mb-2"/>
