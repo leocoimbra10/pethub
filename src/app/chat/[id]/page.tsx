@@ -15,6 +15,19 @@ import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
+const getAvatarColor = (name: string) => {
+    const colors = [
+      'bg-[#FACC15]', // Amarelo
+      'bg-[#FF007F]', // Rosa Choque
+      'bg-[#8B5CF6]', // Roxo
+      'bg-[#22D3EE]', // Ciano
+      'bg-[#FB923C]'  // Laranja
+    ];
+    if (!name) return colors[0];
+    const index = name.length % colors.length;
+    return colors[index];
+};
+
 export default function ChatPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
@@ -184,7 +197,7 @@ export default function ChatPage() {
                 <header className="p-4 border-b-2 border-black">
                     <h2 className="text-2xl font-bold font-headline">Minhas Conversas</h2>
                 </header>
-                <div className="flex-1 overflow-y-auto space-y-2 p-3">
+                <div className="flex-1 overflow-y-auto space-y-3 p-3">
                     {loadingChatsList ? (
                         <div className="p-4 text-center">
                             <Loader className="h-6 w-6 animate-spin mx-auto" />
@@ -195,41 +208,47 @@ export default function ChatPage() {
                                 const otherParticipantName = getOtherParticipantName(c);
                                 const isActive = c.id === chatId;
                                 return (
-                                    <Link href={`/chat/${c.id}`} key={c.id}>
-                                        <div
-                                            className={cn(
-                                                'relative flex items-center gap-3 p-4 rounded-2xl transition-all duration-200 cursor-pointer border',
-                                                isActive
-                                                ? 'bg-white shadow-lg border-purple-100 ring-1 ring-purple-50 z-10' 
-                                                : 'hover:bg-gray-50 border-transparent hover:border-gray-100'
-                                            )}
+                                <div
+                                    key={c.id}
+                                    onClick={() => router.push(`/chat/${c.id}`)}
+                                    className={cn(
+                                    'flex items-center gap-3 p-3 cursor-pointer transition-all duration-200 border-2 border-black rounded-xl',
+                                    isActive
+                                        ? 'bg-black text-white shadow-[2px_2px_0px_#FF007F]'
+                                        : 'bg-white text-black shadow-[4px_4px_0px_#000] hover:shadow-[6px_6px_0px_#000] hover:-translate-x-1 hover:-translate-y-1'
+                                    )}
+                                >
+                                    <div
+                                    className={cn(
+                                        'w-12 h-12 shrink-0 flex items-center justify-center rounded-lg border-2 border-black font-black text-lg text-black',
+                                        getAvatarColor(otherParticipantName),
+                                        isActive && 'border-white'
+                                    )}
+                                    >
+                                    {otherParticipantName?.charAt(0).toUpperCase()}
+                                    </div>
+                                    <div className="flex-1 min-w-0 overflow-hidden">
+                                    <div className="flex justify-between items-baseline">
+                                        <h3
+                                        className={cn(
+                                            'font-bold truncate',
+                                            isActive ? 'text-white' : 'text-black'
+                                        )}
                                         >
-                                            <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-violet-600 to-indigo-500 flex items-center justify-center text-white font-bold text-lg shadow-md shrink-0">
-                                                {otherParticipantName.charAt(0).toUpperCase() || '?'}
-                                            </div>
-
-                                            <div className="flex-1 min-w-0 flex flex-col justify-center">
-                                                <h3 className={cn(
-                                                    'text-sm font-bold truncate',
-                                                    isActive ? 'text-gray-900' : 'text-gray-700'
-                                                )}>
-                                                    {otherParticipantName}
-                                                </h3>
-                                                <p className="text-xs text-gray-500 truncate mt-0.5 max-w-[140px]">
-                                                    {c.lastMessage || "Toque para iniciar..."}
-                                                </p>
-                                            </div>
-                                            
-                                            <span className="absolute top-4 right-4 text-[10px] font-semibold text-gray-400">
-                                                 {c.updatedAt ? formatDistanceToNow(c.updatedAt.toDate(), { addSuffix: true, locale: ptBR }) : ''}
-                                            </span>
-                                            
-                                            {isActive && (
-                                                <div className="absolute right-4 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-purple-500"></div>
-                                            )}
-                                        </div>
-                                    </Link>
-                                )
+                                        {otherParticipantName}
+                                        </h3>
+                                    </div>
+                                    <p
+                                        className={cn(
+                                        'text-sm truncate font-medium',
+                                        isActive ? 'text-gray-300' : 'text-gray-500'
+                                        )}
+                                    >
+                                        {c.lastMessage || "Iniciar conversa..."}
+                                    </p>
+                                    </div>
+                                </div>
+                                );
                             })}
                         </>
                     ) : (
