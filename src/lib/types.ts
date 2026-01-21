@@ -37,3 +37,14 @@ export type Message = {
   senderId: string;
   timestamp: Date;
 };
+
+export type Pet = {
+  id: string;
+  ownerId: string;
+  nome: string;
+  tipo: 'Cachorro' | 'Gato' | 'Outro';
+  raca: string;
+  idade?: number;
+  observacoes?: string;
+  createdAt: Date;
+};

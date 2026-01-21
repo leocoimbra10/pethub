@@ -104,6 +104,21 @@ export default function DashboardPage() {
             </Button>
         </div>
 
+        <Card className="bg-card mb-8">
+          <CardHeader>
+            <CardTitle>Meus Pets</CardTitle>
+            <CardDescription>Gerencie as informações dos seus animais de estimação.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link href="/meus-pets">
+                <Button>
+                    <PawPrint className="mr-2 h-5 w-5" />
+                    Gerenciar Meus Pets
+                </Button>
+            </Link>
+          </CardContent>
+        </Card>
+
         <Card className="bg-card">
           <CardHeader>
             <CardTitle>Minhas Reservas</CardTitle>
