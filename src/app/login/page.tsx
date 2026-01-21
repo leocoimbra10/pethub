@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { auth } from "@/lib/firebase";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithRedirect } from "firebase/auth";
 import { PawPrint } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -62,9 +62,7 @@ export default function LoginPage() {
   const handleGoogleSignIn = async () => {
     const provider = new GoogleAuthProvider();
     try {
-      await signInWithPopup(auth, provider);
-      toast({ title: "Login com Google realizado com sucesso." });
-      router.push('/dashboard');
+      await signInWithRedirect(auth, provider);
     } catch (error: any) {
       toast({
         variant: "destructive",
