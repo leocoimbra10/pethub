@@ -15,6 +15,8 @@ export default function DashboardPage() {
   const router = useRouter();
   const { toast } = useToast();
 
+  console.log("Dashboard: User status", user);
+
   useEffect(() => {
     if (!loading && !user) {
       router.push('/login');

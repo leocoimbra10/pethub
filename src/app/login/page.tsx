@@ -15,7 +15,6 @@ import { useToast } from "@/hooks/use-toast";
 import { auth, useAuth } from "@/lib/firebase";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithRedirect } from "firebase/auth";
 import { Loader, PawPrint } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
@@ -33,13 +32,6 @@ export default function LoginPage() {
   const { toast } = useToast();
   const router = useRouter();
   const { user, loading } = useAuth();
-
-  useEffect(() => {
-    if (user && !loading) {
-      console.log("Usuário logado! Redirecionando para /dashboard...");
-      router.push('/dashboard');
-    }
-  }, [user, loading, router]);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.location.hash === '#register') {
@@ -88,11 +80,21 @@ export default function LoginPage() {
 
   if (user) {
     return (
-      <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">
-        <div className="text-center">
-            <Loader className="h-16 w-16 animate-spin text-primary mx-auto mb-4" />
-            <p className="font-bold text-lg">Login aprovado! Entrando no dashboard...</p>
-        </div>
+      <div className="flex items-center justify-center min-h-[calc(100vh-8rem)] py-12 px-4">
+        <Card className="w-full max-w-md bg-lime-200 border-lime-400">
+          <CardHeader>
+            <CardTitle>Login bem-sucedido!</CardTitle>
+            <CardDescription>Você está logado como:</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="font-bold text-lg break-all">{user.email}</p>
+          </CardContent>
+          <CardFooter>
+            <Button className="w-full" onClick={() => router.push('/dashboard')}>
+              Ir para meu Dashboard
+            </Button>
+          </CardFooter>
+        </Card>
       </div>
     );
   }

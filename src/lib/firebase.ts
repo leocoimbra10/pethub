@@ -1,6 +1,8 @@
+'use client';
+
 // Import the functions you need from the SDKs you need
 import { initializeApp, getApps } from "firebase/app";
-import { getAuth, onAuthStateChanged, User } from "firebase/auth";
+import { getAuth, onAuthStateChanged, User, setPersistence, browserLocalPersistence } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { useEffect, useState } from "react";
 
@@ -22,6 +24,9 @@ if (!getApps().length) {
 
 const auth = getAuth(app);
 const firestore = getFirestore(app);
+
+// Set persistence
+setPersistence(auth, browserLocalPersistence);
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
