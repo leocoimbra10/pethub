@@ -33,7 +33,7 @@ export default function ChatPage() {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   };
 
   useEffect(() => {
@@ -47,31 +47,32 @@ export default function ChatPage() {
   }, [user, loading, router]);
 
   useEffect(() => {
-    if (user) {
-      setLoadingChatsList(true);
-      const q = query(
-        collection(firestore, "chats"),
-        where("participants", "array-contains", user.uid)
-      );
-      const unsubscribe = onSnapshot(q, (querySnapshot) => {
-        const userChats: Chat[] = [];
-        querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            const updatedAt = data.updatedAt?.toDate ? data.updatedAt.toDate() : new Date();
-            userChats.push({ id: doc.id, updatedAt, ...data } as Chat);
-        });
-        // Client-side sort to replace the removed orderBy
-        userChats.sort((a,b) => (b.updatedAt?.getTime() || 0) - (a.updatedAt?.getTime() || 0));
-        console.log("Chats encontrados:", userChats); // Debug no console
-        setChatsList(userChats);
-        setLoadingChatsList(false);
-      }, (error) => {
-        console.error("Erro na Sidebar:", error);
-        toast({ variant: 'destructive', title: 'Erro ao carregar conversas.' });
-        setLoadingChatsList(false);
+    if (!user?.uid) return; // Trava de segurança
+
+    console.log("Buscando chats para:", user.uid); // Debug
+    setLoadingChatsList(true);
+    const q = query(
+      collection(firestore, "chats"),
+      where("participants", "array-contains", user.uid)
+    );
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const userChats: Chat[] = [];
+      querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          const updatedAt = data.updatedAt?.toDate ? data.updatedAt.toDate() : new Date();
+          userChats.push({ id: doc.id, updatedAt, ...data } as Chat);
       });
-      return () => unsubscribe();
-    }
+      // Client-side sort to replace the removed orderBy
+      userChats.sort((a,b) => (b.updatedAt?.getTime() || 0) - (a.updatedAt?.getTime() || 0));
+      console.log("Chats carregados:", userChats); // Debug
+      setChatsList(userChats);
+      setLoadingChatsList(false);
+    }, (error) => {
+      console.error("Erro na Sidebar:", error);
+      toast({ variant: 'destructive', title: 'Erro ao carregar conversas.' });
+      setLoadingChatsList(false);
+    });
+    return () => unsubscribe();
   }, [user, toast]);
   
   useEffect(() => {
