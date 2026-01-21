@@ -1,3 +1,5 @@
+'use client';
+
 import BookingCard from "@/components/BookingCard";
 import {
   Tabs,
@@ -7,8 +9,21 @@ import {
 } from "@/components/ui/tabs";
 import { bookings, listings, users } from "@/lib/placeholder-data";
 import type { Booking, Listing, User } from "@/lib/types";
+import { useAuth } from "@/lib/firebase";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { Loader } from "lucide-react";
 
 export default function DashboardPage() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login');
+    }
+  }, [user, loading, router]);
+
   const now = new Date();
   const upcomingBookings = bookings.filter(b => b.endDate >= now);
   const pastBookings = bookings.filter(b => b.endDate < now);
@@ -26,6 +41,14 @@ export default function DashboardPage() {
           if (!listing || !host) return null;
           return <BookingCard key={booking.id} booking={booking} listing={listing} host={host} />;
         })}
+      </div>
+    );
+  }
+  
+  if (loading || !user) {
+    return (
+      <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">
+        <Loader className="h-16 w-16 animate-spin text-primary" />
       </div>
     );
   }

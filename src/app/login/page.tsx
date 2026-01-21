@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { auth } from "@/lib/firebase";
+import { auth, useAuth } from "@/lib/firebase";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithRedirect } from "firebase/auth";
 import { PawPrint } from "lucide-react";
 import Link from "next/link";
@@ -32,6 +32,13 @@ export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);
   const { toast } = useToast();
   const router = useRouter();
+  const { user, loading } = useAuth();
+
+  useEffect(() => {
+    if (user && !loading) {
+      router.push('/dashboard');
+    }
+  }, [user, loading, router]);
 
   useEffect(() => {
     if (window.location.hash === '#register') {
@@ -44,11 +51,9 @@ export default function LoginPage() {
       if (isLogin) {
         await signInWithEmailAndPassword(auth, email, password);
         toast({ title: "Login realizado com sucesso." });
-        router.push('/dashboard');
       } else {
         await createUserWithEmailAndPassword(auth, email, password);
         toast({ title: "Conta criada com sucesso." });
-        router.push('/dashboard');
       }
     } catch (error: any) {
       toast({
