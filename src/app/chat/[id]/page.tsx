@@ -15,19 +15,6 @@ import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
-const getAvatarColor = (name: string) => {
-    const colors = [
-      'bg-[#FACC15]', // Amarelo
-      'bg-[#FF007F]', // Rosa Choque
-      'bg-[#8B5CF6]', // Roxo
-      'bg-[#22D3EE]', // Ciano
-      'bg-[#FB923C]'  // Laranja
-    ];
-    if (!name) return colors[0];
-    const index = name.length % colors.length;
-    return colors[index];
-};
-
 export default function ChatPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
@@ -202,45 +189,43 @@ export default function ChatPage() {
                             <Loader className="h-6 w-6 animate-spin mx-auto" />
                         </div>
                     ) : chatsList.length > 0 ? (
-                        <div className="space-y-3 p-1">
+                        <div className="space-y-3 p-1 mt-2">
                         {chatsList.map((c) => {
-                            const isActive = c.id === chatId;
-                            const otherParticipantName = getOtherParticipantName(c);
-                            
-                            return (
+                          const isActive = String(c.id) === String(params.id);
+                          const otherParticipantName = getOtherParticipantName(c);
+                          
+                          const baseClasses = "relative flex items-center gap-3 p-3 cursor-pointer transition-all duration-200 border-2 border-black rounded-xl";
+                          
+                          const activeClasses = "bg-[#8B5CF6] text-white shadow-none translate-x-[2px] translate-y-[2px]";
+                          const inactiveClasses = "bg-white text-black shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[6px_6px_0px_rgba(0,0,0,1)]";
+                      
+                          return (
                             <div
-                                key={c.id}
-                                onClick={() => router.push(`/chat/${c.id}`)}
-                                className={cn(
-                                    "relative flex items-center gap-3 p-3 cursor-pointer transition-all duration-200 border-2 border-black rounded-xl",
-                                    isActive 
-                                    ? 'bg-[#8B5CF6] text-white shadow-none translate-x-[2px] translate-y-[2px]'
-                                    : 'bg-white text-black shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[6px_6px_0px_rgba(0,0,0,1)]'
-                                )}
+                              key={c.id}
+                              onClick={() => router.push(`/chat/${c.id}`)}
+                              className={`${baseClasses} ${isActive ? activeClasses : inactiveClasses}`}
                             >
-                                <div className={cn(
-                                'w-12 h-12 shrink-0 flex items-center justify-center rounded-lg border-2 border-black font-black text-lg',
-                                isActive 
-                                    ? 'bg-white text-[#8B5CF6]' 
-                                    : getAvatarColor(otherParticipantName) + ' text-black'
-                                )}>
+                              <div className={`
+                                w-12 h-12 shrink-0 flex items-center justify-center rounded-lg border-2 border-black font-black text-lg
+                                ${isActive ? 'bg-white text-[#8B5CF6]' : 'bg-[#FACC15] text-black'} 
+                              `}>
                                 {otherParticipantName?.charAt(0).toUpperCase()}
-                                </div>
-
-                                <div className="flex-1 min-w-0">
+                              </div>
+                      
+                              <div className="flex-1 min-w-0">
                                 <div className="flex justify-between items-baseline">
-                                    <h3 className={cn('font-bold truncate', isActive ? 'text-white' : 'text-black')}>
+                                  <h3 className="font-bold truncate">
                                     {otherParticipantName}
-                                    </h3>
+                                  </h3>
                                 </div>
-                                <p className={cn('text-sm truncate font-medium', isActive ? 'text-purple-100' : 'text-gray-500')}>
-                                    {c.lastMessage || "Toque para conversar"}
+                                <p className={`text-sm truncate font-medium ${isActive ? 'text-purple-100' : 'text-gray-500'}`}>
+                                  {c.lastMessage || "Toque para conversar"}
                                 </p>
-                                </div>
+                              </div>
                             </div>
-                            );
+                          );
                         })}
-                        </div>
+                      </div>
                     ) : (
                         <div className="p-4 text-center text-muted-foreground">
                             <MessageSquare className="h-8 w-8 mx-auto mb-2"/>

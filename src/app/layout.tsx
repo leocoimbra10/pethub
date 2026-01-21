@@ -30,7 +30,7 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <div className="flex min-h-screen flex-col">
             <Header />
-            <div className="relative z-50">
+            <div className="relative z-50 pt-6">
               <GlobalBackButton />
             </div>
             <main className="flex-grow">{children}</main>
