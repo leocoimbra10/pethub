@@ -4,6 +4,7 @@ import { Toaster } from '@/components/ui/toaster';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { ThemeProvider } from '@/components/ThemeProvider';
+import GlobalBackButton from '@/components/GlobalBackButton';
 
 export const metadata: Metadata = {
   title: 'PetHub | Cuidadores de Confiança para seu Pet',

@@ -12,7 +12,6 @@ import { useState, useEffect } from 'react';
 import { useAuth, firestore } from '@/lib/firebase';
 import { addDoc, collection, getDocs, query, where, serverTimestamp, doc, getDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
-import BackButton from '@/components/BackButton';
 
 export default function CuidadorDetailPage({ params }: { params: { id: string } }) {
   const [host, setHost] = useState<Host | null>(null);
@@ -166,9 +165,8 @@ export default function CuidadorDetailPage({ params }: { params: { id: string } 
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 md:py-12">
-      <BackButton label="Voltar para a busca" />
-      <div className="mb-6">
+    <div className="container mx-auto px-4 pb-8 md:pb-12">
+      <div className="mb-6 pt-8 md:pt-0">
         <h1 className="text-3xl md:text-5xl font-bold font-headline">{host.nome}</h1>
         <div className="flex items-center gap-4 font-bold mt-2">
             <div className="flex items-center gap-1">
