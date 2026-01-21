@@ -3,17 +3,18 @@
 import { useAuth, auth, firestore } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Loader, PawPrint, Calendar, MapPin, MessageSquare } from 'lucide-react';
+import { Loader, PawPrint, Calendar, MapPin, MessageSquare, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { signOut } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import { seedHosts } from '@/lib/seed-hosts';
-import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, limit } from 'firebase/firestore';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import type { Host } from '@/lib/types';
 
 type Reserva = {
   id: string;
@@ -33,6 +34,8 @@ export default function DashboardPage() {
   const [isSeeding, setIsSeeding] = useState(false);
   const [reservas, setReservas] = useState<Reserva[]>([]);
   const [loadingReservas, setLoadingReservas] = useState(true);
+  const [hostProfile, setHostProfile] = useState<Host | null>(null);
+  const [loadingHost, setLoadingHost] = useState(true);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -42,16 +45,15 @@ export default function DashboardPage() {
   
   useEffect(() => {
     if (user) {
+      // Fetch Reservas
       setLoadingReservas(true);
-      const q = query(collection(firestore, "reservas"), where("userId", "==", user.uid));
-      
-      const unsubscribe = onSnapshot(q, 
+      const qReservas = query(collection(firestore, "reservas"), where("userId", "==", user.uid));
+      const unsubscribeReservas = onSnapshot(qReservas, 
         (querySnapshot) => {
           const userReservas: Reserva[] = [];
           querySnapshot.forEach((doc) => {
             userReservas.push({ id: doc.id, ...doc.data() } as Reserva);
           });
-          console.log("Reservas encontradas:", userReservas);
           setReservas(userReservas);
           setLoadingReservas(false);
         },
@@ -65,8 +67,31 @@ export default function DashboardPage() {
           setLoadingReservas(false);
         }
       );
+
+      // Fetch Host Profile
+      setLoadingHost(true);
+      const qHost = query(collection(firestore, "hosts"), where("ownerId", "==", user.uid), limit(1));
+      const unsubscribeHost = onSnapshot(qHost, (snapshot) => {
+        if (!snapshot.empty) {
+            const hostDoc = snapshot.docs[0];
+            setHostProfile({ id: hostDoc.id, ...hostDoc.data() } as Host);
+        } else {
+            setHostProfile(null);
+        }
+        setLoadingHost(false);
+      }, (error) => {
+        console.error("Erro ao buscar perfil de anfitrião:", error);
+        toast({
+            variant: "destructive",
+            title: "Erro ao carregar seu perfil de anfitrião.",
+        });
+        setLoadingHost(false);
+      });
       
-      return () => unsubscribe();
+      return () => {
+        unsubscribeReservas();
+        unsubscribeHost();
+      };
     }
   }, [user, toast]);
 
@@ -148,6 +173,43 @@ export default function DashboardPage() {
             </CardContent>
             </Card>
         </div>
+
+        <Card className="bg-secondary mb-8">
+            <CardHeader>
+                <CardTitle>Área do Anfitrião</CardTitle>
+                <CardDescription className="text-secondary-foreground font-bold">Gerencie seu perfil de cuidador e suas hospedagens.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                {loadingHost ? (
+                    <div className="flex items-center">
+                        <Loader className="h-6 w-6 animate-spin" />
+                        <p className='ml-2 font-bold'>Verificando seu perfil de anfitrião...</p>
+                    </div>
+                ) : hostProfile ? (
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <div>
+                            <p className="font-bold">Seu espaço está no ar!</p>
+                            <p className="font-headline text-xl">{hostProfile.nome}</p>
+                        </div>
+                        <div className="flex gap-2">
+                            <Button variant="outline" disabled>Editar</Button>
+                            <Link href={`/cuidadores/${hostProfile.id}`}>
+                                <Button className='bg-primary text-primary-foreground'>Ver meu Anúncio</Button>
+                            </Link>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <p className="font-bold">Tem um espacinho sobrando e ama pets? <br/>Gere uma renda extra!</p>
+                        <Link href="/quero-cuidar">
+                            <Button className="bg-accent hover:bg-accent/90 text-accent-foreground">
+                                Quero ser Anfitrião
+                            </Button>
+                        </Link>
+                    </div>
+                )}
+            </CardContent>
+        </Card>
 
 
         <Card className="bg-card">
