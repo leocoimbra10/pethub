@@ -33,6 +33,7 @@ import { useToast } from '@/hooks/use-toast';
 const mainNav = [
   { href: '/search', label: 'Buscar cuidador' },
   { href: '/#como-funciona', label: 'Como funciona' },
+  { href: '/#seguranca', label: 'Segurança' },
 ];
 
 const UserActions = () => {
@@ -124,7 +125,7 @@ const UserActions = () => {
 
 export default function Header() {
   return (
-    <header className="sticky top-0 z-50 w-full border-b-2 border-black bg-white">
+    <header className="sticky top-0 z-50 w-full border-b-2 border-black bg-background">
       <div className="container flex h-20 items-center">
         {/* Left Side: Logo + Mobile Trigger */}
         <div className="flex flex-1 items-center justify-start">
