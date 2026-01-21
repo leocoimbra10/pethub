@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { auth, useAuth } from "@/lib/firebase";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithRedirect } from "firebase/auth";
-import { PawPrint } from "lucide-react";
+import { Loader, PawPrint } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -36,12 +36,13 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (user && !loading) {
+      console.log("Usuário logado! Redirecionando...");
       router.push('/dashboard');
     }
   }, [user, loading, router]);
 
   useEffect(() => {
-    if (window.location.hash === '#register') {
+    if (typeof window !== 'undefined' && window.location.hash === '#register') {
       setIsLogin(false);
     }
   }, []);
@@ -76,6 +77,25 @@ export default function LoginPage() {
       });
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">
+        <Loader className="h-16 w-16 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (user) {
+    return (
+      <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">
+        <div className="text-center">
+            <Loader className="h-16 w-16 animate-spin text-primary mx-auto mb-4" />
+            <p className="font-bold text-lg">Login confirmado! Entrando...</p>
+        </div>
+      </div>
+    );
+  }
 
 
   return (
