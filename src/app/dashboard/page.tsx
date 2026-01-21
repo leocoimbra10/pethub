@@ -74,9 +74,9 @@ export default function DashboardPage() {
       const unsubscribeHost = onSnapshot(qHost, (snapshot) => {
         if (!snapshot.empty) {
             const hostDoc = snapshot.docs[0];
-            const hostData = { id: hostDoc.id, ...hostDoc.data() } as Host;
-            console.log("Host Profile carregado:", hostData);
-            setHostProfile(hostData);
+            const hostData = { ...hostDoc.data(), id: hostDoc.id } as Host;
+            setHostProfile(hostData); 
+            console.log("Host carregado com ID:", hostDoc.id);
         } else {
             setHostProfile(null);
         }
@@ -192,12 +192,21 @@ export default function DashboardPage() {
                         <div>
                             <p className="font-bold">Seu espaço está no ar!</p>
                             <p className="font-headline text-xl">{hostProfile.nome}</p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                                Debug ID: {hostProfile?.id || "SEM ID DETECTADO"}
+                            </p>
                         </div>
                         <div className="flex gap-2">
                             <Button variant="outline" onClick={() => alert("Funcionalidade de Edição em breve!")}>Editar</Button>
-                            <Link href={`/cuidadores/${hostProfile.id}`}>
-                                <Button className='bg-primary text-primary-foreground'>Ver meu Anúncio</Button>
-                            </Link>
+                             {hostProfile.id ? (
+                                <Link href={`/cuidadores/${hostProfile.id}`}>
+                                    <Button className='bg-primary text-primary-foreground'>Ver meu Anúncio</Button>
+                                </Link>
+                            ) : (
+                                <Button disabled>
+                                    Carregando Link...
+                                </Button>
+                            )}
                         </div>
                     </div>
                 ) : (
