@@ -9,11 +9,6 @@ export default function GlobalBackButton() {
   // Paths where the back button should NOT be displayed
   const hiddenPaths = ['/', '/login', '/register', '/dashboard'];
 
-  // The chat page has its own navigation within its layout, so we hide the global one.
-  if (pathname.startsWith('/chat')) {
-    return null;
-  }
-
   if (hiddenPaths.includes(pathname)) {
     return null;
   }

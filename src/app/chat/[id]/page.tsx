@@ -82,7 +82,6 @@ export default function ChatPage() {
         return getMillis(b.updatedAt) - getMillis(a.updatedAt);
       });
       
-      console.log("Chats carregados:", sortedChats); // Debug
       setChatsList(sortedChats);
       setLoadingChatsList(false);
     }, (error) => {
@@ -197,7 +196,7 @@ export default function ChatPage() {
                 <header className="p-4 border-b-2 border-black">
                     <h2 className="text-2xl font-bold font-headline">Minhas Conversas</h2>
                 </header>
-                <div className="flex-1 overflow-y-auto space-y-3 p-3">
+                <div className="flex-1 overflow-y-auto p-3">
                     {loadingChatsList ? (
                         <div className="p-4 text-center">
                             <Loader className="h-6 w-6 animate-spin mx-auto" />
@@ -220,9 +219,9 @@ export default function ChatPage() {
                                 >
                                     <div
                                     className={cn(
-                                        'w-12 h-12 shrink-0 flex items-center justify-center rounded-lg border-2 border-black font-black text-lg text-black',
+                                        'w-12 h-12 shrink-0 flex items-center justify-center rounded-lg border-2 border-black font-black text-lg',
                                         getAvatarColor(otherParticipantName),
-                                        isActive && 'border-white'
+                                        isActive ? 'border-white text-black' : 'text-black'
                                     )}
                                     >
                                     {otherParticipantName?.charAt(0).toUpperCase()}
