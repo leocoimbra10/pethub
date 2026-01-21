@@ -2,7 +2,7 @@
 
 import { useAuth, auth, firestore } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Loader } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -15,6 +15,7 @@ export default function DashboardPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
+  const [isSeeding, setIsSeeding] = useState(false);
 
   console.log("Dashboard: User status", user);
 
@@ -39,18 +40,30 @@ export default function DashboardPage() {
   };
 
   const handleSeed = async () => {
-    const success = await seedHosts(firestore);
-    if (success) {
-      toast({
-        title: 'Sucesso!',
-        description: '5 cuidadores de teste foram criados no banco de dados.',
-      });
-    } else {
+    setIsSeeding(true);
+    try {
+      const success = await seedHosts(firestore);
+      if (success) {
+        toast({
+          title: 'Sucesso!',
+          description: '✅ 5 Cuidadores criados com sucesso! Verifique a busca.',
+        });
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Erro',
+          description: 'Não foi possível criar os cuidadores de teste.',
+        });
+      }
+    } catch (error) {
+      console.error(error);
       toast({
         variant: 'destructive',
         title: 'Erro',
-        description: 'Não foi possível criar os cuidadores de teste.',
+        description: 'Ocorreu um erro inesperado ao criar os cuidadores.',
       });
+    } finally {
+      setIsSeeding(false);
     }
   };
 
@@ -106,8 +119,8 @@ export default function DashboardPage() {
                 <CardDescription>Use este botão para popular o banco de dados com cuidadores de teste.</CardDescription>
             </CardHeader>
             <CardContent>
-                <Button onClick={handleSeed} variant="secondary">
-                   🛠️ Gerar Cuidadores Teste
+                <Button onClick={handleSeed} variant="secondary" disabled={isSeeding}>
+                   {isSeeding ? '⏳ Criando...' : '🛠️ Gerar Cuidadores Teste'}
                 </Button>
             </CardContent>
         </Card>
