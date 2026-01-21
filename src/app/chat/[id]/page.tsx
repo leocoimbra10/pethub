@@ -189,40 +189,44 @@ export default function ChatPage() {
                             <Loader className="h-6 w-6 animate-spin mx-auto" />
                         </div>
                     ) : chatsList.length > 0 ? (
-                        <div className="space-y-4 p-2 mt-4">
+                        <div className="flex flex-col gap-3 p-2 mt-4">
                           {chatsList.map((c) => {
-                            // Verificação simples de ID
+                            // 1. Definição do Estado
                             const isActive = String(c.id) === String(params.id);
                             const otherParticipantName = getOtherParticipantName(c);
+                        
+                            // 2. Estilos Forçados com !important
+                            // ESTILO BASE (Comum a todos): Borda preta sólida, arredondado, flexbox
+                            const baseStyle = "relative flex items-center gap-3 p-4 cursor-pointer transition-all duration-200 rounded-xl !border-2 !border-solid !border-black";
                             
+                            // ESTILO ATIVO (Roxo, sem sombra)
+                            const activeStyle = "!bg-[#8B5CF6] !text-white translate-x-[2px] translate-y-[2px]";
+                            
+                            // ESTILO INATIVO (Branco, Sombra Preta)
+                            const inactiveStyle = "!bg-white !text-black shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[6px_6px_0px_rgba(0,0,0,1)]";
+                        
                             return (
                               <div
                                 key={c.id}
                                 onClick={() => router.push(`/chat/${c.id}`)}
-                                // AQUI ESTÁ A MUDANÇA: Classes explícitas para garantir a borda
-                                className={
-                                  isActive
-                                    ? "relative flex items-center gap-3 p-3 cursor-pointer transition-all duration-200 border-2 border-black rounded-xl bg-[#8B5CF6] text-white shadow-none translate-x-[2px] translate-y-[2px]"
-                                    : "relative flex items-center gap-3 p-3 cursor-pointer transition-all duration-200 border-2 border-black rounded-xl bg-white text-black shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[6px_6px_0px_rgba(0,0,0,1)]"
-                                }
+                                className={`${baseStyle} ${isActive ? activeStyle : inactiveStyle}`}
                               >
-                                {/* Avatar: Se ativo (Branco), Se inativo (Amarelo Fixo para garantir contraste) */}
-                                <div className={
-                                  isActive
-                                    ? "w-12 h-12 shrink-0 flex items-center justify-center rounded-lg border-2 border-black font-black text-lg bg-white text-[#8B5CF6]"
-                                    : "w-12 h-12 shrink-0 flex items-center justify-center rounded-lg border-2 border-black font-black text-lg bg-[#FACC15] text-black"
-                                }>
+                                {/* AVATAR */}
+                                <div className={`
+                                  w-12 h-12 shrink-0 flex items-center justify-center rounded-lg !border-2 !border-black font-black text-lg
+                                  ${isActive ? '!bg-white !text-[#8B5CF6]' : '!bg-[#FACC15] !text-black'}
+                                `}>
                                   {otherParticipantName?.charAt(0).toUpperCase()}
                                 </div>
                         
-                                {/* Textos */}
+                                {/* INFO */}
                                 <div className="flex-1 min-w-0">
                                   <div className="flex justify-between items-baseline">
-                                    <h3 className="font-bold truncate text-base">
+                                    <h3 className={`font-bold truncate text-base ${isActive ? '!text-white' : '!text-black'}`}>
                                       {otherParticipantName}
                                     </h3>
                                   </div>
-                                  <p className={isActive ? "text-purple-100 text-xs truncate" : "text-gray-500 text-xs truncate"}>
+                                  <p className={`text-xs truncate font-medium ${isActive ? '!text-purple-100' : '!text-gray-500'}`}>
                                     {c.lastMessage || "Toque para conversar"}
                                   </p>
                                 </div>
