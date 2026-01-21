@@ -197,7 +197,7 @@ export default function Home() {
               <h2 className="text-4xl md:text-5xl font-bold font-headline text-black max-w-2xl mx-auto">Ama animais? Gere renda cuidando deles.</h2>
               <p className="mt-4 text-lg text-black font-medium max-w-xl mx-auto">Faça parte da nossa comunidade de cuidadores e ofereça um espaço seguro para pets.</p>
               <div className="mt-8">
-                  <Link href="/login#register">
+                  <Link href="/register">
                     <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground">Quero cuidar</Button>
                   </Link>
               </div>

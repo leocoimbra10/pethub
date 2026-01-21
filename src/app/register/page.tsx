@@ -13,13 +13,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { auth, useAuth } from "@/lib/firebase";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 import { Loader, PawPrint, TriangleAlert } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -33,15 +33,19 @@ export default function LoginPage() {
     }
   }, [user, loading, router]);
 
-  const handleLogin = async () => {
+  const handleRegister = async () => {
     setError(null);
+    if (password.length < 6) {
+      setError("A senha deve ter pelo menos 6 caracteres.");
+      return;
+    }
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      await createUserWithEmailAndPassword(auth, email, password);
       router.push('/dashboard');
     } catch (err: any) {
       console.error("Erro de autenticação:", err);
-      if (err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
-        setError('Email ou senha inválidos.');
+       if (err.code === 'auth/email-already-in-use') {
+        setError('Este email já está em uso.');
       } else {
         setError(err.message);
       }
@@ -75,16 +79,16 @@ export default function LoginPage() {
               <PawPrint className="h-8 w-8 text-primary-foreground" />
             </div>
           </div>
-          <CardTitle className="text-3xl font-headline">Entrar</CardTitle>
+          <CardTitle className="text-3xl font-headline">Criar conta</CardTitle>
           <CardDescription className="font-bold text-black">
-            Acesse sua conta para gerenciar suas reservas.
+            Crie uma conta para encontrar um cuidador para seu pet.
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
            {error && (
             <Alert variant="destructive">
               <TriangleAlert className="h-4 w-4" />
-              <AlertTitle>Erro de Autenticação</AlertTitle>
+              <AlertTitle>Erro de Cadastro</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
@@ -94,15 +98,15 @@ export default function LoginPage() {
           </div>
           <div className="grid gap-2">
             <Label htmlFor="password" className="font-bold">Senha</Label>
-            <Input id="password" type="password" required className="bg-card" value={password} onChange={(e) => setPassword(e.target.value)} />
+            <Input id="password" type="password" placeholder="Mínimo 6 caracteres" required className="bg-card" value={password} onChange={(e) => setPassword(e.target.value)} />
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
-          <Button className="w-full" onClick={handleLogin}>Entrar</Button>
+          <Button className="w-full" onClick={handleRegister}>Criar conta</Button>
           <div className="text-center text-sm font-bold pt-2">
-            Não tem uma conta?{' '}
-            <Link href="/register" className="underline hover:text-primary">
-              Crie uma
+            Já tem uma conta?{' '}
+            <Link href="/login" className="underline hover:text-primary">
+              Entre
             </Link>
           </div>
         </CardFooter>
