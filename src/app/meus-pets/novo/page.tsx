@@ -25,7 +25,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Loader } from 'lucide-react';
-import Link from 'next/link';
+import BackButton from '@/components/BackButton';
 
 export default function NovoPetPage() {
   const { user, loading: authLoading } = useAuth();
@@ -91,10 +91,7 @@ export default function NovoPetPage() {
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
       <div className="max-w-2xl mx-auto">
-        <Link href="/meus-pets" className="inline-flex items-center gap-2 font-bold mb-4 hover:text-primary">
-            <ArrowLeft className="h-4 w-4" />
-            Voltar para Meus Pets
-        </Link>
+        <BackButton label="Voltar para Meus Pets" />
         <Card>
           <CardHeader>
             <CardTitle className="font-headline text-3xl">Adicionar Novo Pet</CardTitle>

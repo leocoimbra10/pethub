@@ -10,8 +10,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Loader, Dice5, CheckCircle } from 'lucide-react';
-import Link from 'next/link';
+import { Loader, Dice5, CheckCircle } from 'lucide-react';
+import BackButton from '@/components/BackButton';
 
 export default function QueroCuidarPage() {
   const { user, loading: authLoading } = useAuth();
@@ -93,10 +93,7 @@ export default function QueroCuidarPage() {
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
       <div className="max-w-2xl mx-auto">
-        <Link href="/dashboard" className="inline-flex items-center gap-2 font-bold mb-6 hover:text-primary transition-colors">
-          <ArrowLeft className="h-4 w-4" />
-          Voltar para o Dashboard
-        </Link>
+        <BackButton label="Cancelar e Voltar" />
         
         <div className='text-center mb-8'>
             <h1 className="text-4xl md:text-5xl font-bold font-headline">Bora faturar com o PetHub?</h1>
