@@ -17,12 +17,12 @@ export default function HostCard({ listing, host }: HostCardProps) {
         <CardHeader className="p-0">
           <div className="relative aspect-square w-full">
             <Image
-              src={listing.mainImage}
-              alt={listing.title}
+              src={host.photo}
+              alt={host.name}
               fill
               style={{ objectFit: 'cover' }}
               className="border-b-2 border-black"
-              data-ai-hint="cozy house"
+              data-ai-hint="person portrait"
             />
           </div>
         </CardHeader>

@@ -16,6 +16,7 @@ export type Listing = {
   amenities: string[];
   mainImage: string;
   gallery: string[];
+  houseImages: string[];
 };
 
 export type Booking = {
