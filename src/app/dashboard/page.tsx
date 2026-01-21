@@ -43,25 +43,15 @@ export default function DashboardPage() {
     setIsSeeding(true);
     try {
       const success = await seedHosts(firestore);
-      if (success) {
-        toast({
-          title: 'Sucesso!',
-          description: '✅ 5 Cuidadores criados com sucesso! Verifique a busca.',
-        });
-      } else {
-        toast({
-          variant: 'destructive',
-          title: 'Erro',
-          description: 'Não foi possível criar os cuidadores de teste.',
-        });
+      if (!success) {
+        throw new Error("A função de seeding retornou um erro. Verifique os logs do navegador para mais detalhes.");
       }
-    } catch (error) {
-      console.error(error);
       toast({
-        variant: 'destructive',
-        title: 'Erro',
-        description: 'Ocorreu um erro inesperado ao criar os cuidadores.',
+        title: 'Sucesso!',
+        description: '✅ 5 Cuidadores criados com sucesso! Verifique a busca.',
       });
+    } catch (error: any) {
+      alert("Erro ao criar: " + error.message);
     } finally {
       setIsSeeding(false);
     }

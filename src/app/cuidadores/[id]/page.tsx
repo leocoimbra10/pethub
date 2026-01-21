@@ -4,7 +4,6 @@ import { listings, users } from '@/lib/placeholder-data';
 import type { Listing, User } from '@/lib/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Check, MapPin, Star } from 'lucide-react';
@@ -110,11 +109,23 @@ export default function CuidadorDetailPage({ params }: { params: { id: string } 
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="border-2 border-black rounded-lg p-2 bg-card">
-                <Calendar
-                  mode="range"
-                  numberOfMonths={1}
-                />
+              <div className="border rounded-lg p-4 bg-white">
+                <div className="mb-4 font-bold text-center">Fevereiro 2026</div>
+                {/* Cabeçalho dos dias */}
+                <div className="grid grid-cols-7 mb-2 text-center text-xs font-bold text-gray-500">
+                  <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+                </div>
+                {/* Grade dos dias - Forçando o GRID */}
+                <div className="grid grid-cols-7 gap-1 text-sm">
+                  {/* Dias vazios para alinhar (exemplo) */}
+                  <div className="p-2"></div><div className="p-2"></div>
+                  {/* Dias reais */}
+                  {[...Array(28)].map((_, i) => (
+                    <div key={i} className={`p-2 text-center rounded hover:bg-gray-100 cursor-pointer ${i === 5 ? 'bg-[#FF007F] text-white font-bold' : ''}`}>
+                      {i + 1}
+                    </div>
+                  ))}
+                </div>
               </div>
               <Button className="w-full mt-4" size="lg">Reservar estadia</Button>
               <p className="text-center text-sm font-bold mt-2">A cobrança não será feita agora.</p>
