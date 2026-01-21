@@ -25,7 +25,17 @@ export default function DashboardPage() {
     }
   }, [user, loading, router]);
   
-  if (loading || !user) {
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[calc(100vh-8rem)] p-10">
+        <Loader className="h-16 w-16 animate-spin text-primary" />
+        <p className="font-bold text-lg ml-4">Carregando...</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    // Briefly show a loader before the redirect kicks in
     return (
       <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">
         <Loader className="h-16 w-16 animate-spin text-primary" />
