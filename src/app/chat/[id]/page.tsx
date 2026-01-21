@@ -214,13 +214,15 @@ export default function ChatPage() {
                                 className={cn(
                                     "relative flex items-center gap-3 p-3 cursor-pointer transition-all duration-200 border-2 border-black rounded-xl",
                                     isActive 
-                                    ? 'bg-black text-white shadow-[2px_2px_0px_#FF007F]'
-                                    : 'bg-white text-black shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:-translate-y-[2px] hover:shadow-[6px_6px_0px_rgba(0,0,0,1)]'
+                                    ? 'bg-[#8B5CF6] text-white shadow-none translate-x-[2px] translate-y-[2px]'
+                                    : 'bg-white text-black shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[6px_6px_0px_rgba(0,0,0,1)]'
                                 )}
                             >
                                 <div className={cn(
                                 'w-12 h-12 shrink-0 flex items-center justify-center rounded-lg border-2 border-black font-black text-lg',
-                                isActive ? 'bg-gray-800 text-white' : getAvatarColor(otherParticipantName) + ' text-black'
+                                isActive 
+                                    ? 'bg-white text-[#8B5CF6]' 
+                                    : getAvatarColor(otherParticipantName) + ' text-black'
                                 )}>
                                 {otherParticipantName?.charAt(0).toUpperCase()}
                                 </div>
@@ -231,14 +233,10 @@ export default function ChatPage() {
                                     {otherParticipantName}
                                     </h3>
                                 </div>
-                                <p className={cn('text-sm truncate font-medium', isActive ? 'text-gray-400' : 'text-gray-500')}>
+                                <p className={cn('text-sm truncate font-medium', isActive ? 'text-purple-100' : 'text-gray-500')}>
                                     {c.lastMessage || "Toque para conversar"}
                                 </p>
                                 </div>
-                                
-                                {isActive && (
-                                <div className="absolute right-3 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#FF007F]"></div>
-                                )}
                             </div>
                             );
                         })}
