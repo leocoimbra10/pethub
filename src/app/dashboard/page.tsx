@@ -74,7 +74,9 @@ export default function DashboardPage() {
       const unsubscribeHost = onSnapshot(qHost, (snapshot) => {
         if (!snapshot.empty) {
             const hostDoc = snapshot.docs[0];
-            setHostProfile({ id: hostDoc.id, ...hostDoc.data() } as Host);
+            const hostData = { id: hostDoc.id, ...hostDoc.data() } as Host;
+            console.log("Host Profile carregado:", hostData);
+            setHostProfile(hostData);
         } else {
             setHostProfile(null);
         }
@@ -192,7 +194,7 @@ export default function DashboardPage() {
                             <p className="font-headline text-xl">{hostProfile.nome}</p>
                         </div>
                         <div className="flex gap-2">
-                            <Button variant="outline" disabled>Editar</Button>
+                            <Button variant="outline" onClick={() => alert("Funcionalidade de Edição em breve!")}>Editar</Button>
                             <Link href={`/cuidadores/${hostProfile.id}`}>
                                 <Button className='bg-primary text-primary-foreground'>Ver meu Anúncio</Button>
                             </Link>
