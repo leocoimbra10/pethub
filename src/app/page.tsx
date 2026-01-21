@@ -1,12 +1,13 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, MapPin, CalendarCheck, Coffee, HeartPulse, ShieldCheck, Camera, Star, Heart } from 'lucide-react';
+import { Search, MapPin, Camera, Star, HeartPulse, ShieldCheck } from 'lucide-react';
 import HostCard from '@/components/HostCard';
 import { listings, users } from '@/lib/placeholder-data';
 import type { Listing, User } from '@/lib/types';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 
 export default function Home() {
   const featuredListings = listings.slice(0, 4);
@@ -48,15 +49,14 @@ export default function Home() {
           <div className="absolute inset-0 bg-black/40 rounded-xl"></div>
           <div className="relative z-10 px-4">
             <h1 className="text-4xl md:text-7xl font-bold font-headline tracking-tight text-white [text-shadow:_4px_4px_0_rgb(0_0_0_/_1)]">
-              PetHub
+              Pode ir tranquilo. O PetHub fica.
             </h1>
             <p className="mt-4 text-lg md:text-xl max-w-2xl mx-auto text-white font-bold [text-shadow:_2px_2px_0_rgb(0_0_0_/_0.8)]">
-              Seu pet em boas mãos. Encontre o anfitrião perfeito para seu melhor amigo.
+              Quem fica quando você não pode. Conectamos tutores a cuidadores confiáveis. Sem improviso.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-4 max-w-2xl mx-auto">
               <Button className="w-full max-w-sm bg-accent hover:bg-accent/90 text-accent-foreground" size="lg">
-                  <MapPin className="mr-2 h-5 w-5" />
-                  Encontrar Hosts Perto de Mim
+                  Encontrar alguém
               </Button>
               <div className="flex items-center gap-2 text-white w-full max-w-sm">
                   <div className="flex-grow border-t-2 border-white/50"></div>
@@ -82,39 +82,39 @@ export default function Home() {
 
       <section id="como-funciona" className="py-16 bg-background">
           <div className="container mx-auto px-4">
-              <h2 className="text-4xl font-bold font-headline text-center mb-12">Como Funciona?</h2>
+              <h2 className="text-4xl font-bold font-headline text-center mb-12">Como funciona?</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
                   <Card className="bg-card">
                       <CardHeader>
                           <div className="mx-auto bg-primary p-4 rounded-lg border-2 border-black inline-block shadow-neo">
-                              <Search className="h-10 w-10 text-primary-foreground" />
+                              <Badge variant="secondary" className='text-xl'>1</Badge>
                           </div>
                       </CardHeader>
                       <CardContent>
-                          <h3 className="text-2xl font-bold font-headline">1. Busque</h3>
-                          <p className="font-medium mt-2">Encontre anfitriões perto de você com base nas suas necessidades.</p>
+                          <h3 className="text-2xl font-bold font-headline">Zero Improviso</h3>
+                          <p className="font-medium mt-2">Aqui, alguém assume a responsabilidade.</p>
                       </CardContent>
                   </Card>
                   <Card className="bg-card">
                       <CardHeader>
                           <div className="mx-auto bg-accent p-4 rounded-lg border-2 border-black inline-block shadow-neo">
-                              <CalendarCheck className="h-10 w-10 text-accent-foreground" />
+                              <Badge variant="secondary" className='text-xl'>2</Badge>
                           </div>
                       </CardHeader>
                       <CardContent>
-                          <h3 className="text-2xl font-bold font-headline">2. Reserve</h3>
-                          <p className="font-medium mt-2">Converse com o anfitrião, agende as datas e pague com segurança.</p>
+                          <h3 className="text-2xl font-bold font-headline">Segurança Total</h3>
+                          <p className="font-medium mt-2">Pessoas avaliadas para cuidar de quem importa.</p>
                       </CardContent>
                   </Card>
                   <Card className="bg-card">
                       <CardHeader>
-                          <div className="mx-auto bg-secondary p-4 rounded-lg border-2 border-black inline-block shadow-neo">
-                              <Coffee className="h-10 w-10 text-secondary-foreground" />
+                         <div className="mx-auto bg-secondary p-4 rounded-lg border-2 border-black inline-block shadow-neo">
+                              <Badge variant="secondary" className='text-xl'>3</Badge>
                           </div>
                       </CardHeader>
                       <CardContent>
-                          <h3 className="text-2xl font-bold font-headline">3. Relaxe</h3>
-                          <p className="font-medium mt-2">Seu pet fica em boas mãos e você acompanha tudo com fotos diárias.</p>
+                          <h3 className="text-2xl font-bold font-headline">Você vai, a gente fica</h3>
+                          <p className="font-medium mt-2">Seu pet bem cuidado, mesmo quando você não está.</p>
                       </CardContent>
                   </Card>
               </div>
@@ -132,8 +132,8 @@ export default function Home() {
                   </div>
                   <div className="flex flex-col items-center">
                       <ShieldCheck className="h-16 w-16 mb-4" />
-                      <h3 className="text-2xl font-bold font-headline">Anfitriões Verificados</h3>
-                      <p className="font-medium mt-2 max-w-xs">Todos os nossos anfitriões passam por um processo de verificação de identidade.</p>
+                      <h3 className="text-2xl font-bold font-headline">Cuidadores Verificados</h3>
+                      <p className="font-medium mt-2 max-w-xs">Todos os nossos cuidadores passam por um processo de verificação de identidade.</p>
                   </div>
                   <div className="flex flex-col items-center">
                       <Camera className="h-16 w-16 mb-4" />
@@ -146,7 +146,7 @@ export default function Home() {
       
       <section className="py-16 bg-background">
         <div className="container mx-auto px-4">
-          <h2 className="text-4xl font-bold font-headline text-center">Anfitriões em Destaque</h2>
+          <h2 className="text-4xl font-bold font-headline text-center">Cuidadores em Destaque</h2>
           <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {featuredListings.map((listing: Listing) => {
               const host = users.find((user: User) => user.uid === listing.hostId);
@@ -156,7 +156,7 @@ export default function Home() {
           </div>
           <div className="text-center mt-12">
             <Link href="/search">
-              <Button variant="secondary" size="lg">Ver todos os anfitriões</Button>
+              <Button variant="secondary" size="lg">Ver todos os cuidadores</Button>
             </Link>
           </div>
         </div>
@@ -192,13 +192,13 @@ export default function Home() {
           </div>
       </section>
 
-      <section id="quero-ser-anfitriao" className="py-16 bg-secondary border-y-2 border-black">
+      <section id="quero-ser-cuidador" className="py-16 bg-secondary border-y-2 border-black">
           <div className="container mx-auto px-4 text-center">
-              <h2 className="text-4xl md:text-5xl font-bold font-headline text-black max-w-2xl mx-auto">Ama bichos? Ganhe dinheiro hospedando em casa!</h2>
-              <p className="mt-4 text-lg text-black font-medium max-w-xl mx-auto">Junte-se à nossa comunidade de anfitriões e ofereça um lar temporário para pets enquanto seus tutores viajam.</p>
+              <h2 className="text-4xl md:text-5xl font-bold font-headline text-black max-w-2xl mx-auto">Ama animais? Gere renda cuidando deles.</h2>
+              <p className="mt-4 text-lg text-black font-medium max-w-xl mx-auto">Faça parte da nossa comunidade de cuidadores e ofereça um espaço seguro para pets.</p>
               <div className="mt-8">
                   <Link href="/login#register">
-                    <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground">Quero ser Anfitrião</Button>
+                    <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground">Quero cuidar</Button>
                   </Link>
               </div>
           </div>

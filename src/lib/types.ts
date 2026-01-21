@@ -1,6 +1,6 @@
 export type User = {
   uid: string;
-  role: 'host' | 'tutor';
+  role: 'cuidador' | 'tutor';
   name: string;
   photo: string;
   isVerified: boolean;

@@ -12,7 +12,7 @@ interface HostCardProps {
 
 export default function HostCard({ listing, host }: HostCardProps) {
   return (
-    <Link href={`/hosts/${listing.id}`}>
+    <Link href={`/cuidadores/${listing.id}`}>
       <Card className="w-full overflow-hidden transition-all duration-300 group bg-card hover:shadow-[8px_8px_0px_#8B5CF6] active:shadow-neo-sm">
         <CardHeader className="p-0">
           <div className="relative aspect-square w-full">

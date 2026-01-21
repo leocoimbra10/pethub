@@ -31,8 +31,8 @@ import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 
 const mainNav = [
-  { href: '/search', label: 'Achar um Lar' },
-  { href: '/#como-funciona', label: 'Como rola?' },
+  { href: '/search', label: 'Buscar cuidador' },
+  { href: '/#como-funciona', label: 'Como funciona' },
 ];
 
 const UserActions = () => {
@@ -62,7 +62,7 @@ const UserActions = () => {
   if (!user) {
     return (
         <Link href="/login" className="font-bold text-gray-600 hover:text-primary transition-colors">
-            Entrar na Toca
+            Entrar
         </Link>
     );
   }
@@ -153,7 +153,7 @@ export default function Header() {
                     <div className="absolute bottom-8 left-8 right-8 flex flex-col gap-4">
                          <Link href="/login#register" className="w-full">
                             <Button className="w-full bg-accent hover:bg-accent/90 text-accent-foreground">
-                                Quero ser Anfitrião <Heart className="h-4 w-4 ml-1" />
+                                Quero cuidar
                             </Button>
                          </Link>
                          <div className="text-center">
@@ -187,7 +187,7 @@ export default function Header() {
           <UserActions />
            <Link href="/login#register">
             <Button className="bg-accent hover:bg-accent/90 text-accent-foreground">
-                Quero ser Anfitrião <Heart className="h-4 w-4 ml-1" />
+                Quero cuidar
             </Button>
            </Link>
         </div>

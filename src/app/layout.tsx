@@ -6,8 +6,8 @@ import Footer from '@/components/layout/Footer';
 import { ThemeProvider } from '@/components/ThemeProvider';
 
 export const metadata: Metadata = {
-  title: 'PetHub | Hospedagem de Pets',
-  description: 'A plataforma perfeita para encontrar um lar seguro e carinhoso para seu pet enquanto você viaja.',
+  title: 'PetHub | Cuidadores de Confiança para seu Pet',
+  description: 'Conectamos tutores a cuidadores confiáveis. Sem improviso.',
 };
 
 export default function RootLayout({
@@ -16,7 +16,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="pt-BR" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />

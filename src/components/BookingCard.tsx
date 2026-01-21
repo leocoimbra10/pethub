@@ -39,10 +39,10 @@ export default function BookingCard({ booking, listing, host }: BookingCardProps
               <p className="text-sm font-bold flex items-center gap-1">
                 <MapPin className="h-4 w-4" /> {listing.city}
               </p>
-              <Link href={`/hosts/${listing.id}`}>
+              <Link href={`/cuidadores/${listing.id}`}>
                 <h3 className="text-xl font-bold font-headline hover:text-primary transition-colors">{listing.title}</h3>
               </Link>
-              <p className="font-bold">Anfitrião: {host.name}</p>
+              <p className="font-bold">Cuidador: {host.name}</p>
             </div>
             <div className="text-right flex-shrink-0 ml-4">
               <p className="text-sm font-bold">Total</p>
@@ -60,9 +60,9 @@ export default function BookingCard({ booking, listing, host }: BookingCardProps
             <div className="flex gap-2">
               <Button variant="secondary">
                 <MessageSquare className="h-4 w-4 mr-2" />
-                Mensagem
+                Contatar
               </Button>
-              <Link href={`/hosts/${listing.id}`}>
+              <Link href={`/cuidadores/${listing.id}`}>
                 <Button>Ver Detalhes</Button>
               </Link>
             </div>

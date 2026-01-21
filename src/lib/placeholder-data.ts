@@ -6,28 +6,28 @@ const findImage = (id: string) => PlaceHolderImages.find(img => img.id === id)?.
 export const users: User[] = [
   {
     uid: 'host1',
-    role: 'host',
+    role: 'cuidador',
     name: 'Ana Silva',
     photo: findImage('user1'),
     isVerified: true,
   },
   {
     uid: 'host2',
-    role: 'host',
+    role: 'cuidador',
     name: 'Bruno Costa',
     photo: findImage('user2'),
     isVerified: false,
   },
   {
     uid: 'host3',
-    role: 'host',
+    role: 'cuidador',
     name: 'Carla Dias',
     photo: findImage('user3'),
     isVerified: true,
   },
   {
     uid: 'host4',
-    role: 'host',
+    role: 'cuidador',
     name: 'Daniel Farias',
     photo: findImage('user4'),
     isVerified: true,

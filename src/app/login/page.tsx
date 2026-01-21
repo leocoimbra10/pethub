@@ -43,11 +43,11 @@ export default function LoginPage() {
     try {
       if (isLogin) {
         await signInWithEmailAndPassword(auth, email, password);
-        toast({ title: "Login realizado com sucesso!" });
+        toast({ title: "Login realizado com sucesso." });
         router.push('/dashboard');
       } else {
         await createUserWithEmailAndPassword(auth, email, password);
-        toast({ title: "Conta criada com sucesso!" });
+        toast({ title: "Conta criada com sucesso." });
         router.push('/dashboard');
       }
     } catch (error: any) {
@@ -63,7 +63,7 @@ export default function LoginPage() {
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
-      toast({ title: "Login com Google realizado com sucesso!" });
+      toast({ title: "Login com Google realizado com sucesso." });
       router.push('/dashboard');
     } catch (error: any) {
       toast({
@@ -84,9 +84,9 @@ export default function LoginPage() {
               <PawPrint className="h-8 w-8 text-primary-foreground" />
             </div>
           </div>
-          <CardTitle className="text-3xl font-headline">{isLogin ? 'Entre na sua toca' : 'Crie sua toca'}</CardTitle>
+          <CardTitle className="text-3xl font-headline">{isLogin ? 'Entrar' : 'Criar conta'}</CardTitle>
           <CardDescription className="font-bold text-black">
-            {isLogin ? 'Bem-vindo de volta! Faça login para gerenciar suas reservas.' : 'Cadastre-se para encontrar um lar para seu pet.'}
+            {isLogin ? 'Acesse sua conta para gerenciar suas reservas.' : 'Crie uma conta para encontrar um cuidador para seu pet.'}
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
@@ -100,7 +100,7 @@ export default function LoginPage() {
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
-          <Button className="w-full" onClick={handleAuth}>{isLogin ? 'Entrar' : 'Cadastrar'}</Button>
+          <Button className="w-full" onClick={handleAuth}>{isLogin ? 'Entrar' : 'Criar conta'}</Button>
           <div className="relative flex py-2 items-center w-full">
               <div className="flex-grow border-t-2 border-black"></div>
               <span className="flex-shrink mx-4 font-bold text-sm">OU</span>
@@ -113,7 +113,7 @@ export default function LoginPage() {
           <div className="text-center text-sm font-bold pt-2">
             {isLogin ? 'Não tem uma conta?' : 'Já tem uma conta?'}{' '}
             <button onClick={() => setIsLogin(!isLogin)} className="underline hover:text-primary">
-              {isLogin ? 'Cadastre-se' : 'Faça login'}
+              {isLogin ? 'Crie uma' : 'Entre'}
             </button>
           </div>
         </CardFooter>

@@ -16,8 +16,8 @@ export default function Footer() {
           <div>
             <h3 className="font-headline font-bold text-lg mb-4">Plataforma</h3>
             <ul className="space-y-2 font-bold">
-              <li><Link href="/search" className="hover:text-primary transition-colors">Buscar Anfitriões</Link></li>
-              <li><Link href="/login#register" className="hover:text-primary transition-colors">Seja um Anfitrião</Link></li>
+              <li><Link href="/search" className="hover:text-primary transition-colors">Buscar cuidador</Link></li>
+              <li><Link href="/login#register" className="hover:text-primary transition-colors">Seja um cuidador</Link></li>
               <li><Link href="/dashboard" className="hover:text-primary transition-colors">Minhas Reservas</Link></li>
               <li><Link href="#" className="hover:text-primary transition-colors">Sobre Nós</Link></li>
             </ul>
