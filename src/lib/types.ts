@@ -19,6 +19,18 @@ export type Listing = {
   houseImages: string[];
 };
 
+export type Host = {
+  id: string;
+  ownerId: string;
+  nome: string;
+  preco: number;
+  cidade: string;
+  descricao: string;
+  photo: string;
+  houseImages: string[];
+  rating: number;
+};
+
 export type Booking = {
   id:string;
   tutorId: string;

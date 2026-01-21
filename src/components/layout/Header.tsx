@@ -151,7 +151,7 @@ export default function Header() {
                     ))}
                     </nav>
                     <div className="absolute bottom-8 left-8 right-8 flex flex-col gap-4">
-                         <Link href="/register" className="w-full">
+                         <Link href="/quero-cuidar" className="w-full">
                             <Button className="w-full bg-accent hover:bg-accent/90 text-accent-foreground">
                                 Quero cuidar
                             </Button>
@@ -185,7 +185,7 @@ export default function Header() {
         {/* Right Side: Desktop Actions */}
         <div className="hidden md:flex flex-1 items-center justify-end gap-4">
           <UserActions />
-           <Link href="/register">
+           <Link href="/quero-cuidar">
             <Button className="bg-accent hover:bg-accent/90 text-accent-foreground">
                 Quero cuidar
             </Button>
