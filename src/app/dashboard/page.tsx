@@ -10,17 +10,28 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { signOut } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import { seedHosts } from '@/lib/seed-hosts';
-import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, orderBy } from 'firebase/firestore';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+
+type Reserva = {
+  id: string;
+  hostPhoto: string;
+  hostName: string;
+  listingTitle: string;
+  status: string;
+  date: string;
+  listingCity: string;
+  price: number;
+};
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
   const [isSeeding, setIsSeeding] = useState(false);
-  const [reservas, setReservas] = useState<any[]>([]);
+  const [reservas, setReservas] = useState<Reserva[]>([]);
   const [loadingReservas, setLoadingReservas] = useState(true);
 
   useEffect(() => {
@@ -32,11 +43,11 @@ export default function DashboardPage() {
   useEffect(() => {
     if (user) {
       setLoadingReservas(true);
-      const q = query(collection(firestore, "reservas"), where("userId", "==", user.uid));
+      const q = query(collection(firestore, "reservas"), where("userId", "==", user.uid), orderBy("createdAt", "desc"));
       const unsubscribe = onSnapshot(q, (querySnapshot) => {
-        const userReservas: any[] = [];
+        const userReservas: Reserva[] = [];
         querySnapshot.forEach((doc) => {
-          userReservas.push({ id: doc.id, ...doc.data() });
+          userReservas.push({ id: doc.id, ...doc.data() } as Reserva);
         });
         setReservas(userReservas);
         setLoadingReservas(false);

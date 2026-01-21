@@ -12,11 +12,13 @@ import { Check, MapPin, Star } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth, firestore } from '@/lib/firebase';
 import { addDoc, collection } from 'firebase/firestore';
+import { useToast } from '@/hooks/use-toast';
 
 export default function CuidadorDetailPage({ params }: { params: { id: string } }) {
   const [selectedDate, setSelectedDate] = useState<number | null>(null);
   const { user } = useAuth();
   const router = useRouter();
+  const { toast } = useToast();
 
   const listing = listings.find((l) => l.id === params.id);
   
@@ -38,7 +40,11 @@ export default function CuidadorDetailPage({ params }: { params: { id: string } 
       return;
     }
     if (!selectedDate) {
-      alert("Por favor, escolha uma data para a reserva.");
+      toast({
+        variant: "destructive",
+        title: "Data não selecionada",
+        description: "Por favor, escolha uma data para a reserva.",
+      });
       return;
     }
 
@@ -51,15 +57,22 @@ export default function CuidadorDetailPage({ params }: { params: { id: string } 
         listingTitle: listing.title,
         listingCity: listing.city,
         date: `Fevereiro ${selectedDate}, 2026`,
-        price: listing.price,
+        price: listing.price + 15, // Price + service fee
         status: "confirmada",
         createdAt: new Date()
       });
-      alert("Reserva Realizada com sucesso!");
+      toast({
+        title: "Reserva Realizada!",
+        description: "Sua estadia foi confirmada com sucesso.",
+      });
       router.push('/dashboard');
     } catch (error) {
       console.error("Erro ao criar reserva: ", error);
-      alert("Ocorreu um erro ao realizar a reserva. Tente novamente.");
+      toast({
+        variant: "destructive",
+        title: "Erro na reserva",
+        description: "Ocorreu um erro ao realizar a reserva. Tente novamente.",
+      });
     }
   };
 
