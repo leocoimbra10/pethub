@@ -1,3 +1,5 @@
+'use client';
+
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { listings, users } from '@/lib/placeholder-data';
@@ -7,8 +9,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Check, MapPin, Star } from 'lucide-react';
+import { useState } from 'react';
 
 export default function CuidadorDetailPage({ params }: { params: { id: string } }) {
+  const [selectedDate, setSelectedDate] = useState<number | null>(null);
   const listing = listings.find((l) => l.id === params.id);
   
   if (!listing) {
@@ -121,13 +125,17 @@ export default function CuidadorDetailPage({ params }: { params: { id: string } 
                   <div className="p-2"></div><div className="p-2"></div>
                   {/* Dias reais */}
                   {[...Array(28)].map((_, i) => (
-                    <div key={i} className={`p-2 text-center rounded hover:bg-gray-100 cursor-pointer ${i === 5 ? 'bg-[#FF007F] text-white font-bold' : ''}`}>
+                    <div 
+                      key={i} 
+                      className={`p-2 text-center rounded hover:bg-gray-100 cursor-pointer ${i + 1 === selectedDate ? 'bg-[#FF007F] text-white font-bold' : ''}`}
+                      onClick={() => setSelectedDate(i + 1)}
+                    >
                       {i + 1}
                     </div>
                   ))}
                 </div>
               </div>
-              <Button className="w-full mt-4" size="lg">Reservar estadia</Button>
+              <Button className="w-full mt-4" size="lg" disabled={!selectedDate}>Reservar estadia</Button>
               <p className="text-center text-sm font-bold mt-2">A cobrança não será feita agora.</p>
             
               <div className="space-y-2 mt-4 font-bold">

@@ -13,13 +13,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { auth, useAuth } from "@/lib/firebase";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { Loader, PawPrint, TriangleAlert } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
 export default function RegisterPage() {
+  const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -39,8 +40,13 @@ export default function RegisterPage() {
       setError("A senha deve ter pelo menos 6 caracteres.");
       return;
     }
+    if (!nome) {
+      setError("Por favor, insira seu nome.");
+      return;
+    }
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(userCredential.user, { displayName: nome });
       router.push('/dashboard');
     } catch (err: any) {
       console.error("Erro de autenticação:", err);
@@ -92,6 +98,10 @@ export default function RegisterPage() {
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
+          <div className="grid gap-2">
+            <Label htmlFor="nome" className="font-bold">Nome</Label>
+            <Input id="nome" type="text" placeholder="Seu nome ou apelido" required className="bg-card" value={nome} onChange={(e) => setNome(e.target.value)} />
+          </div>
           <div className="grid gap-2">
             <Label htmlFor="email" className="font-bold">Email</Label>
             <Input id="email" type="email" placeholder="seu@email.com" required className="bg-card" value={email} onChange={(e) => setEmail(e.target.value)} />

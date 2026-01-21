@@ -41,19 +41,27 @@ export default function DashboardPage() {
 
   const handleSeed = async () => {
     setIsSeeding(true);
+
+    const seedingPromise = seedHosts(firestore);
+    const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Timeout: A operação demorou demais. Verifique as Regras do Firestore.")), 8000)
+    );
+
     try {
-      const success = await seedHosts(firestore);
-      if (!success) {
-        throw new Error("A função de seeding retornou um erro. Verifique os logs do navegador para mais detalhes.");
-      }
-      toast({
-        title: 'Sucesso!',
-        description: '✅ 5 Cuidadores criados com sucesso! Verifique a busca.',
-      });
+        const success = await Promise.race([seedingPromise, timeoutPromise]);
+
+        if (typeof success === 'boolean' && !success) {
+            throw new Error("A função de seeding retornou um erro. Verifique os logs do navegador para mais detalhes.");
+        }
+        
+        toast({
+            title: 'Sucesso!',
+            description: '✅ 5 Cuidadores criados com sucesso! Verifique a busca.',
+        });
     } catch (error: any) {
-      alert("Erro ao criar: " + error.message);
+        alert("Erro ao criar: " + error.message);
     } finally {
-      setIsSeeding(false);
+        setIsSeeding(false);
     }
   };
 
