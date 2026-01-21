@@ -12,6 +12,7 @@ import { ptBR } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 export default function ChatListPage() {
   const { user, loading } = useAuth();
@@ -85,20 +86,32 @@ export default function ChatListPage() {
                             <Loader className="h-6 w-6 animate-spin mx-auto" />
                         </div>
                     ) : chats.length > 0 ? (
-                        <nav className="p-2 space-y-1">
-                            {chats.map(c => (
+                        <nav className="divide-y divide-border/10">
+                            {chats.map(c => {
+                                const otherParticipantName = getOtherParticipantName(c);
+                                return (
                                 <Link href={`/chat/${c.id}`} key={c.id}>
-                                    <div className={cn(
-                                        "p-3 rounded-lg hover:bg-secondary/50 cursor-pointer transition-colors"
-                                    )}>
-                                        <h3 className="font-bold font-headline truncate">{getOtherParticipantName(c)}</h3>
-                                        <p className="text-sm text-muted-foreground truncate">{c.lastMessage || 'Nenhuma mensagem.'}</p>
-                                        <p className="text-xs text-right font-bold text-muted-foreground mt-1">
-                                            {c.updatedAt ? formatDistanceToNow(c.updatedAt.toDate(), { addSuffix: true, locale: ptBR }) : ''}
-                                        </p>
+                                    <div className="flex items-center gap-4 p-4 cursor-pointer transition-colors hover:bg-muted">
+                                        <Avatar className="h-12 w-12 shrink-0">
+                                            <AvatarFallback>
+                                                {otherParticipantName.charAt(0).toUpperCase()}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex justify-between items-center">
+                                                <h3 className="font-bold truncate">{otherParticipantName}</h3>
+                                                <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">
+                                                    {c.updatedAt ? formatDistanceToNow(c.updatedAt.toDate(), { addSuffix: true, locale: ptBR }) : ''}
+                                                </span>
+                                            </div>
+                                            <p className="text-sm text-muted-foreground truncate">
+                                                {c.lastMessage || "Toque para iniciar a conversa"}
+                                            </p>
+                                        </div>
                                     </div>
                                 </Link>
-                            ))}
+                                )
+                            })}
                         </nav>
                     ) : (
                         <div className="p-4 text-center text-muted-foreground">
