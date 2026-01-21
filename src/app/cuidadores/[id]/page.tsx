@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { notFound } from 'next/navigation';
+import { notFound, useRouter } from 'next/navigation';
 import { listings, users } from '@/lib/placeholder-data';
 import type { Listing, User } from '@/lib/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -10,9 +10,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Check, MapPin, Star } from 'lucide-react';
 import { useState } from 'react';
+import { useAuth, firestore } from '@/lib/firebase';
+import { addDoc, collection } from 'firebase/firestore';
 
 export default function CuidadorDetailPage({ params }: { params: { id: string } }) {
   const [selectedDate, setSelectedDate] = useState<number | null>(null);
+  const { user } = useAuth();
+  const router = useRouter();
+
   const listing = listings.find((l) => l.id === params.id);
   
   if (!listing) {
@@ -26,6 +31,38 @@ export default function CuidadorDetailPage({ params }: { params: { id: string } 
   }
 
   const amenities = listing.amenities;
+
+  const handleReserve = async () => {
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+    if (!selectedDate) {
+      alert("Por favor, escolha uma data para a reserva.");
+      return;
+    }
+
+    try {
+      await addDoc(collection(firestore, "reservas"), {
+        userId: user.uid,
+        hostId: host.uid,
+        hostName: host.name,
+        hostPhoto: host.photo,
+        listingTitle: listing.title,
+        listingCity: listing.city,
+        date: `Fevereiro ${selectedDate}, 2026`,
+        price: listing.price,
+        status: "confirmada",
+        createdAt: new Date()
+      });
+      alert("Reserva Realizada com sucesso!");
+      router.push('/dashboard');
+    } catch (error) {
+      console.error("Erro ao criar reserva: ", error);
+      alert("Ocorreu um erro ao realizar a reserva. Tente novamente.");
+    }
+  };
+
 
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
@@ -124,34 +161,36 @@ export default function CuidadorDetailPage({ params }: { params: { id: string } 
                   {/* Dias vazios para alinhar (exemplo) */}
                   <div className="p-2"></div><div className="p-2"></div>
                   {/* Dias reais */}
-                  {[...Array(28)].map((_, i) => (
+                  {[...Array(28)].map((_, i) => {
+                    const day = i + 1;
+                    return (
                     <div 
                       key={i} 
-                      className={`p-2 text-center rounded hover:bg-gray-100 cursor-pointer ${i + 1 === selectedDate ? 'bg-[#FF007F] text-white font-bold' : ''}`}
-                      onClick={() => setSelectedDate(i + 1)}
+                      className={`p-2 text-center rounded hover:bg-gray-100 cursor-pointer ${day === selectedDate ? 'bg-[#FF007F] text-white font-bold' : ''}`}
+                      onClick={() => setSelectedDate(day)}
                     >
-                      {i + 1}
+                      {day}
                     </div>
-                  ))}
+                  )})}
                 </div>
               </div>
-              <Button className="w-full mt-4" size="lg" disabled={!selectedDate}>Reservar estadia</Button>
+              <Button className="w-full mt-4" size="lg" disabled={!selectedDate} onClick={handleReserve}>Reservar estadia</Button>
               <p className="text-center text-sm font-bold mt-2">A cobrança não será feita agora.</p>
             
               <div className="space-y-2 mt-4 font-bold">
                 <div className="flex justify-between">
-                    <span>R$ {listing.price.toFixed(2).replace('.', ',')} x 5 noites</span>
-                    <span>R$ {(listing.price * 5).toFixed(2).replace('.', ',')}</span>
+                    <span>R$ {listing.price.toFixed(2).replace('.', ',')} x 1 noite</span>
+                    <span>R$ {(listing.price).toFixed(2).replace('.', ',')}</span>
                 </div>
                 <div className="flex justify-between">
                     <span>Taxa de serviço</span>
-                    <span>R$ 75,00</span>
+                    <span>R$ 15,00</span>
                 </div>
               </div>
               <Separator className="my-4 border-black" />
               <div className="flex justify-between font-bold text-lg">
                 <span>Total</span>
-                <span>R$ {(listing.price * 5 + 75).toFixed(2).replace('.', ',')}</span>
+                <span>R$ {(listing.price + 15).toFixed(2).replace('.', ',')}</span>
               </div>
             </CardContent>
           </Card>

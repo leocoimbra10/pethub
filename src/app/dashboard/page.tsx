@@ -3,27 +3,48 @@
 import { useAuth, auth, firestore } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Loader } from 'lucide-react';
+import { Loader, PawPrint, Calendar, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { signOut } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import { seedHosts } from '@/lib/seed-hosts';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
   const [isSeeding, setIsSeeding] = useState(false);
-
-  console.log("Dashboard: User status", user);
+  const [reservas, setReservas] = useState<any[]>([]);
+  const [loadingReservas, setLoadingReservas] = useState(true);
 
   useEffect(() => {
     if (!loading && !user) {
       router.push('/login');
     }
   }, [user, loading, router]);
+  
+  useEffect(() => {
+    if (user) {
+      setLoadingReservas(true);
+      const q = query(collection(firestore, "reservas"), where("userId", "==", user.uid));
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const userReservas: any[] = [];
+        querySnapshot.forEach((doc) => {
+          userReservas.push({ id: doc.id, ...doc.data() });
+        });
+        setReservas(userReservas);
+        setLoadingReservas(false);
+      });
+      return () => unsubscribe();
+    }
+  }, [user]);
+
 
   const handleLogout = async () => {
     try {
@@ -51,7 +72,7 @@ export default function DashboardPage() {
     }
   };
 
-  if (loading) {
+  if (loading || !user) {
     return (
       <div className="flex items-center justify-center min-h-[calc(100vh-8rem)] p-10">
         <Loader className="h-16 w-16 animate-spin text-primary" />
@@ -60,22 +81,17 @@ export default function DashboardPage() {
     );
   }
 
-  if (!user) {
-    // Briefly show a loader before the redirect kicks in
-    return (
-      <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">
-        <Loader className="h-16 w-16 animate-spin text-primary" />
-      </div>
-    );
-  }
-
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
-      <div className="max-w-2xl mx-auto">
-        <h1 className="text-3xl md:text-5xl font-bold font-headline mb-4">
-          Bem-vindo, {user.displayName || user.email}!
-        </h1>
-        <p className="text-lg font-bold mb-8">Este é o seu painel PetHub.</p>
+      <div className="max-w-4xl mx-auto">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
+            <h1 className="text-3xl md:text-5xl font-bold font-headline mb-4 sm:mb-0">
+              Bem-vindo, {user.displayName || user.email}!
+            </h1>
+            <Button variant="destructive" onClick={handleLogout} className="w-full sm:w-auto">
+                Sair da Toca
+            </Button>
+        </div>
 
         <Card className="bg-card">
           <CardHeader>
@@ -83,18 +99,51 @@ export default function DashboardPage() {
             <CardDescription>Acompanhe suas próximas e passadas estadias.</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="font-bold text-center p-8 border-2 border-dashed border-black rounded-xl">
-              Você ainda não tem reservas.
-            </p>
+            {loadingReservas ? (
+                 <div className="flex items-center justify-center p-8">
+                    <Loader className="h-8 w-8 animate-spin text-primary" />
+                    <p className="font-bold ml-4">Buscando suas reservas...</p>
+                 </div>
+            ) : reservas.length > 0 ? (
+              <div className="space-y-4">
+                {reservas.map(reserva => (
+                  <Card key={reserva.id} className="p-4 flex flex-col sm:flex-row items-start gap-4">
+                    <Avatar className="h-20 w-20 border-2 border-black">
+                      <AvatarImage src={reserva.hostPhoto} />
+                      <AvatarFallback>{reserva.hostName.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <div className='w-full'>
+                        <div className="flex justify-between w-full">
+                            <h3 className="font-bold font-headline text-xl">{reserva.listingTitle}</h3>
+                            <Badge className="bg-green-500 text-white border-green-700">{reserva.status}</Badge>
+                        </div>
+                        <p className="font-bold text-sm text-muted-foreground">{reserva.hostName}</p>
+                        <Separator className='my-2 bg-border' />
+                        <div className="flex flex-col sm:flex-row justify-between items-start text-sm font-bold mt-1">
+                          <div className='flex items-center gap-2'>
+                            <Calendar className='h-4 w-4' />
+                            <span>{reserva.date}</span>
+                          </div>
+                          <div className='flex items-center gap-2'>
+                            <MapPin className='h-4 w-4' />
+                            <span>{reserva.listingCity}</span>
+                          </div>
+                          <span>Total: R$ {Number(reserva.price).toFixed(2).replace('.', ',')}</span>
+                        </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center p-8 border-2 border-dashed border-black rounded-xl">
+                <PawPrint className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                <p className="font-bold">Você ainda não tem reservas.</p>
+                 <Link href="/search" className="w-full sm:w-auto mt-4 inline-block">
+                    <Button className="w-full">Buscar Cuidador</Button>
+                </Link>
+              </div>
+            )}
           </CardContent>
-          <CardFooter className="flex-col sm:flex-row gap-2">
-            <Link href="/search" className="w-full sm:w-auto">
-              <Button className="w-full">Buscar Cuidador</Button>
-            </Link>
-            <Button variant="destructive" onClick={handleLogout} className="w-full sm:w-auto">
-              Sair da Toca
-            </Button>
-          </CardFooter>
         </Card>
         
         <Card className="bg-card mt-8">
