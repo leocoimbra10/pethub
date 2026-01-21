@@ -32,11 +32,18 @@ export type Booking = {
 
 export type Message = {
   id: string;
-  bookingId: string;
-  content: string;
+  text: string;
   senderId: string;
-  timestamp: Date;
+  createdAt: any;
 };
+
+export type Chat = {
+    id: string;
+    participants: string[];
+    participantNames: { [key: string]: string };
+    lastMessage?: string;
+    updatedAt: any;
+}
 
 export type Pet = {
   id: string;

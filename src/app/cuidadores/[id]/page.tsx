@@ -8,14 +8,15 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Check, MapPin, Star } from 'lucide-react';
+import { Check, MapPin, Star, MessageSquare, Loader } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth, firestore } from '@/lib/firebase';
-import { addDoc, collection } from 'firebase/firestore';
+import { addDoc, collection, getDocs, query, where, serverTimestamp } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 
 export default function CuidadorDetailPage({ params }: { params: { id: string } }) {
   const [selectedDate, setSelectedDate] = useState<number | null>(null);
+  const [loadingChat, setLoadingChat] = useState(false);
   const { user } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
@@ -76,6 +77,52 @@ export default function CuidadorDetailPage({ params }: { params: { id: string } 
     }
   };
 
+  const handleStartChat = async () => {
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+    
+    setLoadingChat(true);
+    try {
+      const q = query(
+        collection(firestore, "chats"),
+        where("participants", "array-contains", user.uid)
+      );
+
+      const querySnapshot = await getDocs(q);
+      let existingChatId: string | null = null;
+      querySnapshot.forEach(doc => {
+        if (doc.data().participants.includes(host.uid)) {
+          existingChatId = doc.id;
+        }
+      });
+
+      if (existingChatId) {
+        router.push(`/chat/${existingChatId}`);
+      } else {
+        const newChatRef = await addDoc(collection(firestore, "chats"), {
+          participants: [user.uid, host.uid],
+          participantNames: {
+              [user.uid]: user.displayName || 'Usuário',
+              [host.uid]: host.name
+          },
+          lastMessage: "",
+          updatedAt: serverTimestamp()
+        });
+        router.push(`/chat/${newChatRef.id}`);
+      }
+    } catch (error) {
+      console.error("Error starting chat:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Não foi possível iniciar o chat.",
+      });
+    } finally {
+        setLoadingChat(false);
+    }
+  };
 
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
@@ -116,10 +163,16 @@ export default function CuidadorDetailPage({ params }: { params: { id: string } 
               <h2 className="text-3xl font-bold font-headline">Cuidador: {host.name}</h2>
               <p className="font-bold">Cuidador desde 2021</p>
             </div>
-            <Avatar className="h-32 w-32 border-4 border-black shadow-neo">
-              <AvatarImage src={host.photo} alt={host.name} data-ai-hint="person happy"/>
-              <AvatarFallback>{host.name.charAt(0)}</AvatarFallback>
-            </Avatar>
+            <div className="flex flex-col items-end gap-4">
+              <Avatar className="h-32 w-32 border-4 border-black shadow-neo">
+                <AvatarImage src={host.photo} alt={host.name} data-ai-hint="person happy"/>
+                <AvatarFallback>{host.name.charAt(0)}</AvatarFallback>
+              </Avatar>
+              <Button variant="outline" onClick={handleStartChat} disabled={loadingChat}>
+                {loadingChat ? <Loader className="mr-2 h-4 w-4 animate-spin" /> : <MessageSquare className="mr-2 h-4 w-4" />}
+                Enviar Mensagem
+              </Button>
+            </div>
           </div>
           
           <Separator className="my-8 border-black" />

@@ -3,7 +3,7 @@
 import { useAuth, auth, firestore } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Loader, PawPrint, Calendar, MapPin } from 'lucide-react';
+import { Loader, PawPrint, Calendar, MapPin, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -118,20 +118,37 @@ export default function DashboardPage() {
             </Button>
         </div>
 
-        <Card className="bg-card mb-8">
-          <CardHeader>
-            <CardTitle>Meus Pets</CardTitle>
-            <CardDescription>Gerencie as informações dos seus animais de estimação.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Link href="/meus-pets">
-                <Button>
-                    <PawPrint className="mr-2 h-5 w-5" />
-                    Gerenciar Meus Pets
-                </Button>
-            </Link>
-          </CardContent>
-        </Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <Card className="bg-card">
+            <CardHeader>
+                <CardTitle>Meus Pets</CardTitle>
+                <CardDescription>Gerencie as informações dos seus animais de estimação.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Link href="/meus-pets">
+                    <Button>
+                        <PawPrint className="mr-2 h-5 w-5" />
+                        Gerenciar Meus Pets
+                    </Button>
+                </Link>
+            </CardContent>
+            </Card>
+            <Card className="bg-card">
+            <CardHeader>
+                <CardTitle>Minhas Mensagens</CardTitle>
+                <CardDescription>Veja suas conversas com os cuidadores.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Link href="/chat">
+                    <Button>
+                        <MessageSquare className="mr-2 h-5 w-5" />
+                        Ver Mensagens
+                    </Button>
+                </Link>
+            </CardContent>
+            </Card>
+        </div>
+
 
         <Card className="bg-card">
           <CardHeader>
