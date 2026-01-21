@@ -36,7 +36,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (user && !loading) {
-      console.log("Tentando redirecionar...");
+      console.log("Usuário logado! Redirecionando para /dashboard...");
       router.push('/dashboard');
     }
   }, [user, loading, router]);
@@ -91,7 +91,7 @@ export default function LoginPage() {
       <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">
         <div className="text-center">
             <Loader className="h-16 w-16 animate-spin text-primary mx-auto mb-4" />
-            <p className="font-bold text-lg">Login aprovado! Entrando...</p>
+            <p className="font-bold text-lg">Login aprovado! Entrando no dashboard...</p>
         </div>
       </div>
     );
