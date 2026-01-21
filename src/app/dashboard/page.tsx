@@ -192,9 +192,6 @@ export default function DashboardPage() {
                         <div>
                             <p className="font-bold">Seu espaço está no ar!</p>
                             <p className="font-headline text-xl">{hostProfile.nome}</p>
-                            <p className="text-xs text-muted-foreground mt-1">
-                                Debug ID: {hostProfile?.id || "SEM ID DETECTADO"}
-                            </p>
                         </div>
                         <div className="flex gap-2">
                             <Button variant="outline" onClick={() => alert("Funcionalidade de Edição em breve!")}>Editar</Button>
