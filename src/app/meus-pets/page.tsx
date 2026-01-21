@@ -4,11 +4,12 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth, firestore } from '@/lib/firebase';
-import { collection, query, where, onSnapshot, orderBy } from 'firebase/firestore';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader, PawPrint, PlusCircle, Dog, Cat, Bird } from 'lucide-react';
 import type { Pet } from '@/lib/types';
+import { useToast } from '@/hooks/use-toast';
 
 const PetIcon = ({ tipo, className }: { tipo: string; className?: string }) => {
     switch (tipo) {
@@ -26,6 +27,7 @@ export default function MeusPetsPage() {
   const router = useRouter();
   const [pets, setPets] = useState<Pet[]>([]);
   const [loadingPets, setLoadingPets] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -38,8 +40,7 @@ export default function MeusPetsPage() {
       setLoadingPets(true);
       const q = query(
         collection(firestore, 'pets'),
-        where('ownerId', '==', user.uid),
-        orderBy('createdAt', 'desc')
+        where('ownerId', '==', user.uid)
       );
       const unsubscribe = onSnapshot(q, (querySnapshot) => {
         const userPets: Pet[] = [];
@@ -48,10 +49,18 @@ export default function MeusPetsPage() {
         });
         setPets(userPets);
         setLoadingPets(false);
+      }, (error) => {
+        console.error("Erro ao buscar pets:", error);
+        toast({
+          variant: "destructive",
+          title: "Erro ao buscar pets",
+          description: error.message,
+        });
+        setLoadingPets(false);
       });
       return () => unsubscribe();
     }
-  }, [user]);
+  }, [user, toast]);
 
   if (authLoading || !user) {
     return (
@@ -102,8 +111,8 @@ export default function MeusPetsPage() {
         ) : (
           <div className="text-center p-12 border-2 border-dashed border-black rounded-xl">
             <PawPrint className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
-            <h2 className="text-xl font-bold">Nenhum pet cadastrado.</h2>
-            <p className="text-muted-foreground mb-4">Adicione seu primeiro companheiro!</p>
+            <h2 className="text-xl font-bold">Nenhum pet encontrado.</h2>
+            <p className="text-muted-foreground mb-4">Nenhum pet foi encontrado no banco de dados para este usuário.</p>
             <Link href="/meus-pets/novo">
               <Button>Adicionar Pet</Button>
             </Link>

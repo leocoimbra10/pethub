@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { signOut } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import { seedHosts } from '@/lib/seed-hosts';
-import { collection, query, where, onSnapshot, orderBy } from 'firebase/firestore';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -43,18 +43,32 @@ export default function DashboardPage() {
   useEffect(() => {
     if (user) {
       setLoadingReservas(true);
-      const q = query(collection(firestore, "reservas"), where("userId", "==", user.uid), orderBy("createdAt", "desc"));
-      const unsubscribe = onSnapshot(q, (querySnapshot) => {
-        const userReservas: Reserva[] = [];
-        querySnapshot.forEach((doc) => {
-          userReservas.push({ id: doc.id, ...doc.data() } as Reserva);
-        });
-        setReservas(userReservas);
-        setLoadingReservas(false);
-      });
+      // Removed orderBy to prevent potential Firestore index errors during debug
+      const q = query(collection(firestore, "reservas"), where("userId", "==", user.uid));
+      
+      const unsubscribe = onSnapshot(q, 
+        (querySnapshot) => {
+          const userReservas: Reserva[] = [];
+          querySnapshot.forEach((doc) => {
+            userReservas.push({ id: doc.id, ...doc.data() } as Reserva);
+          });
+          setReservas(userReservas);
+          setLoadingReservas(false);
+        },
+        (error) => {
+          console.error("Erro ao buscar reservas:", error);
+          toast({
+            variant: "destructive",
+            title: "Erro ao buscar reservas",
+            description: error.message
+          });
+          setLoadingReservas(false);
+        }
+      );
+      
       return () => unsubscribe();
     }
-  }, [user]);
+  }, [user, toast]);
 
 
   const handleLogout = async () => {
