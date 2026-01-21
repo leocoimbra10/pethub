@@ -54,7 +54,7 @@ export default function Home() {
               O PetHub fica.
             </h1>
             <p className="mt-4 text-lg md:text-xl max-w-2xl mx-auto text-white font-bold [text-shadow:_2px_2px_0_rgb(0_0_0_/_0.8)]">
-              Quem fica quando você não pode. Conectamos tutores a cuidadores confiáveis. Sem improviso.
+              Encontre um cuidador de confiança para seu melhor amigo. Assim, você pode ir tranquilo.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-4 max-w-2xl mx-auto">
               <Button className="w-full max-w-sm bg-accent hover:bg-accent/90 text-accent-foreground" size="lg">
