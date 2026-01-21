@@ -90,7 +90,7 @@ const UserActions = () => {
         <Link href="/dashboard">
           <DropdownMenuItem>
             <LayoutDashboard className="mr-2 h-4 w-4" />
-            <span>Minhas Reservas</span>
+            <span>Meu Painel</span>
           </DropdownMenuItem>
         </Link>
         <DropdownMenuItem>
