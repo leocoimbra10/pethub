@@ -44,12 +44,12 @@ export default function DashboardPage() {
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
       <h1 className="text-3xl md:text-5xl font-bold font-headline mb-8 text-center">
-        Bem-vindo, {user.displayName || user.email}!
+        Olá, {user.email}! Bem-vindo ao PetHub.
       </h1>
       <div className="flex justify-center">
-        <Button onClick={handleLogout}>
+        <Button onClick={handleLogout} variant="destructive">
             <LogOut className="mr-2 h-4 w-4" />
-            <span>Sair</span>
+            <span>Sair da Toca</span>
         </Button>
       </div>
     </div>
