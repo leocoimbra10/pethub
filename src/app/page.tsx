@@ -49,7 +49,9 @@ export default function Home() {
           <div className="absolute inset-0 bg-black/40 rounded-xl"></div>
           <div className="relative z-10 px-4">
             <h1 className="text-4xl md:text-7xl font-bold font-headline tracking-tight text-white [text-shadow:_4px_4px_0_rgb(0_0_0_/_1)]">
-              Pode ir tranquilo. O PetHub fica.
+              Pode ir tranquilo.
+              <br />
+              O PetHub fica.
             </h1>
             <p className="mt-4 text-lg md:text-xl max-w-2xl mx-auto text-white font-bold [text-shadow:_2px_2px_0_rgb(0_0_0_/_0.8)]">
               Quem fica quando você não pode. Conectamos tutores a cuidadores confiáveis. Sem improviso.

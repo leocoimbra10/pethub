@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Loader, MessageSquare, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-import { collection, query, where, onSnapshot, orderBy } from 'firebase/firestore';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import type { Chat } from '@/lib/types';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -31,17 +31,23 @@ export default function ChatListPage() {
       setLoadingChats(true);
       const q = query(
         collection(firestore, "chats"),
-        where("participants", "array-contains", user.uid),
-        orderBy("updatedAt", "desc")
+        where("participants", "array-contains", user.uid)
       );
       const unsubscribe = onSnapshot(q, (querySnapshot) => {
-        const userChats: Chat[] = [];
-        querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            const updatedAt = data.updatedAt?.toDate ? data.updatedAt.toDate() : new Date();
-            userChats.push({ id: doc.id, updatedAt, ...data } as Chat);
+        const userChats: Chat[] = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Chat));
+        
+        const sortedChats = userChats.sort((a, b) => {
+            const getMillis = (dateObj: any) => {
+                if (!dateObj) return 0;
+                if (typeof dateObj.toMillis === 'function') return dateObj.toMillis(); // Firestore Timestamp
+                if (dateObj instanceof Date) return dateObj.getTime(); // JS Date
+                if (typeof dateObj === 'number') return dateObj; // Already a number
+                return 0;
+            };
+            return getMillis(b.updatedAt) - getMillis(a.updatedAt);
         });
-        setChats(userChats);
+
+        setChats(sortedChats);
         setLoadingChats(false);
       }, (error) => {
         console.error("Error fetching chats list:", error);
@@ -88,7 +94,7 @@ export default function ChatListPage() {
                                         <h3 className="font-bold font-headline truncate">{getOtherParticipantName(c)}</h3>
                                         <p className="text-sm text-muted-foreground truncate">{c.lastMessage || 'Nenhuma mensagem.'}</p>
                                         <p className="text-xs text-right font-bold text-muted-foreground mt-1">
-                                            {c.updatedAt ? formatDistanceToNow(c.updatedAt, { addSuffix: true, locale: ptBR }) : ''}
+                                            {c.updatedAt ? formatDistanceToNow(c.updatedAt.toDate(), { addSuffix: true, locale: ptBR }) : ''}
                                         </p>
                                     </div>
                                 </Link>

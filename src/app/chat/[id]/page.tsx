@@ -49,23 +49,28 @@ export default function ChatPage() {
   useEffect(() => {
     if (!user?.uid) return; // Trava de segurança
 
-    console.log("Buscando chats para:", user.uid); // Debug
     setLoadingChatsList(true);
     const q = query(
       collection(firestore, "chats"),
       where("participants", "array-contains", user.uid)
     );
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const userChats: Chat[] = [];
-      querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          const updatedAt = data.updatedAt?.toDate ? data.updatedAt.toDate() : new Date();
-          userChats.push({ id: doc.id, updatedAt, ...data } as Chat);
-      });
+      const userChats: Chat[] = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Chat));
+
       // Client-side sort to replace the removed orderBy
-      userChats.sort((a,b) => (b.updatedAt?.getTime() || 0) - (a.updatedAt?.getTime() || 0));
-      console.log("Chats carregados:", userChats); // Debug
-      setChatsList(userChats);
+      const sortedChats = userChats.sort((a, b) => {
+        const getMillis = (dateObj: any) => {
+            if (!dateObj) return 0;
+            if (typeof dateObj.toMillis === 'function') return dateObj.toMillis(); // Firestore Timestamp
+            if (dateObj instanceof Date) return dateObj.getTime(); // JS Date
+            if (typeof dateObj === 'number') return dateObj; // Already a number
+            return 0;
+        };
+        return getMillis(b.updatedAt) - getMillis(a.updatedAt);
+      });
+      
+      console.log("Chats carregados:", sortedChats); // Debug
+      setChatsList(sortedChats);
       setLoadingChatsList(false);
     }, (error) => {
       console.error("Erro na Sidebar:", error);
@@ -195,7 +200,7 @@ export default function ChatPage() {
                                         <h3 className="font-bold font-headline truncate">{getOtherParticipantName(c)}</h3>
                                         <p className="text-sm text-muted-foreground truncate">{c.lastMessage || 'Nenhuma mensagem.'}</p>
                                         <p className="text-xs text-right font-bold text-muted-foreground mt-1">
-                                            {c.updatedAt ? formatDistanceToNow(c.updatedAt, { addSuffix: true, locale: ptBR }) : ''}
+                                            {c.updatedAt ? formatDistanceToNow(c.updatedAt.toDate(), { addSuffix: true, locale: ptBR }) : ''}
                                         </p>
                                     </div>
                                 </Link>
