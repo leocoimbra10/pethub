@@ -2,10 +2,8 @@
 
 import Link from 'next/link';
 import {
-  PawPrint,
   Menu,
   Heart,
-  User as UserIcon,
   LogOut,
   Sun,
   Moon,
@@ -32,10 +30,9 @@ import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 
-// New UX Writing for nav links
 const mainNav = [
   { href: '/search', label: 'Achar um Lar' },
-  { href: '/#como-rola', label: 'Como rola?' },
+  { href: '/#como-funciona', label: 'Como rola?' },
 ];
 
 const UserActions = () => {
@@ -139,9 +136,8 @@ export default function Header() {
                     </Button>
                 </SheetTrigger>
                 <SheetContent side="left">
-                    <Link href="/" className="flex items-center space-x-2 mb-8">
-                        <PawPrint className="h-8 w-8 text-primary" />
-                        <span className="font-bold font-headline text-2xl">Airbnbicho</span>
+                    <Link href="/" className="flex items-center mb-8">
+                        <span className="font-bold font-headline text-3xl">PetHub</span>
                     </Link>
                     <nav className="flex flex-col space-y-4">
                     {mainNav.map((item) => (
@@ -156,8 +152,8 @@ export default function Header() {
                     </nav>
                     <div className="absolute bottom-8 left-8 right-8 flex flex-col gap-4">
                          <Link href="/login#register" className="w-full">
-                            <Button className="w-full bg-accent hover:bg-accent/90 text-accent-foreground rounded-2xl">
-                                Quero dar Colo <Heart className="h-4 w-4" />
+                            <Button className="w-full bg-accent hover:bg-accent/90 text-accent-foreground">
+                                Quero ser Anfitrião <Heart className="h-4 w-4 ml-1" />
                             </Button>
                          </Link>
                          <div className="text-center">
@@ -166,10 +162,9 @@ export default function Header() {
                     </div>
                 </SheetContent>
             </Sheet>
-             <Link href="/" className="flex items-center space-x-2">
-                <PawPrint className="h-8 w-8 text-primary" />
-                <span className="hidden font-bold sm:inline-block font-headline text-2xl">
-                    Airbnbicho
+             <Link href="/" className="flex items-center">
+                <span className="font-bold font-headline text-3xl">
+                    PetHub
                 </span>
             </Link>
         </div>
@@ -191,8 +186,8 @@ export default function Header() {
         <div className="hidden md:flex flex-1 items-center justify-end gap-4">
           <UserActions />
            <Link href="/login#register">
-            <Button className="bg-accent hover:bg-accent/90 text-accent-foreground rounded-2xl">
-                Quero dar Colo <Heart className="h-4 w-4" />
+            <Button className="bg-accent hover:bg-accent/90 text-accent-foreground">
+                Quero ser Anfitrião <Heart className="h-4 w-4 ml-1" />
             </Button>
            </Link>
         </div>

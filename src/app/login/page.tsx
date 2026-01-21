@@ -13,11 +13,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { auth } from "@/lib/firebase";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { PawPrint } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+
+const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512" {...props}>
+    <path fill="currentColor" d="M488 261.8C488 403.3 381.5 512 244 512 111.3 512 0 398.5 0 256S111.3 0 244 0c69.8 0 132 28.1 176.2 72.9l-63.7 61.9C331.4 110.1 291.1 96 244 96c-82.3 0-149.2 67.2-149.2 150.8s66.9 150.8 149.2 150.8c95.6 0 131.3-67.2 136.4-101.6H244v-75.5h236.1c2.4 12.6 3.9 26.1 3.9 40.8z"/>
+  </svg>
+);
+
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -52,6 +59,21 @@ export default function LoginPage() {
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+      toast({ title: "Login com Google realizado com sucesso!" });
+      router.push('/dashboard');
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Erro de autenticação",
+        description: error.message,
+      });
+    }
+  };
+
 
   return (
     <div className="flex items-center justify-center min-h-[calc(100vh-8rem)] py-12 px-4">
@@ -62,9 +84,9 @@ export default function LoginPage() {
               <PawPrint className="h-8 w-8 text-primary-foreground" />
             </div>
           </div>
-          <CardTitle className="text-3xl font-headline">{isLogin ? 'Acesse sua conta' : 'Crie sua conta'}</CardTitle>
+          <CardTitle className="text-3xl font-headline">{isLogin ? 'Entre na sua toca' : 'Crie sua toca'}</CardTitle>
           <CardDescription className="font-bold text-black">
-            {isLogin ? 'Bem-vindo de volta! Entre para gerenciar suas reservas.' : 'Cadastre-se para encontrar o melhor anfitrião para seu pet.'}
+            {isLogin ? 'Bem-vindo de volta! Faça login para gerenciar suas reservas.' : 'Cadastre-se para encontrar um lar para seu pet.'}
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
@@ -79,7 +101,16 @@ export default function LoginPage() {
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
           <Button className="w-full" onClick={handleAuth}>{isLogin ? 'Entrar' : 'Cadastrar'}</Button>
-          <div className="text-center text-sm font-bold">
+          <div className="relative flex py-2 items-center w-full">
+              <div className="flex-grow border-t-2 border-black"></div>
+              <span className="flex-shrink mx-4 font-bold text-sm">OU</span>
+              <div className="flex-grow border-t-2 border-black"></div>
+          </div>
+          <Button variant="outline" className="w-full bg-card" onClick={handleGoogleSignIn}>
+            <GoogleIcon className="mr-2 h-4 w-4" />
+            Entrar com Google
+          </Button>
+          <div className="text-center text-sm font-bold pt-2">
             {isLogin ? 'Não tem uma conta?' : 'Já tem uma conta?'}{' '}
             <button onClick={() => setIsLogin(!isLogin)} className="underline hover:text-primary">
               {isLogin ? 'Cadastre-se' : 'Faça login'}

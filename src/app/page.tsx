@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, MapPin, CalendarCheck, Coffee, HeartPulse, ShieldCheck, Camera, Star } from 'lucide-react';
+import { Search, MapPin, CalendarCheck, Coffee, HeartPulse, ShieldCheck, Camera, Star, Heart } from 'lucide-react';
 import HostCard from '@/components/HostCard';
 import { listings, users } from '@/lib/placeholder-data';
 import type { Listing, User } from '@/lib/types';
@@ -48,7 +48,7 @@ export default function Home() {
           <div className="absolute inset-0 bg-black/40 rounded-xl"></div>
           <div className="relative z-10 px-4">
             <h1 className="text-4xl md:text-7xl font-bold font-headline tracking-tight text-white [text-shadow:_4px_4px_0_rgb(0_0_0_/_1)]">
-              Airbnbicho
+              PetHub
             </h1>
             <p className="mt-4 text-lg md:text-xl max-w-2xl mx-auto text-white font-bold [text-shadow:_2px_2px_0_rgb(0_0_0_/_0.8)]">
               Seu pet em boas mãos. Encontre o anfitrião perfeito para seu melhor amigo.
@@ -80,7 +80,7 @@ export default function Home() {
         </section>
       </div>
 
-      <section id="como-rola" className="py-16 bg-background">
+      <section id="como-funciona" className="py-16 bg-background">
           <div className="container mx-auto px-4">
               <h2 className="text-4xl font-bold font-headline text-center mb-12">Como Funciona?</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
@@ -123,7 +123,7 @@ export default function Home() {
 
       <section className="py-16 bg-primary text-primary-foreground border-y-2 border-black">
           <div className="container mx-auto px-4">
-              <h2 className="text-4xl font-bold font-headline text-center mb-12">Por que escolher o Airbnbicho?</h2>
+              <h2 className="text-4xl font-bold font-headline text-center mb-12">Por que escolher a PetHub?</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
                   <div className="flex flex-col items-center">
                       <HeartPulse className="h-16 w-16 mb-4" />
@@ -192,7 +192,7 @@ export default function Home() {
           </div>
       </section>
 
-      <section className="py-16 bg-secondary border-y-2 border-black">
+      <section id="quero-ser-anfitriao" className="py-16 bg-secondary border-y-2 border-black">
           <div className="container mx-auto px-4 text-center">
               <h2 className="text-4xl md:text-5xl font-bold font-headline text-black max-w-2xl mx-auto">Ama bichos? Ganhe dinheiro hospedando em casa!</h2>
               <p className="mt-4 text-lg text-black font-medium max-w-xl mx-auto">Junte-se à nossa comunidade de anfitriões e ofereça um lar temporário para pets enquanto seus tutores viajam.</p>

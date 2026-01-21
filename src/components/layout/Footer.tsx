@@ -9,7 +9,7 @@ export default function Footer() {
         <div className="text-center mb-8">
             <Link href="/" className="inline-flex items-center gap-2">
               <PawPrint className="h-8 w-8 text-primary" />
-              <span className="font-bold text-2xl font-headline">Airbnbicho</span>
+              <span className="font-bold text-2xl font-headline">PetHub</span>
             </Link>
         </div>
         <div className="grid md:grid-cols-3 gap-8 mb-8 text-center md:text-left">
@@ -17,7 +17,7 @@ export default function Footer() {
             <h3 className="font-headline font-bold text-lg mb-4">Plataforma</h3>
             <ul className="space-y-2 font-bold">
               <li><Link href="/search" className="hover:text-primary transition-colors">Buscar Anfitriões</Link></li>
-              <li><Link href="#" className="hover:text-primary transition-colors">Seja um Anfitrião</Link></li>
+              <li><Link href="/login#register" className="hover:text-primary transition-colors">Seja um Anfitrião</Link></li>
               <li><Link href="/dashboard" className="hover:text-primary transition-colors">Minhas Reservas</Link></li>
               <li><Link href="#" className="hover:text-primary transition-colors">Sobre Nós</Link></li>
             </ul>
@@ -52,7 +52,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="border-t-2 border-black mt-8 pt-6 text-center text-sm font-bold">
-            <p>© {new Date().getFullYear()} Airbnbicho. Todos os direitos reservados.</p>
+            <p>© {new Date().getFullYear()} PetHub. Todos os direitos reservados.</p>
         </div>
       </div>
     </footer>

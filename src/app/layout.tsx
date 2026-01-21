@@ -6,8 +6,8 @@ import Footer from '@/components/layout/Footer';
 import { ThemeProvider } from '@/components/ThemeProvider';
 
 export const metadata: Metadata = {
-  title: 'Airbnbicho',
-  description: 'Onde tutores de pets encontram anfitriões para hospedar seus animais em casa.',
+  title: 'PetHub | Hospedagem de Pets',
+  description: 'A plataforma perfeita para encontrar um lar seguro e carinhoso para seu pet enquanto você viaja.',
 };
 
 export default function RootLayout({
