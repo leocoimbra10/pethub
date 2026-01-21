@@ -51,8 +51,7 @@ export default function ChatPage() {
       setLoadingChatsList(true);
       const q = query(
         collection(firestore, "chats"),
-        where("participants", "array-contains", user.uid),
-        orderBy("updatedAt", "desc")
+        where("participants", "array-contains", user.uid)
       );
       const unsubscribe = onSnapshot(q, (querySnapshot) => {
         const userChats: Chat[] = [];
@@ -61,10 +60,13 @@ export default function ChatPage() {
             const updatedAt = data.updatedAt?.toDate ? data.updatedAt.toDate() : new Date();
             userChats.push({ id: doc.id, updatedAt, ...data } as Chat);
         });
+        // Client-side sort to replace the removed orderBy
+        userChats.sort((a,b) => (b.updatedAt?.getTime() || 0) - (a.updatedAt?.getTime() || 0));
+        console.log("Chats encontrados:", userChats); // Debug no console
         setChatsList(userChats);
         setLoadingChatsList(false);
       }, (error) => {
-        console.error("Error fetching chats list:", error);
+        console.error("Erro na Sidebar:", error);
         toast({ variant: 'destructive', title: 'Erro ao carregar conversas.' });
         setLoadingChatsList(false);
       });
