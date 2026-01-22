@@ -7,10 +7,10 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Check, MapPin, Star, MessageSquare, Loader } from 'lucide-react';
+import { Check, MapPin, Star, MessageSquare, Loader, User } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth, firestore } from '@/lib/firebase';
-import { addDoc, collection, getDocs, query, where, serverTimestamp, doc, getDoc } from 'firebase/firestore';
+import { addDoc, collection, getDocs, query, where, serverTimestamp, doc, getDoc, onSnapshot, orderBy } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 
 export default function CuidadorDetailPage({ params }: { params: { id: string } }) {
@@ -18,6 +18,11 @@ export default function CuidadorDetailPage({ params }: { params: { id: string } 
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<number | null>(null);
   const [loadingChat, setLoadingChat] = useState(false);
+  
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [newComment, setNewComment] = useState("");
+  const [rating, setRating] = useState(5);
+
   const { user } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
@@ -31,15 +36,12 @@ export default function CuidadorDetailPage({ params }: { params: { id: string } 
       
       setLoading(true);
       try {
-        // TENTATIVA 1: Busca pelo ID do Documento (Padrão para novos cadastros)
         const docRef = doc(firestore, "hosts", params.id as string);
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
           setHost({ id: docSnap.id, ...docSnap.data() } as Host);
         } else {
-          // TENTATIVA 2: Fallback para IDs numéricos (Dados de teste antigos)
-          // Só executa se não achou pelo ID direto
           console.warn("Host não encontrado por ID, tentando fallback...");
           const q = query(collection(firestore, "hosts"), where("id", "==", parseInt(params.id as string) || params.id));
           const querySnap = await getDocs(q);
@@ -62,6 +64,58 @@ export default function CuidadorDetailPage({ params }: { params: { id: string } 
 
     fetchHost();
   }, [params.id]);
+
+  useEffect(() => {
+    if (!params.id) return;
+
+    const reviewsColRef = collection(firestore, "hosts", params.id, "reviews");
+    const q = query(reviewsColRef, orderBy("createdAt", "desc"));
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const fetchedReviews = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setReviews(fetchedReviews);
+    }, (error) => {
+      console.error("Error fetching reviews:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao carregar avaliações",
+      });
+    });
+
+    return () => unsubscribe();
+  }, [params.id, toast]);
+
+  const handleAddReview = async () => {
+    if (!user) {
+      toast({ variant: 'destructive', title: 'Você precisa estar logado para avaliar.' });
+      router.push('/login');
+      return;
+    }
+    if (!newComment.trim()) {
+      toast({ variant: 'destructive', title: 'Comentário vazio', description: 'Por favor, escreva algo sobre sua experiência.' });
+      return;
+    }
+
+    if (!host) return;
+
+    try {
+      const reviewsColRef = collection(firestore, "hosts", host.id, "reviews");
+      await addDoc(reviewsColRef, {
+        comment: newComment,
+        rating: rating,
+        authorId: user.uid,
+        authorName: user.displayName || 'Anônimo',
+        createdAt: serverTimestamp(),
+      });
+
+      toast({ title: 'Avaliação enviada!', description: 'Obrigado por sua contribuição.' });
+      setNewComment('');
+      setRating(5);
+    } catch (error) {
+      console.error("Error adding review:", error);
+      toast({ variant: 'destructive', title: 'Erro ao enviar avaliação' });
+    }
+  };
 
   const handleReserve = async () => {
     if (!user || !host) {
@@ -237,6 +291,72 @@ export default function CuidadorDetailPage({ params }: { params: { id: string } 
               ))}
             </div>
           </div>
+
+          {/* === SEÇÃO DE AVALIAÇÕES === */}
+          <div className="mt-8 border-t-4 border-black pt-8">
+            <h2 className="text-2xl font-black mb-6 flex items-center gap-2">
+              <Star className="fill-[#FACC15] text-black w-8 h-8" strokeWidth={2.5} />
+              Avaliações ({reviews.length})
+            </h2>
+
+            {/* 1. Formulário de Avaliar (Para teste rápido) */}
+            <div className="bg-gray-50 border-2 border-black p-4 rounded-xl mb-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <h3 className="font-bold mb-3">Deixe seu review:</h3>
+              <div className="flex gap-2 mb-3">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button 
+                    key={star} 
+                    onClick={() => setRating(star)}
+                    className="transition-transform hover:scale-110"
+                  >
+                    <Star 
+                      className={`w-8 h-8 ${star <= rating ? 'fill-[#FACC15] text-black' : 'text-gray-300'}`} 
+                      strokeWidth={2}
+                    />
+                  </button>
+                ))}
+              </div>
+              <textarea
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="Como foi a hospedagem? (Conte detalhes...)"
+                className="w-full p-3 border-2 border-black rounded-lg mb-3 min-h-[80px]"
+              />
+              <button
+                onClick={handleAddReview}
+                className="bg-black text-white font-bold py-2 px-6 rounded-lg hover:bg-[#8B5CF6] transition-colors"
+              >
+                Enviar Avaliação
+              </button>
+            </div>
+
+            {/* 2. Lista de Reviews */}
+            <div className="space-y-4">
+              {reviews.length === 0 ? (
+                <p className="text-gray-500 italic">Seja o primeiro a avaliar este cuidador!</p>
+              ) : (
+                reviews.map((rev: any, idx) => (
+                  <div key={idx} className="flex gap-4 p-4 border-2 border-black rounded-xl bg-white">
+                    <div className="w-10 h-10 rounded-full bg-gray-200 border-2 border-black flex items-center justify-center font-bold shrink-0">
+                      <User className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-bold">Usuário PetHub</span>
+                        <div className="flex">
+                          {[...Array(rev.rating || 5)].map((_, i) => (
+                            <Star key={i} className="w-3 h-3 fill-[#FACC15] text-black" />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-gray-700">{rev.comment}</p>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
         </div>
 
         {/* Booking Card */}
