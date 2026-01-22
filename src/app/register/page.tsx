@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -30,7 +30,6 @@ export default function RegisterPage() {
 
   useEffect(() => {
     if (user && !loading) {
-      console.log("Usuário logado! Redirecionando...");
       router.push('/dashboard');
     }
   }, [user, loading, router]);
@@ -50,7 +49,6 @@ export default function RegisterPage() {
       await updateProfile(userCredential.user, { displayName: nome });
       router.push('/dashboard');
     } catch (err: any) {
-      console.error("Erro de autenticação:", err);
        if (err.code === 'auth/email-already-in-use') {
         setError('Este email já está em uso.');
       } else {
@@ -58,17 +56,22 @@ export default function RegisterPage() {
       }
     }
   };
+  
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      handleRegister();
+    }
+  };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">
         <Loader className="h-16 w-16 animate-spin text-primary" />
-        <p className="font-bold text-lg ml-4">Verificando...</p>
       </div>
     );
   }
-
-  if (user) {
+  
+    if (user) {
     return (
       <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">
         <Loader className="h-16 w-16 animate-spin text-primary" />
@@ -79,16 +82,18 @@ export default function RegisterPage() {
 
   return (
     <div className="flex items-center justify-center min-h-[calc(100vh-8rem)] py-12 px-4">
-      <Card className="w-full max-w-sm bg-secondary">
+      <Card className="w-full max-w-sm bg-card border-2 border-black shadow-neo">
         <CardHeader className="text-center">
-          <div className="flex justify-center items-center mb-4">
-            <div className="p-4 bg-primary rounded-lg border-2 border-black">
-              <PawPrint className="h-8 w-8 text-primary-foreground" />
-            </div>
-          </div>
-          <CardTitle className="text-3xl font-headline">Criar conta</CardTitle>
-          <CardDescription className="font-bold text-black">
-            Como você quer ser chamado?
+          <Link href="/" className="inline-block mb-4">
+             <div className="flex justify-center items-center">
+                <div className="p-4 bg-primary rounded-lg border-2 border-black shadow-neo-sm">
+                  <PawPrint className="h-8 w-8 text-primary-foreground" />
+                </div>
+              </div>
+          </Link>
+          <CardTitle className="text-3xl font-headline">Crie sua conta</CardTitle>
+          <CardDescription className="font-bold">
+            É rápido e fácil. Vamos começar!
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
@@ -100,20 +105,20 @@ export default function RegisterPage() {
             </Alert>
           )}
           <div className="grid gap-2">
-            <Label htmlFor="nome" className="font-bold">Nome</Label>
-            <Input id="nome" type="text" placeholder="Seu nome ou apelido" required className="bg-card" value={nome} onChange={(e) => setNome(e.target.value)} />
+            <Label htmlFor="nome" className="font-bold">Seu Nome</Label>
+            <Input id="nome" type="text" placeholder="Como podemos te chamar?" required className="bg-background" value={nome} onChange={(e) => setNome(e.target.value)} onKeyDown={handleKeyDown}/>
           </div>
           <div className="grid gap-2">
             <Label htmlFor="email" className="font-bold">Email</Label>
-            <Input id="email" type="email" placeholder="seu@email.com" required className="bg-card" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <Input id="email" type="email" placeholder="seu@email.com" required className="bg-background" value={email} onChange={(e) => setEmail(e.target.value)} onKeyDown={handleKeyDown}/>
           </div>
           <div className="grid gap-2">
             <Label htmlFor="password" className="font-bold">Senha</Label>
-            <Input id="password" type="password" placeholder="Mínimo 6 caracteres" required className="bg-card" value={password} onChange={(e) => setPassword(e.target.value)} />
+            <Input id="password" type="password" placeholder="Mínimo 6 caracteres" required className="bg-background" value={password} onChange={(e) => setPassword(e.target.value)} onKeyDown={handleKeyDown}/>
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
-          <Button className="w-full" onClick={handleRegister}>Criar conta</Button>
+          <Button className="w-full" onClick={handleRegister}>Criar minha conta</Button>
           <div className="text-center text-sm font-bold pt-2">
             Já tem uma conta?{' '}
             <Link href="/login" className="underline hover:text-primary">
