@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -21,16 +21,15 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const [user, loading] = useAuthState(auth);
 
   useEffect(() => {
     if (user && !loading) {
-      console.log("Usuário logado! Redirecionando...");
-      router.push('/dashboard');
+      router.push("/dashboard");
     }
   }, [user, loading, router]);
 
@@ -38,14 +37,24 @@ export default function LoginPage() {
     setError(null);
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      router.push('/dashboard');
+      router.push("/dashboard");
     } catch (err: any) {
       console.error("Erro de autenticação:", err);
-      if (err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
-        setError('Email ou senha inválidos.');
+      if (
+        err.code === "auth/wrong-password" ||
+        err.code === "auth/user-not-found" ||
+        err.code === "auth/invalid-credential"
+      ) {
+        setError("Email ou senha inválidos.");
       } else {
         setError(err.message);
       }
+    }
+  };
+  
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      handleLogin();
     }
   };
 
@@ -53,7 +62,6 @@ export default function LoginPage() {
     return (
       <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">
         <Loader className="h-16 w-16 animate-spin text-primary" />
-        <p className="font-bold text-lg ml-4">Verificando...</p>
       </div>
     );
   }
@@ -69,20 +77,22 @@ export default function LoginPage() {
 
   return (
     <div className="flex items-center justify-center min-h-[calc(100vh-8rem)] py-12 px-4">
-      <Card className="w-full max-w-sm bg-secondary">
+      <Card className="w-full max-w-sm bg-card border-2 border-black shadow-neo">
         <CardHeader className="text-center">
-          <div className="flex justify-center items-center mb-4">
-            <div className="p-4 bg-primary rounded-lg border-2 border-black">
-              <PawPrint className="h-8 w-8 text-primary-foreground" />
-            </div>
-          </div>
-          <CardTitle className="text-3xl font-headline">Entrar</CardTitle>
-          <CardDescription className="font-bold text-black">
-            Acesse sua conta para gerenciar suas reservas.
+          <Link href="/" className="inline-block mb-4">
+             <div className="flex justify-center items-center">
+                <div className="p-4 bg-primary rounded-lg border-2 border-black shadow-neo-sm">
+                  <PawPrint className="h-8 w-8 text-primary-foreground" />
+                </div>
+              </div>
+          </Link>
+          <CardTitle className="text-3xl font-headline">Bem-vindo!</CardTitle>
+          <CardDescription className="font-bold">
+            Acesse sua conta para continuar.
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
-           {error && (
+          {error && (
             <Alert variant="destructive">
               <TriangleAlert className="h-4 w-4" />
               <AlertTitle>Erro de Autenticação</AlertTitle>
@@ -90,22 +100,57 @@ export default function LoginPage() {
             </Alert>
           )}
           <div className="grid gap-2">
-            <Label htmlFor="email" className="font-bold">Email</Label>
-            <Input id="email" type="email" placeholder="seu@email.com" required className="bg-card" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <Label htmlFor="email" className="font-bold">
+              Email
+            </Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="seu@email.com"
+              required
+              className="bg-background"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              onKeyDown={handleKeyDown}
+            />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="password" className="font-bold">Senha</Label>
-            <Input id="password" type="password" required className="bg-card" value={password} onChange={(e) => setPassword(e.target.value)} />
+            <Label htmlFor="password" className="font-bold">
+              Senha
+            </Label>
+            <Input
+              id="password"
+              type="password"
+              required
+              className="bg-background"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={handleKeyDown}
+            />
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
-          <Button className="w-full" onClick={handleLogin}>Entrar</Button>
-          <div className="text-center text-sm font-bold pt-2">
-            Não tem uma conta?{' '}
+          <Button className="w-full" onClick={handleLogin}>
+            Entrar
+          </Button>
+          
+          <div className="relative w-full">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t-2 border-black" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 font-bold">
+                Ou
+              </span>
+            </div>
+          </div>
+
+          <p className="text-center text-sm font-bold">
+            Não tem uma conta?{" "}
             <Link href="/register" className="underline hover:text-primary">
               Crie uma
             </Link>
-          </div>
+          </p>
         </CardFooter>
       </Card>
     </div>
