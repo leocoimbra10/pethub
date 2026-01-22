@@ -1,6 +1,7 @@
 'use client';
 
-import { useAuth, firestore } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
+import { useAuthState } from 'react-firebase-hooks/auth';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Loader, MessageSquare, ArrowLeft } from 'lucide-react';
@@ -30,7 +31,7 @@ const ChatListItem = ({ chat, currentUserId, onClick }: { chat: Chat, currentUse
 
     const fetchUser = async () => {
       try {
-        const userDoc = await getDoc(doc(firestore, "users", otherId));
+        const userDoc = await getDoc(doc(db, "users", otherId));
         if (userDoc.exists()) {
           const data = userDoc.data();
           setOtherUser({ 
@@ -87,7 +88,7 @@ const ChatListItem = ({ chat, currentUserId, onClick }: { chat: Chat, currentUse
 
 
 export default function ChatListPage() {
-  const { user, loading } = useAuth();
+  const [user, loading] = useAuthState(auth);
   const router = useRouter();
   const [chats, setChats] = useState<Chat[]>([]);
   const [loadingChats, setLoadingChats] = useState(true);
@@ -103,7 +104,7 @@ export default function ChatListPage() {
     if (user) {
       setLoadingChats(true);
       const q = query(
-        collection(firestore, "chats"),
+        collection(db, "chats"),
         where("participants", "array-contains", user.uid)
       );
       const unsubscribe = onSnapshot(q, (querySnapshot) => {

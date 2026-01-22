@@ -35,7 +35,9 @@ export default function RootLayout({
             <div className="relative z-50 pt-6">
               <GlobalBackButton />
             </div>
-            <main className="flex-grow">{children}</main>
+            <main className="flex-grow">
+              {children}
+            </main>
             <Footer />
           </div>
           <Toaster />

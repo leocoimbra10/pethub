@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { firestore, useAuth } from "@/lib/firebase";
+import { db, auth } from "@/lib/firebase";
+import { useAuthState } from "react-firebase-hooks/auth";
 import { collection, query, where, onSnapshot, addDoc, serverTimestamp, doc, getDoc, updateDoc, orderBy } from "firebase/firestore";
 import { useRouter, useParams } from "next/navigation";
 import { Send, ArrowLeft, Phone, ShieldAlert, Loader, MessageSquare } from "lucide-react";
@@ -32,7 +33,7 @@ const ChatListItem = ({ chat, currentUserId, isActive, onClick }: { chat: Chat, 
 
     const fetchUser = async () => {
       try {
-        const userDoc = await getDoc(doc(firestore, "users", otherId));
+        const userDoc = await getDoc(doc(db, "users", otherId));
         if (userDoc.exists()) {
           const data = userDoc.data();
           setOtherUser({ 
@@ -86,7 +87,7 @@ const ChatListItem = ({ chat, currentUserId, isActive, onClick }: { chat: Chat, 
 
 // === PÁGINA PRINCIPAL DO CHAT ===
 export default function ChatPage() {
-  const { user, loading: loadingUser } = useAuth();
+  const [user, loadingUser] = useAuthState(auth);
   const router = useRouter();
   const params = useParams();
   const chatId = params.id as string;
@@ -113,7 +114,7 @@ export default function ChatPage() {
   useEffect(() => {
     if (!user) return;
     setLoadingSidebar(true);
-    const q = query(collection(firestore, "chats"), where("participants", "array-contains", user.uid));
+    const q = query(collection(db, "chats"), where("participants", "array-contains", user.uid));
     
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const chats = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Chat));
@@ -144,7 +145,7 @@ export default function ChatPage() {
         };
 
         const fetchUser = async () => {
-            const userDoc = await getDoc(doc(firestore, "users", otherId));
+            const userDoc = await getDoc(doc(db, "users", otherId));
             if (userDoc.exists()) {
                 setOtherParticipant(userDoc.data());
             } else {
@@ -159,7 +160,7 @@ export default function ChatPage() {
   // 3. Busca Mensagens do Chat Ativo
   useEffect(() => {
     if (!chatId) return;
-    const q = query(collection(firestore, "chats", chatId, "messages"), orderBy("createdAt", "asc"));
+    const q = query(collection(db, "chats", chatId, "messages"), orderBy("createdAt", "asc"));
     
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setMessages(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Message)));
@@ -177,13 +178,13 @@ export default function ChatPage() {
     if (!newMessage.trim() || !user || !chatId) return;
 
     try {
-      await addDoc(collection(firestore, "chats", chatId, "messages"), {
+      await addDoc(collection(db, "chats", chatId, "messages"), {
         text: newMessage,
         senderId: user.uid,
         createdAt: serverTimestamp(),
       });
 
-      const chatRef = doc(firestore, "chats", chatId);
+      const chatRef = doc(db, "chats", chatId);
       await updateDoc(chatRef, {
         lastMessage: newMessage,
         updatedAt: serverTimestamp()

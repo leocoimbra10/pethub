@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { firestore } from "@/lib/firebase";
+import { db } from "@/lib/firebase";
 import { collection, query, getDocs } from "firebase/firestore";
 import { Search, MapPin, Frown } from "lucide-react";
 import type { Host } from '@/lib/types';
@@ -23,7 +23,7 @@ export default function SearchPage() {
     async function fetchHosts() {
       setLoading(true);
       try {
-        const q = query(collection(firestore, "hosts"));
+        const q = query(collection(db, "hosts"));
         const querySnapshot = await getDocs(q);
         
         const allHosts = querySnapshot.docs.map(doc => ({

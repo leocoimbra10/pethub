@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useAuth, firestore } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
+import { useAuthState } from "react-firebase-hooks/auth";
 import { collection, query, where, getDocs, doc, updateDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { Save, Loader2, ArrowLeft, X } from "lucide-react";
@@ -12,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 export default function EditListingPage() {
-  const { user, loading: loadingAuth } = useAuth();
+  const [user, loadingAuth] = useAuthState(auth);
   const [hostData, setHostData] = useState<any>(null);
   const [hostId, setHostId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -28,7 +29,7 @@ export default function EditListingPage() {
 
     async function fetchHostData() {
       if (user) {
-        const q = query(collection(firestore, "hosts"), where("ownerId", "==", user.uid));
+        const q = query(collection(db, "hosts"), where("ownerId", "==", user.uid));
         const querySnapshot = await getDocs(q);
 
         if (!querySnapshot.empty) {
@@ -50,7 +51,7 @@ export default function EditListingPage() {
     if (!hostId) return;
     setSaving(true);
     try {
-      const docRef = doc(firestore, "hosts", hostId);
+      const docRef = doc(db, "hosts", hostId);
       await updateDoc(docRef, {
         nome: hostData.nome,
         descricao: hostData.descricao,

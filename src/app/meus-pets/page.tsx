@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { firestore, useAuth } from "@/lib/firebase";
+import { db, auth } from "@/lib/firebase";
+import { useAuthState } from 'react-firebase-hooks/auth';
 import { collection, query, getDocs, addDoc, deleteDoc, doc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Plus, Trash2, PawPrint, Save, Loader2, X } from "lucide-react";
@@ -8,7 +9,7 @@ import ImageUpload from "@/components/ImageUpload";
 import { useToast } from "@/hooks/use-toast";
 
 export default function MyPetsPage() {
-  const { user, loading: loadingAuth } = useAuth();
+  const [user, loadingAuth] = useAuthState(auth);
   const [pets, setPets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
@@ -35,7 +36,7 @@ export default function MyPetsPage() {
     async function fetchPets() {
       if (user) {
         try {
-          const q = query(collection(firestore, "users", user.uid, "pets"));
+          const q = query(collection(db, "users", user.uid, "pets"));
           const snap = await getDocs(q);
           setPets(snap.docs.map(d => {
             const data = d.data();
@@ -85,7 +86,7 @@ export default function MyPetsPage() {
     try {
       const newPetData = { nome, raca, idade, obs, fotos };
       
-      const docRef = await addDoc(collection(firestore, "users", user!.uid, "pets"), newPetData);
+      const docRef = await addDoc(collection(db, "users", user!.uid, "pets"), newPetData);
       setPets(prev => [...prev, { id: docRef.id, ...newPetData }]);
       
       toast({ title: 'Pet salvo!', description: `${nome} foi adicionado(a) à sua matilha.` });
@@ -108,7 +109,7 @@ export default function MyPetsPage() {
   const handleDeletePet = async (id: string) => {
     if (!window.confirm("Tem certeza que quer remover este pet?")) return;
     try {
-      await deleteDoc(doc(firestore, "users", user!.uid, "pets", id));
+      await deleteDoc(doc(db, "users", user!.uid, "pets", id));
       setPets(pets.filter(p => p.id !== id));
       toast({ title: 'Pet removido com sucesso.' });
     } catch (error) {

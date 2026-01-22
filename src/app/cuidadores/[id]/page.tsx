@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { firestore, useAuth } from "@/lib/firebase";
+import { db, auth } from "@/lib/firebase";
+import { useAuthState } from "react-firebase-hooks/auth";
 import {
   doc,
   collection,
@@ -47,7 +48,7 @@ export default function CuidadorDetailPage({
 
   const [loadingChat, setLoadingChat] = useState(false);
 
-  const { user } = useAuth();
+  const [user] = useAuthState(auth);
   const router = useRouter();
   const { toast } = useToast();
   
@@ -84,7 +85,7 @@ export default function CuidadorDetailPage({
 
     setLoading(true);
 
-    const hostDocRef = doc(firestore, "hosts", params.id);
+    const hostDocRef = doc(db, "hosts", params.id);
     const unsubscribeHost = onSnapshot(
       hostDocRef,
       (docSnap) => {
@@ -110,7 +111,7 @@ export default function CuidadorDetailPage({
       }
     );
 
-    const reviewsColRef = collection(firestore, "hosts", params.id, "reviews");
+    const reviewsColRef = collection(db, "hosts", params.id, "reviews");
     const q = query(reviewsColRef, orderBy("createdAt", "desc"));
     const unsubscribeReviews = onSnapshot(
       q,
@@ -154,7 +155,7 @@ export default function CuidadorDetailPage({
     }
     
     try {
-      const newChatRef = await addDoc(collection(firestore, "chats"), {
+      const newChatRef = await addDoc(collection(db, "chats"), {
         participants: [user.uid, host.ownerId],
         participantNames: {
           [user.uid]: user.displayName || "Usuário",
@@ -164,7 +165,7 @@ export default function CuidadorDetailPage({
         updatedAt: serverTimestamp(),
       });
 
-      await addDoc(collection(firestore, "chats", newChatRef.id, "messages"), {
+      await addDoc(collection(db, "chats", newChatRef.id, "messages"), {
         text: firstMessage,
         senderId: user.uid,
         createdAt: serverTimestamp()
@@ -212,7 +213,7 @@ export default function CuidadorDetailPage({
     if (!host) return;
 
     try {
-      const reviewsColRef = collection(firestore, "hosts", host.id, "reviews");
+      const reviewsColRef = collection(db, "hosts", host.id, "reviews");
       await addDoc(reviewsColRef, {
         comment: newComment,
         rating: rating,

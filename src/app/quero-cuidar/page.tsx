@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { useAuth, firestore } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
+import { useAuthState } from 'react-firebase-hooks/auth';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,7 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader, Dice5, CheckCircle } from 'lucide-react';
 
 export default function QueroCuidarPage() {
-  const { user, loading: authLoading } = useAuth();
+  const [user, authLoading] = useAuthState(auth);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -61,7 +62,7 @@ export default function QueroCuidarPage() {
     }
     setIsSaving(true);
     try {
-      await addDoc(collection(firestore, 'hosts'), {
+      await addDoc(collection(db, 'hosts'), {
         ownerId: user.uid,
         nome,
         preco: Number(preco),

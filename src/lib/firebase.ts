@@ -1,47 +1,23 @@
-'use client';
-
-// Import the functions you need from the SDKs you need
-import { initializeApp, getApps } from "firebase/app";
-import { getAuth, onAuthStateChanged, User, setPersistence, browserLocalPersistence } from "firebase/auth";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { getAuth } from "firebase/auth";
+import { getStorage } from "firebase/storage";
 
-// Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyBcdD9I6ea20Y69Yj5ffn8R3ctlLXSY1uo",
-  authDomain: "studio-1786811890-24060.firebaseapp.com",
-  projectId: "studio-1786811890-24060",
-  storageBucket: "studio-1786811890-24060.firebasestorage.app",
-  messagingSenderId: "182469140897",
-  appId: "1:182469140897:web:422316ce2238c00fa8ebe0"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase
-let app;
-if (!getApps().length) {  
-  app = initializeApp(firebaseConfig);
-}
+// Lógica para garantir que o App existe antes de usar
+const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 
+// Inicializa os serviços passando o app garantido
+const db = getFirestore(app);
 const auth = getAuth(app);
-const firestore = getFirestore(app);
+const storage = getStorage(app);
 
-// Set persistence
-setPersistence(auth, browserLocalPersistence);
-
-export function useAuth() {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  return { user, loading };
-}
-
-export { auth, firestore };
+export { app, db, auth, storage };

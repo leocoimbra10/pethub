@@ -12,7 +12,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { auth, useAuth } from "@/lib/firebase";
+import { auth } from "@/lib/firebase";
+import { useAuthState } from "react-firebase-hooks/auth";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { Loader, PawPrint, TriangleAlert } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -24,7 +25,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const { user, loading } = useAuth();
+  const [user, loading] = useAuthState(auth);
 
   useEffect(() => {
     if (user && !loading) {

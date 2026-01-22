@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
-import { auth, firestore } from "@/lib/firebase";
-import { useAuth } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
+import { useAuthState } from "react-firebase-hooks/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { updateProfile } from "firebase/auth";
 import { User, Phone, Mail, Save, Loader2 } from "lucide-react";
@@ -10,7 +10,7 @@ import ImageUpload from "@/components/ImageUpload";
 import { useToast } from "@/hooks/use-toast";
 
 export default function ProfilePage() {
-  const { user, loading: loadingAuth } = useAuth();
+  const [user, loadingAuth] = useAuthState(auth);
   const [userData, setUserData] = useState<any>({ nome: "", telefone: "", email: "", photoURL: "" });
   const [isLoading, setIsLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -26,7 +26,7 @@ export default function ProfilePage() {
     async function fetchProfile() {
       if (user) {
         setIsLoading(true);
-        const docRef = doc(firestore, "users", user.uid);
+        const docRef = doc(db, "users", user.uid);
         const snap = await getDoc(docRef);
         
         if (snap.exists()) {
@@ -58,7 +58,7 @@ export default function ProfilePage() {
     setSaving(true);
     try {
       // 1. Update Database
-      const docRef = doc(firestore, "users", user.uid);
+      const docRef = doc(db, "users", user.uid);
       await setDoc(docRef, {
         nome: userData.nome,
         telefone: userData.telefone
@@ -99,7 +99,7 @@ export default function ProfilePage() {
               if(!user) return;
               setUserData((prev: any) => ({ ...prev, photoURL: url }));
               try {
-                await setDoc(doc(firestore, "users", user.uid), { photoURL: url }, { merge: true }); // Database
+                await setDoc(doc(db, "users", user.uid), { photoURL: url }, { merge: true }); // Database
                 await updateProfile(user, { photoURL: url }); // Auth Profile
                 
                 toast({ title: "Foto de perfil atualizada!" });

@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
-import { useAuth, auth } from "@/lib/firebase";
+import { auth } from "@/lib/firebase";
+import { useAuthState } from "react-firebase-hooks/auth";
 import { LogOut, User, LayoutDashboard, PawPrint } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -8,7 +9,7 @@ import { signOut } from "firebase/auth";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Header() {
-  const { user, loading } = useAuth();
+  const [user, loading] = useAuthState(auth);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<any>(null);
   const router = useRouter();
@@ -75,7 +76,7 @@ export default function Header() {
           </Link>
 
           {loading ? (
-            <div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse border-2 border-black"></div>
+            <div className="w-12 h-12 bg-gray-200 rounded-full animate-pulse border-2 border-black"></div>
           ) : user ? (
             // === USUÁRIO LOGADO (Dropdown) ===
             <div className="relative" ref={dropdownRef}>

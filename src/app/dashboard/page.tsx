@@ -1,6 +1,7 @@
 'use client';
 
-import { useAuth, auth, firestore } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
+import { useAuthState } from 'react-firebase-hooks/auth';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Loader, PawPrint, Calendar, MapPin, MessageSquare, Home } from 'lucide-react';
@@ -28,7 +29,7 @@ type Reserva = {
 };
 
 export default function DashboardPage() {
-  const { user, loading } = useAuth();
+  const [user, loading] = useAuthState(auth);
   const router = useRouter();
   const { toast } = useToast();
   const [isSeeding, setIsSeeding] = useState(false);
@@ -47,7 +48,7 @@ export default function DashboardPage() {
     if (user) {
       // Fetch Reservas
       setLoadingReservas(true);
-      const qReservas = query(collection(firestore, "reservas"), where("userId", "==", user.uid));
+      const qReservas = query(collection(db, "reservas"), where("userId", "==", user.uid));
       const unsubscribeReservas = onSnapshot(qReservas, 
         (querySnapshot) => {
           const userReservas: Reserva[] = [];
@@ -70,7 +71,7 @@ export default function DashboardPage() {
 
       // Fetch Host Profile
       setLoadingHost(true);
-      const qHost = query(collection(firestore, "hosts"), where("ownerId", "==", user.uid), limit(1));
+      const qHost = query(collection(db, "hosts"), where("ownerId", "==", user.uid), limit(1));
       const unsubscribeHost = onSnapshot(qHost, (snapshot) => {
         if (!snapshot.empty) {
             const hostDoc = snapshot.docs[0];
@@ -115,7 +116,7 @@ export default function DashboardPage() {
   const handleSeed = async () => {
     setIsSeeding(true);
     try {
-      await seedHosts(firestore);
+      await seedHosts(db);
       alert("✅ 5 Cuidadores criados! Vá para a busca.");
     } catch (error: any) {
       alert("Erro: " + error.message);
