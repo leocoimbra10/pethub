@@ -14,10 +14,10 @@ export default function ImageUpload({ onUpload, currentImage }: ImageUploadProps
   useEffect(() => {
     cloudinaryRef.current = (window as any).cloudinary;
     
-    // CONFIGURAÇÃO COM SEU CLOUD NAME
+    // CONFIGURAÇÃO COM VARIÁVEIS DE AMBIENTE
     widgetRef.current = cloudinaryRef.current.createUploadWidget({
-      cloudName: 'dsqdc8tap',      // <--- SEU NOME AQUI
-      uploadPreset: 'pethub_preset', // <--- SEU PRESET
+      cloudName: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+      uploadPreset: process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET,
       sources: ['local', 'camera', 'url'], // De onde vem a foto
       multiple: false,
       folder: 'users_avatars',
