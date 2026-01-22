@@ -59,7 +59,7 @@ export default function DashboardPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <Link href="/meus-pets">
-                <Card className="bg-card hover:border-primary hover:shadow-[8px_8px_0px_#8B5CF6] transition-all h-full flex flex-col justify-between cursor-pointer">
+                <Card className="bg-card hover:border-primary hover:shadow-[8px_8px_0px_hsl(var(--primary))] transition-all h-full flex flex-col justify-between cursor-pointer">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-3">
                            <PawPrint className="w-10 h-10 text-primary" />
@@ -73,16 +73,16 @@ export default function DashboardPage() {
                 </Card>
             </Link>
             <Link href="/quero-cuidar">
-                <Card className="bg-card hover:border-accent hover:shadow-[8px_8px_0px_#EC4899] transition-all h-full flex flex-col justify-between cursor-pointer">
+                <Card className="bg-card hover:border-secondary hover:shadow-[8px_8px_0px_hsl(var(--secondary))] transition-all h-full flex flex-col justify-between cursor-pointer">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-3">
-                            <Home className="w-10 h-10 text-accent" />
-                            Painel de Cuidador
+                            <Home className="w-10 h-10 text-secondary" />
+                            Área do Cuidador
                         </CardTitle>
                         <CardDescription>Ofereça seus serviços e comece a gerar uma renda extra com o que você ama.</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <Button variant="secondary" className="bg-accent text-accent-foreground hover:bg-accent/90">Seja um anfitrião</Button>
+                        <Button variant="secondary">Seja um anfitrião</Button>
                     </CardContent>
                 </Card>
             </Link>
