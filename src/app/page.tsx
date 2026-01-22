@@ -4,8 +4,19 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Search, ShieldCheck, Camera, Heart } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { Input } from '@/components/ui/input';
 
 export default function Home() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const router = useRouter();
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    router.push(`/search?city=${encodeURIComponent(searchTerm)}`);
+  };
+
 
   return (
     <>
@@ -24,14 +35,19 @@ export default function Home() {
           <p className="mt-4 text-lg md:text-xl max-w-2xl mx-auto font-bold [text-shadow:_2px_2px_0_rgb(0_0_0_/_0.8)]">
             Hospedagem domiciliar com amor, segurança e fotos todo dia.
           </p>
-          <div className="mt-8 flex justify-center">
-            <Link href="/search">
-              <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground text-lg">
-                <Search className="mr-2 h-5 w-5" />
-                Encontrar um Anfitrião
-              </Button>
-            </Link>
-          </div>
+          <form onSubmit={handleSearchSubmit} className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-2 max-w-xl mx-auto">
+            <Input
+              type="text"
+              placeholder="Qual cidade?"
+              className="bg-white/90 text-black placeholder:text-gray-600 w-full sm:flex-1 py-6 text-lg"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <Button type="submit" size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground text-lg w-full sm:w-auto py-6">
+              <Search className="mr-2 h-5 w-5" />
+              Encontrar um Anfitrião
+            </Button>
+          </form>
         </div>
       </section>
 
