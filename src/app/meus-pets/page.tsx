@@ -4,13 +4,13 @@ import { useEffect, useState } from "react";
 import { auth, db } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { collection, addDoc, query, getDocs, deleteDoc, doc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, query, getDocs, deleteDoc, doc, serverTimestamp, updateDoc } from "firebase/firestore";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Plus, Trash2, ArrowLeft, PawPrint } from "lucide-react";
+import { Loader2, Plus, Trash2, ArrowLeft, PawPrint, Pencil, X } from "lucide-react";
 import type { Pet } from "@/lib/types";
 
 export default function MyPetsPage() {
@@ -20,12 +20,15 @@ export default function MyPetsPage() {
   const router = useRouter();
   const { toast } = useToast();
 
+  // Form states
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [nome, setNome] = useState("");
   const [tipo, setTipo] = useState<"Cachorro" | "Gato" | "Outro">("Cachorro");
   const [raca, setRaca] = useState("");
   const [idade, setIdade] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // 1. Auth check and initial pet fetch
   useEffect(() => {
     if (loadingAuth) return;
     if (!user) {
@@ -41,7 +44,7 @@ export default function MyPetsPage() {
         setPets(petsList);
       } catch (error) {
         console.error("Erro ao buscar pets:", error);
-        toast({ variant: "destructive", title: "Erro ao buscar pets." });
+        toast({ variant: "destructive", title: "Erro ao buscar seus pets." });
       } finally {
         setLoading(false);
       }
@@ -50,7 +53,28 @@ export default function MyPetsPage() {
     fetchPets(user.uid);
   }, [user, loadingAuth, router, toast]);
 
-  const handleAddPet = async (e: React.FormEvent) => {
+  // 2. Populate form for editing
+  const handleEditClick = (pet: Pet) => {
+    setEditingId(pet.id);
+    setNome(pet.nome);
+    setTipo(pet.tipo);
+    setRaca(pet.raca);
+    setIdade(pet.idade?.toString() || "");
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // 3. Cancel editing
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setNome("");
+    setTipo("Cachorro");
+    setRaca("");
+    setIdade("");
+  };
+
+
+  // 4. Save (Create or Update)
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !nome) {
       toast({ variant: 'destructive', title: 'O nome do pet é obrigatório.' });
@@ -59,41 +83,56 @@ export default function MyPetsPage() {
     setIsSubmitting(true);
 
     try {
-      const petData = {
-        ownerId: user.uid,
-        nome,
-        tipo,
-        raca,
-        idade: Number(idade) || 0,
-        createdAt: serverTimestamp()
-      };
-      const docRef = await addDoc(collection(db, "users", user.uid, "pets"), petData);
+      if (editingId) {
+        // --- UPDATE MODE ---
+        const petRef = doc(db, "users", user.uid, "pets", editingId);
+        await updateDoc(petRef, {
+          nome,
+          tipo,
+          raca,
+          idade: Number(idade) || 0,
+          updatedAt: serverTimestamp()
+        });
+        toast({ title: "Pet atualizado com sucesso! ✏️" });
+      } else {
+        // --- CREATE MODE ---
+        const petData = {
+          ownerId: user.uid,
+          nome,
+          tipo,
+          raca,
+          idade: Number(idade) || 0,
+          createdAt: serverTimestamp()
+        };
+        await addDoc(collection(db, "users", user.uid, "pets"), petData);
+        toast({ title: "Pet adicionado com sucesso! 🎉" });
+      }
       
-      setPets(prev => [...prev, { id: docRef.id, ...petData, createdAt: new Date() }]);
-      
-      setNome("");
-      setRaca("");
-      setIdade("");
-      setTipo("Cachorro");
-      toast({ title: "Pet adicionado com sucesso!" });
+      // Reset form and reload list
+      handleCancelEdit();
+      const q = query(collection(db, "users", user.uid, "pets"));
+      const querySnapshot = await getDocs(q);
+      const petsList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Pet));
+      setPets(petsList);
       
     } catch (error) {
-      console.error("Erro ao adicionar pet:", error);
-      toast({ variant: 'destructive', title: "Erro ao adicionar pet." });
+      console.error("Erro ao salvar pet:", error);
+      toast({ variant: 'destructive', title: "Erro ao salvar o pet." });
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  // 5. Delete Pet
   const handleDeletePet = async (petId: string) => {
     if (!user || !window.confirm("Tem certeza que quer remover este pet?")) return;
     try {
       await deleteDoc(doc(db, "users", user.uid, "pets", petId));
       setPets(pets.filter(pet => pet.id !== petId));
-      toast({ title: "Pet removido." });
+      toast({ title: "Pet removido com sucesso." });
     } catch (error) {
       console.error("Erro ao deletar pet:", error);
-      toast({ variant: 'destructive', title: "Erro ao remover pet." });
+      toast({ variant: 'destructive', title: "Erro ao remover o pet." });
     }
   };
 
@@ -116,9 +155,10 @@ export default function MyPetsPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-1">
-                <form onSubmit={handleAddPet} className="bg-card p-6 rounded-xl border-2 border-black shadow-neo sticky top-24 space-y-4">
+                <form onSubmit={handleSubmit} className={`p-6 rounded-xl border-2 border-black shadow-neo sticky top-24 space-y-4 transition-colors ${editingId ? 'bg-secondary/20' : 'bg-card'}`}>
                     <h2 className="text-xl font-bold mb-2 flex items-center gap-2">
-                        <Plus /> Adicionar Novo Pet
+                        {editingId ? <Pencil /> : <Plus />}
+                        {editingId ? "Editar Pet" : "Adicionar Novo Pet"}
                     </h2>
                     
                     <div>
@@ -148,9 +188,17 @@ export default function MyPetsPage() {
                         <Input id="idade" type="number" value={idade} onChange={e => setIdade(e.target.value)} placeholder="Ex: 3" />
                     </div>
 
-                    <Button type="submit" disabled={isSubmitting} className="w-full">
-                        {isSubmitting ? <Loader2 className="animate-spin" /> : "Salvar Pet"}
-                    </Button>
+                    <div className="flex flex-col gap-2 pt-2">
+                      <Button type="submit" disabled={isSubmitting} variant={editingId ? 'secondary' : 'default'}>
+                          {isSubmitting ? <Loader2 className="animate-spin" /> : (editingId ? "Atualizar Pet" : "Salvar Pet")}
+                      </Button>
+
+                      {editingId && (
+                        <Button type="button" variant="ghost" onClick={handleCancelEdit}>
+                          <X className="mr-2" /> Cancelar Edição
+                        </Button>
+                      )}
+                    </div>
                 </form>
             </div>
 
@@ -163,7 +211,7 @@ export default function MyPetsPage() {
                 </div>
                 ) : (
                 pets.map((pet) => (
-                    <div key={pet.id} className="bg-card p-4 rounded-xl border-2 border-black shadow-neo flex justify-between items-center group">
+                    <div key={pet.id} className={`bg-card p-4 rounded-xl border-2 border-black shadow-neo flex justify-between items-center group transition-all ${editingId === pet.id ? 'shadow-[8px_8px_0px_hsl(var(--secondary))]' : ''}`}>
                         <div className="flex items-center gap-4">
                             <div className={`w-14 h-14 rounded-lg border-2 border-black flex items-center justify-center text-3xl ${pet.tipo === 'Gato' ? 'bg-secondary' : 'bg-accent/20'}`}>
                             {pet.tipo === 'Gato' ? '🐱' : '🐶'}
@@ -176,15 +224,25 @@ export default function MyPetsPage() {
                             </div>
                         </div>
 
-                        <Button 
-                            onClick={() => handleDeletePet(pet.id)}
-                            variant="ghost"
-                            size="icon"
-                            className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                            title="Excluir Pet"
-                        >
-                            <Trash2 />
-                        </Button>
+                        <div className="flex items-center gap-2">
+                            <Button 
+                                onClick={() => handleEditClick(pet)}
+                                variant="secondary"
+                                size="icon"
+                                title="Editar Pet"
+                            >
+                                <Pencil />
+                            </Button>
+                            <Button 
+                                onClick={() => handleDeletePet(pet.id)}
+                                variant="ghost"
+                                size="icon"
+                                className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                                title="Excluir Pet"
+                            >
+                                <Trash2 />
+                            </Button>
+                        </div>
                     </div>
                 ))
                 )}
