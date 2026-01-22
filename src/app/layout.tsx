@@ -25,6 +25,8 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Nunito:wght@400;700;900&display=swap"
           rel="stylesheet"
         />
+        {/* SCRIPT DO CLOUDINARY */}
+        <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
       </head>
       <body className="font-body antialiased bg-white">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>

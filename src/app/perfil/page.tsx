@@ -6,10 +6,11 @@ import { useAuth } from "@/lib/firebase";
 import { User, Phone, Mail, Save, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
+import ImageUpload from "@/components/ImageUpload";
 
 export default function ProfilePage() {
   const { user, loading: loadingAuth } = useAuth();
-  const [userData, setUserData] = useState({ nome: "", telefone: "", email: "" });
+  const [userData, setUserData] = useState({ nome: "", telefone: "", email: "", photoURL: "" });
   const [isLoading, setIsLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const router = useRouter();
@@ -30,11 +31,17 @@ export default function ProfilePage() {
           setUserData({ 
               nome: data.nome || user.displayName || "",
               telefone: data.telefone || "",
-              email: user.email || ""
+              email: user.email || "",
+              photoURL: data.photoURL || user.photoURL || ""
           });
         } else {
           // If no profile in DB, use auth data as a base
-          setUserData({ nome: user.displayName || "", email: user.email || "", telefone: "" });
+          setUserData({ 
+              nome: user.displayName || "", 
+              email: user.email || "", 
+              telefone: "",
+              photoURL: user.photoURL || ""
+            });
         }
         setIsLoading(false);
       };
@@ -78,6 +85,20 @@ export default function ProfilePage() {
       <h1 className="text-4xl font-black mb-8 border-b-4 border-black pb-4">Meu Perfil</h1>
       
       <div className="bg-white border-2 border-black rounded-xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+        <div className="mb-8">
+           <ImageUpload 
+             currentImage={userData.photoURL}
+             onUpload={async (url) => {
+               // Atualiza estado
+               setUserData(prev => ({ ...prev, photoURL: url }));
+               // Salva no Firestore
+               if (user) {
+                 await setDoc(doc(firestore, "users", user.uid), { photoURL: url }, { merge: true });
+                 toast({ title: 'Foto de perfil atualizada!'})
+               }
+             }} 
+           />
+        </div>
         <div className="space-y-6">
           <div>
             <label className="font-bold flex items-center gap-2 mb-2"><User size={20}/> Nome Completo</label>
