@@ -14,13 +14,21 @@ export default function ImageUpload({ onUpload, currentImage }: ImageUploadProps
   useEffect(() => {
     cloudinaryRef.current = (window as any).cloudinary;
     
-    // CONFIGURAÇÃO DO WIDGET
+    // CONFIGURAÇÃO COM SEU CLOUD NAME
     widgetRef.current = cloudinaryRef.current.createUploadWidget({
-      cloudName: 'pethub-demo', // Substitua pelo seu Cloud Name
-      uploadPreset: 'pethub_preset', // O preset "unsigned" que você criou no Cloudinary
-      sources: ['local', 'url', 'camera'],
+      cloudName: 'dsqdc8tap',      // <--- SEU NOME AQUI
+      uploadPreset: 'pethub_preset', // <--- SEU PRESET
+      sources: ['local', 'camera', 'url'], // De onde vem a foto
       multiple: false,
       folder: 'users_avatars',
+      language: "pt",
+      text: {
+        "pt": {
+          "or": "Ou",
+          "menu": { "files": "Meus Arquivos" },
+          "local": { "browse": "Escolher arquivo" }
+        }
+      },
       styles: {
         palette: {
           window: "#FFFFFF",
@@ -36,12 +44,11 @@ export default function ImageUpload({ onUpload, currentImage }: ImageUploadProps
           inProgress: "#0078FF",
           complete: "#20B832",
           sourceBg: "#F4F4F5"
-        },
-        fonts: { default: null, "'Inter', sans-serif": { url: "https://fonts.googleapis.com/css?family=Inter", active: true } }
+        }
       }
     }, function(error: any, result: any) {
       if (!error && result && result.event === "success") {
-        console.log("Upload feito! URL:", result.info.secure_url);
+        console.log("Upload com sucesso:", result.info.secure_url);
         onUpload(result.info.secure_url);
       }
     });
@@ -61,12 +68,14 @@ export default function ImageUpload({ onUpload, currentImage }: ImageUploadProps
           </div>
         )}
         
-        {/* Overlay */}
+        {/* Overlay Escuro ao passar o mouse */}
         <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-          <p className="text-white font-bold text-xs">Alterar</p>
+          <p className="text-white font-bold text-xs">ALTERAR</p>
         </div>
       </div>
-      <p className="text-xs font-bold text-gray-500 mt-2">Toque para mudar a foto</p>
+      <p className="text-xs font-bold text-gray-500 mt-2 cursor-pointer hover:underline" onClick={() => widgetRef.current.open()}>
+        Toque para mudar a foto
+      </p>
     </div>
   );
 }
