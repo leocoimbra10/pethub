@@ -1,162 +1,105 @@
-'use client';
-
-import Link from 'next/link';
+import Link from "next/link";
 import { Button } from '@/components/ui/button';
-import { Search, ShieldCheck, Camera, Heart } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { PawPrint, Home as HomeIcon, TreePalm, Shield } from 'lucide-react';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
 export default function Home() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const router = useRouter();
-
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchTerm) {
-      router.push(`/search?city=${encodeURIComponent(searchTerm)}`);
-    }
-  };
-
-
   return (
-    <>
-      {/* Hero Section */}
-      <section 
-        className="relative border-b-2 border-black bg-cover bg-center"
-        style={{ backgroundImage: "url('https://images.unsplash.com/photo-1583511655826-05700d52f4d9?q=80&w=1976&auto=format&fit=crop')" }}
-      >
-        <div className="absolute inset-0 bg-black/50"></div>
-        <div className="relative container mx-auto px-4 py-24 md:py-32 text-center text-white">
-          <h1 className="text-4xl md:text-7xl font-bold font-headline tracking-tight [text-shadow:_4px_4px_0_rgb(0_0_0_/_0.2)]">
-            Seu pet em casa,
-            <br />
-            mesmo longe de casa.
-          </h1>
-          <p className="mt-4 text-lg md:text-xl max-w-2xl mx-auto font-bold [text-shadow:_2px_2px_0_rgb(0_0_0_/_0.8)]">
-            Hospedagem domiciliar com amor, segurança e fotos todo dia.
-          </p>
-          <form 
-            onSubmit={handleSearchSubmit}
-            className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-2 max-w-xl mx-auto"
-          >
-             <select
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full p-3 bg-gray-50 border-2 border-black rounded-lg font-bold text-black py-6 text-lg sm:flex-1"
-              >
-                <option value="">Selecione uma cidade</option>
-                <option value="São Paulo">São Paulo</option>
-                <option value="Rio de Janeiro">Rio de Janeiro</option>
-                <option value="Belo Horizonte">Belo Horizonte</option>
-                <option value="Curitiba">Curitiba</option>
-                <option value="Brasília">Brasília</option>
-                <option value="Salvador">Salvador</option>
-              </select>
-            <Button type="submit" size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground text-lg w-full sm:w-auto py-6">
-              <Search className="mr-2 h-5 w-5" />
-              Encontrar um Anfitrião
-            </Button>
-          </form>
-        </div>
-      </section>
-
-      {/* Trust Section */}
-      <section id="seguranca" className="py-16 bg-secondary">
-          <div className="container mx-auto px-4">
-              <h2 className="text-4xl font-bold font-headline text-center mb-12 text-secondary-foreground">Tranquilidade em primeiro lugar</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-                  <Card className="bg-card">
-                      <CardHeader className="items-center">
-                          <div className="p-4 bg-primary rounded-lg border-2 border-black inline-block shadow-neo">
-                              <ShieldCheck className="h-10 w-10 text-primary-foreground" />
-                          </div>
-                      </CardHeader>
-                      <CardContent>
-                          <CardTitle className="text-xl font-headline">Identidade Verificada</CardTitle>
-                          <p className="font-medium mt-2">Todo cuidador passa por uma checagem de identidade para garantir um ambiente seguro.</p>
-                      </CardContent>
-                  </Card>
-                  <Card className="bg-card">
-                      <CardHeader className="items-center">
-                          <div className="p-4 bg-primary rounded-lg border-2 border-black inline-block shadow-neo">
-                            <Heart className="h-10 w-10 text-primary-foreground" />
-                          </div>
-                      </CardHeader>
-                      <CardContent>
-                          <CardTitle className="text-xl font-headline">Garantia Veterinária</CardTitle>
-                          <p className="font-medium mt-2">Oferecemos cobertura para despesas veterinárias emergenciais durante a estadia.</p>
-                      </CardContent>
-                  </Card>
-                  <Card className="bg-card">
-                      <CardHeader className="items-center">
-                         <div className="p-4 bg-primary rounded-lg border-2 border-black inline-block shadow-neo">
-                            <Camera className="h-10 w-10 text-primary-foreground" />
-                          </div>
-                      </CardHeader>
-                      <CardContent>
-                          <CardTitle className="text-xl font-headline">Atualizações Diárias</CardTitle>
-                          <p className="font-medium mt-2">Receba fotos e vídeos do seu pet todos os dias para matar a saudade e acompanhar a diversão.</p>
-                      </CardContent>
-                  </Card>
-              </div>
-          </div>
-      </section>
+    <div className="min-h-screen bg-background flex flex-col">
       
-      {/* How it works Section */}
-      <section id="como-funciona" className="py-16 bg-background">
-          <div className="container mx-auto px-4">
-              <h2 className="text-4xl font-bold font-headline text-center mb-12">Como funciona?</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-                  <Card className="bg-card">
-                      <CardHeader>
-                          <div className="mx-auto bg-primary p-4 rounded-lg border-2 border-black inline-block shadow-neo">
-                              <p className='font-headline text-2xl text-primary-foreground'>1</p>
-                          </div>
-                          <CardTitle className='font-headline pt-2'>Busque</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                          <p className="font-medium mt-2">Encontre cuidadores perto de você e veja perfis detalhados com fotos e avaliações.</p>
-                      </CardContent>
-                  </Card>
-                  <Card className="bg-card">
-                      <CardHeader>
-                           <div className="mx-auto bg-primary p-4 rounded-lg border-2 border-black inline-block shadow-neo">
-                              <p className='font-headline text-2xl text-primary-foreground'>2</p>
-                          </div>
-                           <CardTitle className='font-headline pt-2'>Converse</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                          <p className="font-medium mt-2">Converse com o anfitrião pelo chat, tire suas dúvidas e combine os detalhes da estadia.</p>
-                      </CardContent>
-                  </Card>
-                  <Card className="bg-card">
-                      <CardHeader>
-                         <div className="mx-auto bg-primary p-4 rounded-lg border-2 border-black inline-block shadow-neo">
-                              <p className='font-headline text-2xl text-primary-foreground'>3</p>
-                          </div>
-                          <CardTitle className='font-headline pt-2'>Relaxe</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                          <p className="font-medium mt-2">Faça a reserva e viaje tranquilo, sabendo que seu pet está em boas mãos e se divertindo.</p>
-                      </CardContent>
-                  </Card>
-              </div>
+      {/* Header */}
+      <header className="bg-card shadow-sm sticky top-0 z-50 border-b-2 border-black">
+        <div className="container mx-auto px-6 py-4 flex justify-between items-center">
+          <Link href="/" className="flex items-center gap-2">
+            <PawPrint className="text-primary h-8 w-8" />
+            <span className="text-2xl font-bold text-foreground tracking-tight font-headline">PetHub</span>
+          </Link>
+          <div className="space-x-4">
+            <Link href="/login" className="text-foreground hover:text-primary font-medium transition">
+              Entrar
+            </Link>
+            <Button asChild className="hidden md:inline-block">
+              <Link href="/register">Criar Conta</Link>
+            </Button>
           </div>
-      </section>
+        </div>
+      </header>
 
-      {/* Become a host Section */}
-      <section id="quero-ser-cuidador" className="py-16 bg-accent border-y-2 border-black">
-          <div className="container mx-auto px-4 text-center">
-              <h2 className="text-4xl md:text-5xl font-bold font-headline text-accent-foreground max-w-2xl mx-auto">Tem espaço sobrando e ama bichos? Vire um Anfitrião PetHub.</h2>
-              <p className="mt-4 text-lg text-accent-foreground font-medium max-w-xl mx-auto">Faça parte da nossa comunidade, defina suas próprias regras e gere uma renda extra cuidando de pets.</p>
-              <div className="mt-8">
-                  <Link href="/quero-cuidar">
-                    <Button size="lg" variant="secondary">Quero ser um anfitrião</Button>
-                  </Link>
-              </div>
+      {/* Main Hero */}
+      <main className="flex-1">
+        <div className="container mx-auto px-6 py-16 md:py-24 text-center">
+          
+          <h1 className="text-5xl md:text-7xl font-extrabold text-foreground mb-6 tracking-tight leading-tight font-headline">
+            O melhor amigo do <br className="hidden md:block" />
+            <span className="text-primary">seu melhor amigo.</span>
+          </h1>
+
+          <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed font-bold">
+            Conectamos donos amorosos a cuidadores de confiança. 
+            Hospedagem, passeios e muito carinho para o seu pet enquanto você viaja ou trabalha.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <Button asChild size="lg" className="w-full sm:w-auto text-lg">
+              <Link href="/search">
+                🔍 Encontrar Cuidador
+              </Link>
+            </Button>
+            <Button asChild size="lg" variant="secondary" className="w-full sm:w-auto text-lg">
+               <Link href="/quero-cuidar">
+                💙 Quero ser Cuidador
+              </Link>
+            </Button>
           </div>
-      </section>
-    </>
+
+          {/* Feature Cards */}
+          <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            <Card>
+              <CardHeader className="items-center">
+                <div className="bg-primary/10 w-16 h-16 flex items-center justify-center rounded-full border-2 border-black">
+                  <HomeIcon className="h-8 w-8 text-primary" />
+                </div>
+              </CardHeader>
+              <CardContent className="text-center">
+                <CardTitle className="text-xl font-headline">Hospedagem</CardTitle>
+                <p className="text-muted-foreground mt-2">Seu pet fica na casa de um anfitrião amoroso, sem gaiolas e com todo conforto.</p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="items-center">
+                <div className="bg-secondary/20 w-16 h-16 flex items-center justify-center rounded-full border-2 border-black">
+                  <TreePalm className="h-8 w-8 text-secondary-foreground" />
+                </div>
+              </CardHeader>
+              <CardContent className="text-center">
+                <CardTitle className="text-xl font-headline">Passeios</CardTitle>
+                <p className="text-muted-foreground mt-2">Passeadores verificados para gastar a energia do seu cãozinho com segurança.</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="items-center">
+                <div className="bg-accent/10 w-16 h-16 flex items-center justify-center rounded-full border-2 border-black">
+                   <Shield className="h-8 w-8 text-accent" />
+                </div>
+              </CardHeader>
+              <CardContent className="text-center">
+                <CardTitle className="text-xl font-headline">Segurança</CardTitle>
+                <p className="text-muted-foreground mt-2">Cuidadores avaliados, fotos diárias e suporte 24h para sua tranquilidade.</p>
+              </CardContent>
+            </Card>
+          </div>
+
+        </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="bg-card py-8 border-t-2 border-black mt-10">
+        <div className="text-center text-muted-foreground">
+          <p>© {new Date().getFullYear()} PetHub. Feito com amor por Leo Coimbra.</p>
+        </div>
+      </footer>
+    </div>
   );
 }
