@@ -5,15 +5,84 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Loader, MessageSquare, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, getDoc, doc } from 'firebase/firestore';
 import type { Chat } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 
+// Sub-componente para item da lista de chat
+const ChatListItem = ({ chat, currentUserId, onClick }: { chat: Chat, currentUserId: string, onClick: () => void }) => {
+  const [otherUser, setOtherUser] = useState<any>({ name: "Carregando...", photo: null });
+
+  useEffect(() => {
+    const otherId = chat.participants.find((uid: string) => uid !== currentUserId);
+    
+    if (!otherId) {
+       setOtherUser({ name: "Chat", photo: null });
+       return;
+    }
+
+    const fetchUser = async () => {
+      try {
+        const userDoc = await getDoc(doc(firestore, "users", otherId));
+        if (userDoc.exists()) {
+          const data = userDoc.data();
+          setOtherUser({ 
+            name: data.nome || "Usuário sem nome", 
+            photo: data.photoURL 
+          });
+        } else {
+          const fallbackName = chat.participantNames?.[otherId] || "Usuário";
+          setOtherUser({ name: fallbackName, photo: null });
+        }
+      } catch (error) {
+        console.error("Erro ao buscar user", error);
+        setOtherUser({ name: "Usuário", photo: null });
+      }
+    };
+    fetchUser();
+  }, [chat, currentUserId]);
+
+  return (
+    <div
+      onClick={onClick}
+      style={{
+          border: "2px solid black",
+          backgroundColor: "white",
+          boxShadow: "4px 4px 0px 0px black",
+          color: "black"
+      }}
+      className="relative flex items-center gap-3 p-4 cursor-pointer rounded-xl transition-all duration-200 hover:-translate-y-1 hover:shadow-[6px_6px_0px_#000]"
+    >
+      <div 
+        className="w-12 h-12 shrink-0 flex items-center justify-center rounded-lg font-black text-lg overflow-hidden"
+        style={{
+            border: "2px solid black",
+            backgroundColor: "#FACC15",
+            color: "black"
+        }}
+      >
+        {otherUser.photo ? (
+          <img src={otherUser.photo} alt={otherUser.name} className="w-full h-full object-cover" />
+        ) : (
+          otherUser.name.charAt(0).toUpperCase()
+        )}
+      </div>
+      <div className="flex-1 min-w-0">
+        <h3 className="font-bold truncate text-base">{otherUser.name}</h3>
+        <p className="text-xs truncate font-medium text-gray-500">
+          {chat.lastMessage || "Toque para conversar"}
+        </p>
+      </div>
+    </div>
+  );
+};
+
+
 export default function ChatListPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
-  const [chats, setChats] = useState<any[]>([]);
+  const [chats, setChats] = useState<Chat[]>([]);
   const [loadingChats, setLoadingChats] = useState(true);
   const { toast } = useToast();
 
@@ -33,23 +102,12 @@ export default function ChatListPage() {
       const unsubscribe = onSnapshot(q, (querySnapshot) => {
         const userChats: Chat[] = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Chat));
         
-        const sortedChats = userChats.sort((a, b) => {
-            const getMillis = (d: any) => {
-                if (!d) return 0;
-                if (d.toMillis) return d.toMillis();
-                if (d instanceof Date) return d.getTime();
-                return 0;
-            };
+        userChats.sort((a, b) => {
+            const getMillis = (d: any) => d?.toMillis ? d.toMillis() : 0;
             return getMillis(b.updatedAt) - getMillis(a.updatedAt);
         });
 
-        const chatsWithHostName = sortedChats.map(chat => {
-            const otherId = chat.participants.find((p: string) => p !== user.uid);
-            const hostName = otherId && chat.participantNames ? chat.participantNames[otherId] : 'Anfitrião';
-            return {...chat, hostName};
-        });
-
-        setChats(chatsWithHostName);
+        setChats(userChats);
         setLoadingChats(false);
       }, (error) => {
         console.error("Error fetching chats list:", error);
@@ -94,37 +152,12 @@ export default function ChatListPage() {
                     ) : (
                         <div className="flex flex-col gap-3 p-2 mt-4">
                             {chats.map((c) => (
-                            <div
+                              <ChatListItem
                                 key={c.id}
+                                chat={c}
+                                currentUserId={user!.uid}
                                 onClick={() => router.push(`/chat/${c.id}`)}
-                                style={{
-                                    border: "2px solid black",
-                                    backgroundColor: "white",
-                                    boxShadow: "4px 4px 0px 0px black",
-                                    color: "black"
-                                }}
-                                className="relative flex items-center gap-3 p-4 cursor-pointer rounded-xl transition-all duration-200 hover:-translate-y-1 hover:shadow-[6px_6px_0px_#000]"
-                            >
-                                <div 
-                                className="w-12 h-12 shrink-0 flex items-center justify-center rounded-lg font-black text-lg"
-                                style={{
-                                    border: "2px solid black",
-                                    backgroundColor: "#FACC15",
-                                    color: "black"
-                                }}
-                                >
-                                {c.hostName?.charAt(0).toUpperCase() || "?"}
-                                </div>
-
-                                <div className="flex-1 min-w-0">
-                                <div className="flex justify-between items-baseline">
-                                    <h3 className="font-bold truncate text-base">{c.hostName}</h3>
-                                </div>
-                                <p className="text-xs truncate font-medium text-gray-500">
-                                    {c.lastMessage || "Toque para conversar"}
-                                </p>
-                                </div>
-                            </div>
+                              />
                             ))}
                         </div>
                     )}
