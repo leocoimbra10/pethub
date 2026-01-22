@@ -21,7 +21,8 @@ export default function CuidadorDetailPage({ params }: { params: { id: string } 
   
   const [reviews, setReviews] = useState<any[]>([]);
   const [newComment, setNewComment] = useState("");
-  const [rating, setRating] = useState(5);
+  const [rating, setRating] = useState(0); 
+  const [hoverRating, setHoverRating] = useState(0);
 
   const { user } = useAuth();
   const router = useRouter();
@@ -95,6 +96,10 @@ export default function CuidadorDetailPage({ params }: { params: { id: string } 
       toast({ variant: 'destructive', title: 'Comentário vazio', description: 'Por favor, escreva algo sobre sua experiência.' });
       return;
     }
+    if (rating === 0) {
+      toast({ variant: 'destructive', title: 'Nota não selecionada', description: 'Por favor, selecione de 1 a 5 estrelas.' });
+      return;
+    }
 
     if (!host) return;
 
@@ -110,7 +115,7 @@ export default function CuidadorDetailPage({ params }: { params: { id: string } 
 
       toast({ title: 'Avaliação enviada!', description: 'Obrigado por sua contribuição.' });
       setNewComment('');
-      setRating(5);
+      setRating(0);
     } catch (error) {
       console.error("Error adding review:", error);
       toast({ variant: 'destructive', title: 'Erro ao enviar avaliação' });
@@ -304,13 +309,20 @@ export default function CuidadorDetailPage({ params }: { params: { id: string } 
               <h3 className="font-bold mb-3">Deixe seu review:</h3>
               <div className="flex gap-2 mb-3">
                 {[1, 2, 3, 4, 5].map((star) => (
-                  <button 
-                    key={star} 
+                  <button
+                    key={star}
+                    type="button"
                     onClick={() => setRating(star)}
-                    className="transition-transform hover:scale-110"
+                    onMouseEnter={() => setHoverRating(star)}
+                    onMouseLeave={() => setHoverRating(0)}
+                    className="transition-transform hover:scale-110 focus:outline-none"
                   >
-                    <Star 
-                      className={`w-8 h-8 ${star <= rating ? 'fill-[#FACC15] text-black' : 'text-gray-300'}`} 
+                    <Star
+                      className={`w-8 h-8 transition-colors duration-200 ${
+                        star <= (hoverRating || rating)
+                          ? "fill-[#FACC15] text-black"
+                          : "text-gray-300 fill-transparent"
+                      }`}
                       strokeWidth={2}
                     />
                   </button>
@@ -425,3 +437,5 @@ export default function CuidadorDetailPage({ params }: { params: { id: string } 
     </div>
   );
 }
+
+    
