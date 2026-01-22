@@ -7,6 +7,7 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { signOut } from "firebase/auth";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
 
 export default function Header() {
   const [user, loading] = useAuthState(auth);
@@ -67,7 +68,6 @@ export default function Header() {
         {/* ÁREA DO USUÁRIO */}
         <div className="flex items-center gap-4">
           
-          {/* Botão Quero Cuidar (Sempre visível) */}
           <Link 
             href="/quero-cuidar"
             className="hidden md:block bg-[#F472B6] text-black font-black px-6 py-3 rounded-xl border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-none transition-all"
@@ -140,12 +140,17 @@ export default function Header() {
             </div>
           ) : (
             // === USUÁRIO DESLOGADO ===
-            <Link 
-              href="/login"
-              className="font-bold text-black hover:underline"
-            >
-              Entrar
-            </Link>
+            <div className="flex items-center gap-4">
+              <Link 
+                href="/login"
+                className="font-bold text-black hover:underline"
+              >
+                Entrar
+              </Link>
+              <Link href="/register">
+                <Button>Criar Conta</Button>
+              </Link>
+            </div>
           )}
         </div>
       </div>
