@@ -1,7 +1,9 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useAuth, firestore } from "@/lib/firebase";
+import { auth, firestore } from "@/lib/firebase";
+import { useAuth } from "@/lib/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
+import { updateProfile } from "firebase/auth";
 import { User, Phone, Mail, Save, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import ImageUpload from "@/components/ImageUpload";
@@ -47,7 +49,7 @@ export default function ProfilePage() {
       }
     }
     if (user) {
-        fetchProfile();
+      fetchProfile();
     }
   }, [user, loadingAuth, router]);
 
@@ -55,24 +57,32 @@ export default function ProfilePage() {
     if (!user) return;
     setSaving(true);
     try {
+      // 1. Update Database
       const docRef = doc(firestore, "users", user.uid);
       await setDoc(docRef, {
         nome: userData.nome,
-        telefone: userData.telefone,
+        telefone: userData.telefone
       }, { merge: true });
+      
+      // 2. Update Auth Profile for name
+      if (user.displayName !== userData.nome) {
+          await updateProfile(user, { displayName: userData.nome });
+      }
+      
       toast({ title: "Perfil salvo com sucesso! ✅" });
-    } catch (error) {
+      window.location.reload(); 
+    } catch (error: any) {
       console.error(error);
-      toast({ variant: "destructive", title: "Erro ao salvar." });
+      toast({ variant: 'destructive', title: "Erro ao salvar.", description: error.message });
     } finally {
       setSaving(false);
     }
   };
 
   if (loadingAuth || isLoading) return (
-      <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">
-        <Loader2 className="h-16 w-16 animate-spin text-primary" />
-      </div>
+    <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">
+      <Loader2 className="h-16 w-16 animate-spin text-primary" />
+    </div>
   );
 
   return (
@@ -81,14 +91,21 @@ export default function ProfilePage() {
       
       <div className="bg-white border-2 border-black rounded-xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
         
-        <div className="mb-8">
+        {/* ÁREA DA FOTO */}
+        <div className="mb-8 flex flex-col items-center">
           <ImageUpload 
             currentImage={userData.photoURL}
             onUpload={async (url) => {
+              if(!user) return;
               setUserData((prev: any) => ({ ...prev, photoURL: url }));
-              if(user) {
-                  await setDoc(doc(firestore, "users", user.uid), { photoURL: url }, { merge: true });
-                  toast({ title: "Foto de perfil atualizada!" });
+              try {
+                await setDoc(doc(firestore, "users", user.uid), { photoURL: url }, { merge: true }); // Database
+                await updateProfile(user, { photoURL: url }); // Auth Profile
+                
+                toast({ title: "Foto de perfil atualizada!" });
+                window.location.reload();
+              } catch(e: any) {
+                  toast({variant: 'destructive', title: 'Erro ao salvar foto', description: e.message})
               }
             }} 
           />
@@ -101,7 +118,6 @@ export default function ProfilePage() {
               value={userData.nome}
               onChange={(e) => setUserData({...userData, nome: e.target.value})}
               className="w-full p-3 border-2 border-black rounded-lg font-bold"
-              placeholder="Seu nome"
             />
           </div>
 
