@@ -1,14 +1,15 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useAuth, firestore } from "@/lib/firebase";
-import { collection, doc, getDocs, query, where, updateDoc } from "firebase/firestore";
+import { collection, query, where, getDocs, doc, updateDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
-import { Save, Loader2, ArrowLeft } from "lucide-react";
+import { Save, Loader2, ArrowLeft, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import ImageUpload from "@/components/ImageUpload";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function EditListingPage() {
   const { user, loading: loadingAuth } = useAuth();
@@ -32,7 +33,8 @@ export default function EditListingPage() {
 
         if (!querySnapshot.empty) {
           const hostDoc = querySnapshot.docs[0];
-          setHostData(hostDoc.data());
+          const data = hostDoc.data();
+          setHostData({ ...data, houseImages: data.houseImages || [] });
           setHostId(hostDoc.id);
         } else {
           toast({ variant: "destructive", title: "Anúncio não encontrado!" });
@@ -53,9 +55,10 @@ export default function EditListingPage() {
         nome: hostData.nome,
         descricao: hostData.descricao,
         preco: Number(hostData.preco),
-        cidade: hostData.cidade
+        cidade: hostData.cidade,
+        houseImages: hostData.houseImages
       });
-      toast({ title: "Anúncio atualizado!", description: "Suas alterações foram salvas." });
+      toast({ title: "Anúncio atualizado com sucesso! 🏠" });
       router.push("/dashboard");
     } catch (error) {
       console.error(error);
@@ -63,6 +66,24 @@ export default function EditListingPage() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const addPhoto = (url: string) => {
+    if (hostData.houseImages.length >= 5) {
+        toast({ variant: 'destructive', title: 'Limite de fotos atingido', description: 'Você pode ter no máximo 5 fotos.'});
+        return;
+    }
+    setHostData((prev: any) => ({
+      ...prev,
+      houseImages: [...prev.houseImages, url]
+    }));
+  };
+
+  const removePhoto = (indexToRemove: number) => {
+    setHostData((prev: any) => ({
+      ...prev,
+      houseImages: prev.houseImages.filter((_: any, idx: number) => idx !== indexToRemove)
+    }));
   };
 
   if (loading || !hostData) return (
@@ -82,6 +103,38 @@ export default function EditListingPage() {
 
       <div className="bg-card border-2 border-black rounded-xl p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] space-y-6">
         
+        <div>
+          <Label className="block font-bold mb-4">Fotos do Ambiente</Label>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+            {hostData.houseImages.map((img: string, idx: number) => (
+              <div key={idx} className="relative aspect-video rounded-md overflow-hidden border-2 border-black shadow-neo-sm group">
+                <img src={img} alt={`Casa ${idx+1}`} className="w-full h-full object-cover" />
+                <button 
+                  onClick={() => removePhoto(idx)}
+                  className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 border-2 border-black opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 focus:opacity-100"
+                  aria-label={`Remover foto ${idx + 1}`}
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+
+            {hostData.houseImages.length < 5 && (
+                 <div className="relative flex flex-col items-center justify-center aspect-video border-2 border-dashed border-black rounded-md bg-muted/50">
+                    <div className="transform scale-75"> 
+                      <ImageUpload 
+                        onUpload={addPhoto} 
+                      />
+                    </div>
+                    <span className="absolute bottom-2 text-xs font-bold text-muted-foreground">Adicionar Foto</span>
+                 </div>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground font-bold">Dica: Adicione fotos da sala, quintal e onde o pet vai dormir.</p>
+        </div>
+
+        <hr className="border-t-2 border-muted" />
+
         <div>
           <Label className="block font-bold mb-2">Título do Anúncio</Label>
           <Input 
@@ -117,7 +170,6 @@ export default function EditListingPage() {
               </select>
             </div>
         </div>
-        
 
         <div>
           <Label className="block font-bold mb-2">Descrição</Label>
