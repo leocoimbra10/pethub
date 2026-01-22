@@ -4,12 +4,9 @@ import { useState, useEffect } from "react";
 import { firestore, useAuth } from "@/lib/firebase";
 import {
   doc,
-  getDoc,
   collection,
   addDoc,
   query,
-  where,
-  getDocs,
   serverTimestamp,
   orderBy,
   onSnapshot,
@@ -19,15 +16,15 @@ import {
   MapPin,
   Star,
   ShieldCheck,
-  User,
   MessageCircle,
-  ArrowLeft,
   Camera,
   Loader,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { Host } from "@/lib/types";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 export default function CuidadorDetailPage({
   params,
@@ -43,11 +40,40 @@ export default function CuidadorDetailPage({
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
 
+  const [checkIn, setCheckIn] = useState("");
+  const [checkOut, setCheckOut] = useState("");
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [totalNights, setTotalNights] = useState(0);
+
   const [loadingChat, setLoadingChat] = useState(false);
 
   const { user } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
+  
+  const today = new Date().toISOString().split("T")[0];
+
+  useEffect(() => {
+    if (checkIn && checkOut && host?.preco) {
+      const d1 = new Date(checkIn);
+      const d2 = new Date(checkOut);
+      if (d2 <= d1) {
+        setTotalNights(0);
+        setTotalPrice(0);
+        return;
+      }
+      const diffTime = Math.abs(d2.getTime() - d1.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      if (diffDays > 0) {
+        setTotalNights(diffDays);
+        setTotalPrice(diffDays * host.preco);
+      } else {
+        setTotalNights(0);
+        setTotalPrice(0);
+      }
+    }
+  }, [checkIn, checkOut, host]);
 
   useEffect(() => {
     if (!params.id) {
@@ -115,36 +141,36 @@ export default function CuidadorDetailPage({
       router.push("/login");
       return;
     }
-
     setLoadingChat(true);
-    try {
-      const q = query(
-        collection(firestore, "chats"),
-        where("participants", "array-contains", user.uid)
-      );
 
-      const querySnapshot = await getDocs(q);
-      let existingChatId: string | null = null;
-      querySnapshot.forEach((doc) => {
-        if (doc.data().participants.includes(host.ownerId)) {
-          existingChatId = doc.id;
-        }
+    let firstMessage = "Olá! Tenho interesse na hospedagem.";
+    if (totalNights > 0 && checkIn && checkOut) {
+      const dateFmt = (d: string) => {
+        const date = new Date(d);
+        const adjustedDate = new Date(date.valueOf() + date.getTimezoneOffset() * 60 * 1000);
+        return adjustedDate.toLocaleDateString('pt-BR');
+      }
+      firstMessage = `Olá! Gostaria de solicitar uma reserva para ${totalNights} noites (de ${dateFmt(checkIn)} até ${dateFmt(checkOut)}). O valor total estimado é de R$ ${totalPrice}. Poderia confirmar a disponibilidade?`;
+    }
+    
+    try {
+      const newChatRef = await addDoc(collection(firestore, "chats"), {
+        participants: [user.uid, host.ownerId],
+        participantNames: {
+          [user.uid]: user.displayName || "Usuário",
+          [host.ownerId]: host.nome,
+        },
+        lastMessage: firstMessage,
+        updatedAt: serverTimestamp(),
       });
 
-      if (existingChatId) {
-        router.push(`/chat/${existingChatId}`);
-      } else {
-        const newChatRef = await addDoc(collection(firestore, "chats"), {
-          participants: [user.uid, host.ownerId],
-          participantNames: {
-            [user.uid]: user.displayName || "Usuário",
-            [host.ownerId]: host.nome,
-          },
-          lastMessage: "",
-          updatedAt: serverTimestamp(),
-        });
-        router.push(`/chat/${newChatRef.id}`);
-      }
+      await addDoc(collection(firestore, "chats", newChatRef.id, "messages"), {
+        text: firstMessage,
+        senderId: user.uid,
+        createdAt: serverTimestamp()
+      });
+
+      router.push(`/chat/${newChatRef.id}`);
     } catch (error) {
       console.error("Error starting chat:", error);
       toast({
@@ -308,7 +334,7 @@ export default function CuidadorDetailPage({
                 "O anfitrião não adicionou uma descrição detalhada."}
             </p>
 
-            <div className="bg-card border-2 border-black p-6 rounded-2xl shadow-neo">
+            <div className="bg-card border-2 border-black p-6 rounded-2xl shadow-neo sticky top-24">
               <div className="flex justify-between items-end mb-6">
                 <div>
                   <span className="text-3xl font-black">R$ {host.preco}</span>
@@ -323,6 +349,49 @@ export default function CuidadorDetailPage({
                 </div>
               </div>
 
+              <div className="grid grid-cols-2 gap-2 mb-4">
+                <div>
+                  <Label htmlFor="checkin" className="block text-xs font-bold mb-1">Check-in</Label>
+                  <Input
+                    id="checkin"
+                    type="date"
+                    value={checkIn}
+                    min={today}
+                    onChange={(e) => setCheckIn(e.target.value)}
+                    className="w-full p-2 pl-2 border-2 border-black rounded-lg font-bold text-sm bg-background"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="checkout" className="block text-xs font-bold mb-1">Check-out</Label>
+                  <Input
+                    id="checkout"
+                    type="date"
+                    value={checkOut}
+                    min={checkIn || today}
+                    onChange={(e) => setCheckOut(e.target.value)}
+                    disabled={!checkIn}
+                    className="w-full p-2 pl-2 border-2 border-black rounded-lg font-bold text-sm bg-background"
+                  />
+                </div>
+              </div>
+
+              {totalNights > 0 && (
+                <div className="bg-muted/50 p-3 rounded-lg border-2 border-muted mb-4 space-y-2 text-sm">
+                  <div className="flex justify-between font-bold">
+                    <span>R$ {host.preco} x {totalNights} noites</span>
+                    <span>R$ {totalPrice}</span>
+                  </div>
+                  <div className="flex justify-between font-bold text-primary">
+                    <span>Taxa PetHub</span>
+                    <span>Grátis</span>
+                  </div>
+                  <div className="border-t-2 border-muted pt-2 flex justify-between text-lg font-black">
+                    <span>Total</span>
+                    <span>R$ {totalPrice}</span>
+                  </div>
+                </div>
+              )}
+
               <Button
                 size="lg"
                 onClick={handleStartChat}
@@ -330,8 +399,9 @@ export default function CuidadorDetailPage({
                 className="w-full bg-accent text-accent-foreground font-black text-lg py-4 rounded-xl"
               >
                 {loadingChat ? <Loader className="animate-spin" /> : <MessageCircle />}
-                Falar com Anfitrião
+                {totalNights > 0 ? "Solicitar Reserva" : "Falar com Anfitrião"}
               </Button>
+               {totalNights > 0 && <p className="text-xs text-center mt-2 font-bold text-muted-foreground">Você não será cobrado ainda.</p>}
             </div>
           </div>
         </div>
