@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { firestore, useAuth } from "@/lib/firebase";
 import { collection, query, getDocs, addDoc, deleteDoc, doc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
@@ -15,13 +15,12 @@ export default function MyPetsPage() {
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
   
-  const [newPet, setNewPet] = useState({ 
-    nome: "", 
-    raca: "", 
-    idade: "", 
-    fotos: [] as string[], 
-    obs: "" 
-  });
+  const nomeRef = useRef<HTMLInputElement>(null);
+  const racaRef = useRef<HTMLInputElement>(null);
+  const idadeRef = useRef<HTMLInputElement>(null);
+  const obsRef = useRef<HTMLTextAreaElement>(null);
+  
+  const [fotos, setFotos] = useState<string[]>([]);
 
   const [activePhoto, setActivePhoto] = useState<Record<string, string>>({});
   const router = useRouter();
@@ -50,7 +49,7 @@ export default function MyPetsPage() {
           }));
         } catch (error) {
           console.error("Erro ao buscar pets", error);
-          toast({ variant: "destructive", title: "Erro ao buscar pets."});
+          toast({ variant: "destructive", title: "Erro ao buscar seus pets." });
         } finally {
           setLoading(false);
         }
@@ -64,43 +63,57 @@ export default function MyPetsPage() {
   }, [user, loadingAuth, router, toast]);
 
   const handleAddPhoto = (url: string) => {
-    setNewPet(prev => ({ ...prev, fotos: [...prev.fotos, url] }));
+    setFotos(prev => [...prev, url]);
   };
 
   const handleRemovePhoto = (index: number) => {
-    setNewPet(prev => ({ ...prev, fotos: prev.fotos.filter((_, i) => i !== index) }));
+    setFotos(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSavePet = async () => {
-    if (!newPet.nome || !newPet.raca) {
-      toast({ variant: "destructive", title: "Preencha nome e raça!"});
+    const nome = nomeRef.current?.value;
+    const raca = racaRef.current?.value;
+    const idade = idadeRef.current?.value;
+    const obs = obsRef.current?.value;
+
+    if (!nome || !raca) {
+      toast({ variant: 'destructive', title: 'Campos obrigatórios', description: 'Por favor, preencha o nome e a raça.' });
       return;
     }
+    
     setSaving(true);
     try {
-      const docRef = await addDoc(collection(firestore, "users", user!.uid, "pets"), newPet);
-      setPets([...pets, { id: docRef.id, ...newPet }]);
-      toast({ title: "Pet salvo!", description: `${newPet.nome} foi adicionado à sua matilha.`});
+      const newPetData = { nome, raca, idade, obs, fotos };
       
-      setNewPet({ nome: "", raca: "", idade: "", fotos: [], obs: "" });
+      const docRef = await addDoc(collection(firestore, "users", user!.uid, "pets"), newPetData);
+      setPets(prev => [...prev, { id: docRef.id, ...newPetData }]);
+      
+      toast({ title: 'Pet salvo!', description: `${nome} foi adicionado(a) à sua matilha.` });
+
+      if (nomeRef.current) nomeRef.current.value = "";
+      if (racaRef.current) racaRef.current.value = "";
+      if (idadeRef.current) idadeRef.current.value = "";
+      if (obsRef.current) obsRef.current.value = "";
+      setFotos([]);
+      
       setShowForm(false);
     } catch (error) {
       console.error(error);
-      toast({ variant: "destructive", title: "Erro ao adicionar pet."});
+      toast({ variant: 'destructive', title: 'Erro ao salvar pet', description: 'Não foi possível adicionar o pet.' });
     } finally {
       setSaving(false);
     }
   };
 
   const handleDeletePet = async (id: string) => {
-    if (!window.confirm("Remover este pet?")) return;
+    if (!window.confirm("Tem certeza que quer remover este pet?")) return;
     try {
       await deleteDoc(doc(firestore, "users", user!.uid, "pets", id));
       setPets(pets.filter(p => p.id !== id));
-      toast({ title: "Pet removido." });
+      toast({ title: 'Pet removido com sucesso.' });
     } catch (error) {
       console.error(error);
-      toast({ variant: "destructive", title: "Erro ao remover pet." });
+      toast({ variant: 'destructive', title: 'Erro ao remover pet.' });
     }
   };
 
@@ -116,12 +129,14 @@ export default function MyPetsPage() {
         <h1 className="text-3xl font-black flex items-center gap-2">
           <PawPrint className="w-8 h-8" /> Meus Pets
         </h1>
-        <button 
-          onClick={() => setShowForm(!showForm)}
-          className="bg-[#FACC15] text-black font-black px-4 py-2 rounded-lg border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-none transition-all flex items-center gap-2"
-        >
-          {showForm ? "Cancelar" : <><Plus className="w-5 h-5" /> Adicionar Pet</>}
-        </button>
+        {!showForm && (
+          <button 
+            onClick={() => setShowForm(true)}
+            className="bg-[#FACC15] text-black font-black px-4 py-2 rounded-lg border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-none transition-all flex items-center gap-2"
+          >
+            <Plus className="w-5 h-5" /> Adicionar Pet
+          </button>
+        )}
       </div>
 
       {showForm && (
@@ -133,7 +148,7 @@ export default function MyPetsPage() {
             <div>
               <label className="block text-xs font-bold mb-2">Galeria de Fotos</label>
               <div className="grid grid-cols-2 gap-2 mb-2">
-                {newPet.fotos.map((foto, idx) => (
+                {fotos.map((foto, idx) => (
                   <div key={idx} className="relative aspect-square border-2 border-black rounded-lg overflow-hidden group">
                     <img src={foto} alt="Pet" className="w-full h-full object-cover" />
                     <button 
@@ -159,8 +174,7 @@ export default function MyPetsPage() {
                 <div>
                   <label className="font-bold text-sm">Nome</label>
                   <input 
-                    value={newPet.nome}
-                    onChange={(e) => setNewPet({...newPet, nome: e.target.value})}
+                    ref={nomeRef}
                     className="w-full p-2 border-2 border-black rounded-lg font-bold outline-none focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all"
                     placeholder="Ex: Rex"
                   />
@@ -168,8 +182,7 @@ export default function MyPetsPage() {
                 <div>
                   <label className="font-bold text-sm">Raça</label>
                   <input 
-                    value={newPet.raca}
-                    onChange={(e) => setNewPet({...newPet, raca: e.target.value})}
+                    ref={racaRef}
                     className="w-full p-2 border-2 border-black rounded-lg font-bold outline-none focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all"
                     placeholder="Ex: Vira-lata"
                   />
@@ -179,9 +192,7 @@ export default function MyPetsPage() {
               <div>
                   <label className="font-bold text-sm">Idade</label>
                   <input 
-                    type="text"
-                    value={newPet.idade}
-                    onChange={(e) => setNewPet({...newPet, idade: e.target.value})}
+                    ref={idadeRef}
                     className="w-full p-2 border-2 border-black rounded-lg font-bold outline-none focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all"
                     placeholder="Ex: 2 anos"
                   />
@@ -190,8 +201,7 @@ export default function MyPetsPage() {
               <div>
                   <label className="font-bold text-sm">Observações</label>
                   <textarea 
-                    value={newPet.obs}
-                    onChange={(e) => setNewPet({...newPet, obs: e.target.value})}
+                    ref={obsRef}
                     className="w-full p-2 border-2 border-black rounded-lg font-bold h-20 outline-none focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all"
                     placeholder="Detalhes..."
                   />
@@ -218,7 +228,6 @@ export default function MyPetsPage() {
           <div className="col-span-full text-center py-10 text-gray-400">
             <PawPrint className="w-16 h-16 mx-auto mb-4 opacity-20" />
             <p className="font-bold text-xl">Nenhum pet cadastrado.</p>
-            <p className="text-sm">Clique em "Adicionar Pet" para começar.</p>
           </div>
         )}
 
