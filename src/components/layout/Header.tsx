@@ -1,50 +1,21 @@
-'use client';
+"use client";
+import Link from "next/link";
+import { useAuth, auth } from "@/lib/firebase";
+import { LogOut, User, LayoutDashboard, PawPrint } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { signOut } from "firebase/auth";
+import { useToast } from "@/hooks/use-toast";
 
-import Link from 'next/link';
-import {
-  Menu,
-  Heart,
-  LogOut,
-  Sun,
-  Moon,
-  LayoutDashboard,
-  User
-} from 'lucide-react';
-import { useTheme } from 'next-themes';
-import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-  DropdownMenuSub,
-  DropdownMenuSubTrigger,
-  DropdownMenuPortal,
-  DropdownMenuSubContent
-} from '@/components/ui/dropdown-menu';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useAuth, auth } from '@/lib/firebase';
-import { signOut } from 'firebase/auth';
-import { useRouter } from 'next/navigation';
-import { useToast } from '@/hooks/use-toast';
-
-const mainNav = [
-  { href: '/search', label: 'Buscar' },
-  { href: '/#como-funciona', label: 'Como Funciona' },
-  { href: '/#seguranca', label: 'Segurança' },
-  { href: '/blog', label: 'Blog' },
-];
-
-const UserActions = () => {
+export default function Header() {
   const { user, loading } = useAuth();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<any>(null);
   const router = useRouter();
   const { toast } = useToast();
-  const { setTheme } = useTheme();
 
   const handleLogout = async () => {
+    setIsDropdownOpen(false);
     try {
       await signOut(auth);
       toast({ title: "Você foi desconectado." });
@@ -58,149 +29,125 @@ const UserActions = () => {
     }
   };
 
-  if (loading) {
-    return <div className="h-9 w-24 rounded-md bg-muted animate-pulse" />;
-  }
-
-  if (!user) {
-    return (
-      <Link href="/login" className="font-bold text-lg text-black px-4 py-2 rounded-lg transition-all duration-200 hover:bg-black hover:text-white">
-        Entrar
-      </Link>
-    );
-  }
+  // Fecha o dropdown se clicar fora dele
+  useEffect(() => {
+    function handleClickOutside(event: any) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [dropdownRef]);
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-11 w-11 rounded-full !shadow-none active:translate-x-0 active:translate-y-0 p-0">
-          <Avatar className="h-12 w-12 border-2 border-black">
-            <AvatarImage src={user.photoURL || "https://picsum.photos/seed/user-avatar/100/100"} data-ai-hint="person" alt="Avatar do usuário" />
-            <AvatarFallback>{user.email?.[0].toUpperCase()}</AvatarFallback>
-          </Avatar>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56" align="end" forceMount>
-        <DropdownMenuLabel className="font-normal">
-          <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{user.displayName || 'Usuário'}</p>
-            <p className="text-xs leading-none text-muted-foreground">
-              {user.email}
-            </p>
-          </div>
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <Link href="/dashboard">
-          <DropdownMenuItem>
-            <LayoutDashboard className="mr-2 h-4 w-4" />
-            <span>Meu Painel</span>
-          </DropdownMenuItem>
+    <nav className="sticky top-0 z-50 bg-white border-b-4 border-black py-4">
+      <div className="container mx-auto px-4 flex justify-between items-center">
+        {/* LOGO */}
+        <Link href="/" className="font-black text-3xl tracking-tighter hover:rotate-2 transition-transform cursor-pointer">
+          PetHub
         </Link>
-        <Link href="/perfil">
-          <DropdownMenuItem>
-            <User className="mr-2 h-4 w-4" />
-            <span>Meu Perfil</span>
-          </DropdownMenuItem>
-        </Link>
-        <DropdownMenuItem>
-          <Heart className="mr-2 h-4 w-4" />
-          <span>Favoritos</span>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger>
-            <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-            <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-            <span className="ml-2">Tema</span>
-          </DropdownMenuSubTrigger>
-          <DropdownMenuPortal>
-            <DropdownMenuSubContent>
-              <DropdownMenuItem onClick={() => setTheme("light")}>Claro</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTheme("dark")}>Escuro</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTheme("system")}>Sistema</DropdownMenuItem>
-            </DropdownMenuSubContent>
-          </DropdownMenuPortal>
-        </DropdownMenuSub>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleLogout}>
-          <LogOut className="mr-2 h-4 w-4" />
-          <span>Sair</span>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-};
 
-export default function Header() {
-  return (
-    <header className="sticky top-0 z-50 w-full border-b-4 border-black bg-background">
-      <div className="container flex h-24 items-center">
-        {/* Left Side: Logo + Mobile Trigger */}
-        <div className="flex flex-1 items-center justify-start">
-            <Sheet>
-                <SheetTrigger asChild>
-                    <Button variant="ghost" size="icon" className="md:hidden mr-4">
-                    <Menu className="h-6 w-6" />
-                    <span className="sr-only">Toggle Menu</span>
-                    </Button>
-                </SheetTrigger>
-                <SheetContent side="left">
-                    <Link href="/" className="flex items-center mb-8">
-                        <span className="font-headline text-3xl font-black tracking-tighter">PetHub</span>
-                    </Link>
-                    <nav className="flex flex-col space-y-2">
-                    {mainNav.map((item) => (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          className="font-bold text-lg text-black px-4 py-2 rounded-lg transition-all duration-200 hover:bg-black hover:text-white"
-                        >
-                          {item.label}
-                        </Link>
-                    ))}
-                    </nav>
-                    <div className="absolute bottom-8 left-8 right-8 flex flex-col gap-4">
-                         <Link href="/quero-cuidar" className="w-full">
-                            <Button className="w-full bg-accent hover:bg-accent/90 text-accent-foreground">
-                                Quero cuidar
-                            </Button>
-                         </Link>
-                         <div className="text-center">
-                           <UserActions />
-                         </div>
-                    </div>
-                </SheetContent>
-            </Sheet>
-             <Link href="/" className="transition-transform duration-200 hover:rotate-[-2deg]">
-                <span className="font-headline text-3xl font-black tracking-tighter">
-                    PetHub
-                </span>
-            </Link>
+        {/* LINKS CENTRAIS (Desktop) */}
+        <div className="hidden md:flex items-center gap-2">
+          <Link href="/search" className="font-bold text-black px-4 py-2 rounded-lg border-2 border-transparent hover:border-black hover:bg-black hover:text-white transition-all">
+            Buscar cuidador
+          </Link>
+          <Link href="/#como-funciona" className="font-bold text-black px-4 py-2 rounded-lg border-2 border-transparent hover:border-black hover:bg-black hover:text-white transition-all">
+            Como funciona
+          </Link>
+          <Link href="/#seguranca" className="font-bold text-black px-4 py-2 rounded-lg border-2 border-transparent hover:border-black hover:bg-black hover:text-white transition-all">
+            Segurança
+          </Link>
         </div>
 
-        {/* Center: Desktop Nav */}
-        <nav className="hidden md:flex items-center justify-center gap-2">
-          {mainNav.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="font-bold text-lg text-black px-4 py-2 rounded-lg transition-all duration-200 hover:bg-black hover:text-white hover:shadow-[4px_4px_0px_0px_#FCD34D]"
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
+        {/* ÁREA DO USUÁRIO */}
+        <div className="flex items-center gap-4">
+          
+          {/* Botão Quero Cuidar (Sempre visível) */}
+          <Link 
+            href="/quero-cuidar"
+            className="hidden md:block bg-[#F472B6] text-black font-black px-6 py-3 rounded-xl border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-none transition-all"
+          >
+            Quero cuidar
+          </Link>
 
-        {/* Right Side: Desktop Actions */}
-        <div className="hidden md:flex flex-1 items-center justify-end gap-4">
-           <Link href="/quero-cuidar">
-            <Button className="bg-accent hover:bg-accent/90 text-accent-foreground text-base">
-                Quero cuidar
-            </Button>
-           </Link>
-           <UserActions />
+          {loading ? (
+            <div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse border-2 border-black"></div>
+          ) : user ? (
+            // === USUÁRIO LOGADO (Dropdown) ===
+            <div className="relative" ref={dropdownRef}>
+              <button 
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className="w-12 h-12 rounded-full bg-black border-2 border-black flex items-center justify-center overflow-hidden shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[2px] active:shadow-none transition-all"
+              >
+                {user.photoURL ? (
+                  <img src={user.photoURL} alt="Avatar" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-white font-black text-lg">
+                    {user.displayName?.charAt(0).toUpperCase() || <User />}
+                  </span>
+                )}
+              </button>
+
+              {/* Menu Dropdown */}
+              {isDropdownOpen && (
+                <div className="absolute right-0 top-full mt-3 w-56 bg-white border-2 border-black rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] py-2 overflow-hidden">
+                  
+                  <div className="px-4 py-3 border-b-2 border-gray-100 mb-2">
+                    <p className="text-sm font-bold text-gray-500">Olá,</p>
+                    <p className="font-black truncate">{user.displayName || "Usuário"}</p>
+                  </div>
+
+                  <Link 
+                    href="/dashboard" 
+                    className="flex items-center gap-2 px-4 py-3 font-bold hover:bg-gray-100 transition-colors"
+                    onClick={() => setIsDropdownOpen(false)}
+                  >
+                    <LayoutDashboard className="w-5 h-5" /> Dashboard
+                  </Link>
+                  
+                  <Link 
+                    href="/perfil" 
+                    className="flex items-center gap-2 px-4 py-3 font-bold hover:bg-gray-100 transition-colors"
+                    onClick={() => setIsDropdownOpen(false)}
+                  >
+                    <User className="w-5 h-5" /> Meu Perfil
+                  </Link>
+
+                   {/* Link Temporário para facilitar testes */}
+                  <Link 
+                    href="/meus-pets" 
+                    className="flex items-center gap-2 px-4 py-3 font-bold hover:bg-gray-100 transition-colors"
+                    onClick={() => setIsDropdownOpen(false)}
+                  >
+                    <PawPrint className="w-5 h-5" /> Meus Pets
+                  </Link>
+
+                  <div className="border-t-2 border-gray-100 mt-2 pt-2">
+                    <button 
+                      onClick={handleLogout}
+                      className="w-full text-left flex items-center gap-2 px-4 py-3 font-bold text-red-600 hover:bg-red-50 transition-colors"
+                    >
+                      <LogOut className="w-5 h-5" /> Sair da Toca
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            // === USUÁRIO DESLOGADO ===
+            <Link 
+              href="/login"
+              className="font-bold text-black hover:underline"
+            >
+              Entrar
+            </Link>
+          )}
         </div>
       </div>
-    </header>
+    </nav>
   );
 }
