@@ -1,15 +1,16 @@
 "use client";
 import { useState, useEffect } from "react";
 import { firestore, useAuth } from "@/lib/firebase";
-import { collection, query, getDocs, addDoc, deleteDoc, doc, where, onSnapshot } from "firebase/firestore";
+import { collection, query, onSnapshot, addDoc, deleteDoc, doc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Plus, Trash2, PawPrint, Loader, Cat, Dog, Bird } from "lucide-react";
 import ImageUpload from "@/components/ImageUpload";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import Link from "next/link";
 
 const PetIcon = ({ tipo, className }: { tipo: string, className?: string }) => {
     switch(tipo?.toLowerCase()) {
@@ -59,7 +60,7 @@ export default function MyPetsPage() {
     }
     setSaving(true);
     try {
-      const docRef = await addDoc(collection(firestore, "users", user!.uid, "pets"), newPet);
+      await addDoc(collection(firestore, "users", user!.uid, "pets"), newPet);
       toast({ title: "Pet adicionado com sucesso!", description: `${newPet.nome} agora faz parte da família.`});
       setShowForm(false);
       setNewPet({ nome: "", raca: "", idade: "", foto: "", obs: "" });

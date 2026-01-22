@@ -15,6 +15,12 @@ const ChatListItem = ({ chat, currentUserId, onClick }: { chat: Chat, currentUse
   const [otherUser, setOtherUser] = useState<any>({ name: "Carregando...", photo: null });
 
   useEffect(() => {
+    // Proteção
+    if (!chat || !currentUserId || !chat.participants) {
+        setOtherUser({ name: "Chat", photo: null });
+        return;
+    }
+
     const otherId = chat.participants.find((uid: string) => uid !== currentUserId);
     
     if (!otherId) {
@@ -32,6 +38,7 @@ const ChatListItem = ({ chat, currentUserId, onClick }: { chat: Chat, currentUse
             photo: data.photoURL 
           });
         } else {
+          // Fallback seguro
           const fallbackName = chat.participantNames?.[otherId] || "Usuário";
           setOtherUser({ name: fallbackName, photo: null });
         }
@@ -65,7 +72,7 @@ const ChatListItem = ({ chat, currentUserId, onClick }: { chat: Chat, currentUse
         {otherUser.photo ? (
           <img src={otherUser.photo} alt={otherUser.name} className="w-full h-full object-cover" />
         ) : (
-          otherUser.name.charAt(0).toUpperCase()
+          (otherUser.name || '?').charAt(0).toUpperCase()
         )}
       </div>
       <div className="flex-1 min-w-0">

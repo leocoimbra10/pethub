@@ -10,12 +10,19 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import type { Message, Chat } from '@/lib/types';
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
-// === SUB-COMPONENTE INTELIGENTE DA LISTA ===
+// === SUB-COMPONENTE INTELIGENTE (COM PROTEÇÃO) ===
 const ChatListItem = ({ chat, currentUserId, isActive, onClick }: { chat: Chat, currentUserId: string, isActive: boolean, onClick: () => void }) => {
   const [otherUser, setOtherUser] = useState<any>({ name: "Carregando...", photo: null });
 
   useEffect(() => {
+    // Proteção
+    if (!chat || !currentUserId || !chat.participants) {
+      setOtherUser({ name: "Chat", photo: null });
+      return;
+    }
+
     const otherId = chat.participants.find((uid: string) => uid !== currentUserId);
     
     if (!otherId) {
@@ -33,11 +40,12 @@ const ChatListItem = ({ chat, currentUserId, isActive, onClick }: { chat: Chat, 
             photo: data.photoURL 
           });
         } else {
+          // Fallback seguro
           const fallbackName = chat.participantNames?.[otherId] || "Usuário";
           setOtherUser({ name: fallbackName, photo: null });
         }
       } catch (error) {
-        console.error("Erro ao buscar user", error);
+        console.error("Erro silencioso ao buscar user:", error);
         setOtherUser({ name: "Usuário", photo: null });
       }
     };
@@ -57,7 +65,7 @@ const ChatListItem = ({ chat, currentUserId, isActive, onClick }: { chat: Chat, 
         {otherUser.photo ? (
           <img src={otherUser.photo} alt="Avatar" className="w-full h-full object-cover" />
         ) : (
-          otherUser.name.charAt(0).toUpperCase()
+          (otherUser.name || "?").charAt(0).toUpperCase()
         )}
       </div>
 
@@ -101,7 +109,7 @@ export default function ChatPage() {
     scrollToBottom();
   }, [messages]);
 
-  // 1. Busca Lista de Conversas para a Sidebar
+  // 1. Busca Lista de Conversas
   useEffect(() => {
     if (!user) return;
     setLoadingSidebar(true);
@@ -110,6 +118,7 @@ export default function ChatPage() {
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const chats = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Chat));
       
+      // Ordenação Segura
       chats.sort((a, b) => {
           const getMillis = (d: any) => d?.toMillis ? d.toMillis() : 0;
           return getMillis(b.updatedAt) - getMillis(a.updatedAt);
@@ -165,7 +174,7 @@ export default function ChatPage() {
   // 4. Enviar Mensagem
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || !user) return;
+    if (!newMessage.trim() || !user || !chatId) return;
 
     try {
       await addDoc(collection(firestore, "chats", chatId, "messages"), {
