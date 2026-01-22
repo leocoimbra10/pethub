@@ -31,9 +31,10 @@ import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 
 const mainNav = [
-  { href: '/search', label: 'Buscar cuidador' },
-  { href: '/#como-funciona', label: 'Como funciona' },
+  { href: '/search', label: 'Buscar' },
+  { href: '/#como-funciona', label: 'Como Funciona' },
   { href: '/#seguranca', label: 'Segurança' },
+  { href: '/blog', label: 'Blog' },
 ];
 
 const UserActions = () => {
@@ -62,9 +63,9 @@ const UserActions = () => {
 
   if (!user) {
     return (
-        <Link href="/login" className="font-bold text-gray-600 hover:text-primary transition-colors">
-            Entrar
-        </Link>
+      <Link href="/login" className="font-bold text-lg text-black px-4 py-2 rounded-lg transition-all duration-200 hover:bg-black hover:text-white">
+        Entrar
+      </Link>
     );
   }
 
@@ -72,7 +73,7 @@ const UserActions = () => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-11 w-11 rounded-full !shadow-none active:translate-x-0 active:translate-y-0 p-0">
-          <Avatar className="h-11 w-11 border-2 border-black">
+          <Avatar className="h-12 w-12 border-2 border-black">
             <AvatarImage src={user.photoURL || "https://picsum.photos/seed/user-avatar/100/100"} data-ai-hint="person" alt="Avatar do usuário" />
             <AvatarFallback>{user.email?.[0].toUpperCase()}</AvatarFallback>
           </Avatar>
@@ -125,8 +126,8 @@ const UserActions = () => {
 
 export default function Header() {
   return (
-    <header className="sticky top-0 z-50 w-full border-b-2 border-black bg-background">
-      <div className="container flex h-20 items-center">
+    <header className="sticky top-0 z-50 w-full border-b-4 border-black bg-background">
+      <div className="container flex h-24 items-center">
         {/* Left Side: Logo + Mobile Trigger */}
         <div className="flex flex-1 items-center justify-start">
             <Sheet>
@@ -138,16 +139,16 @@ export default function Header() {
                 </SheetTrigger>
                 <SheetContent side="left">
                     <Link href="/" className="flex items-center mb-8">
-                        <span className="font-bold font-headline text-3xl">PetHub</span>
+                        <span className="font-headline text-3xl font-black tracking-tighter">PetHub</span>
                     </Link>
-                    <nav className="flex flex-col space-y-4">
+                    <nav className="flex flex-col space-y-2">
                     {mainNav.map((item) => (
                         <Link
-                        key={item.href}
-                        href={item.href}
-                        className="transition-colors hover:text-primary font-bold text-lg"
+                          key={item.href}
+                          href={item.href}
+                          className="font-bold text-lg text-black px-4 py-2 rounded-lg transition-all duration-200 hover:bg-black hover:text-white"
                         >
-                        {item.label}
+                          {item.label}
                         </Link>
                     ))}
                     </nav>
@@ -163,20 +164,20 @@ export default function Header() {
                     </div>
                 </SheetContent>
             </Sheet>
-             <Link href="/" className="flex items-center">
-                <span className="font-bold font-headline text-3xl">
+             <Link href="/" className="transition-transform duration-200 hover:rotate-[-2deg]">
+                <span className="font-headline text-3xl font-black tracking-tighter">
                     PetHub
                 </span>
             </Link>
         </div>
 
         {/* Center: Desktop Nav */}
-        <nav className="hidden md:flex items-center justify-center space-x-6">
+        <nav className="hidden md:flex items-center justify-center gap-2">
           {mainNav.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="font-bold text-gray-600 transition-colors hover:text-primary text-base"
+              className="font-bold text-lg text-black px-4 py-2 rounded-lg transition-all duration-200 hover:bg-black hover:text-white hover:shadow-[4px_4px_0px_0px_#FCD34D]"
             >
               {item.label}
             </Link>
@@ -185,12 +186,12 @@ export default function Header() {
 
         {/* Right Side: Desktop Actions */}
         <div className="hidden md:flex flex-1 items-center justify-end gap-4">
-          <UserActions />
            <Link href="/quero-cuidar">
-            <Button className="bg-accent hover:bg-accent/90 text-accent-foreground">
+            <Button className="bg-accent hover:bg-accent/90 text-accent-foreground text-base">
                 Quero cuidar
             </Button>
            </Link>
+           <UserActions />
         </div>
       </div>
     </header>
