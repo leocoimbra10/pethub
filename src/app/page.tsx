@@ -6,7 +6,6 @@ import { Search, ShieldCheck, Camera, Heart } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { Input } from '@/components/ui/input';
 
 export default function Home() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -14,7 +13,9 @@ export default function Home() {
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    router.push(`/search?city=${encodeURIComponent(searchTerm)}`);
+    if (searchTerm) {
+      router.push(`/search?city=${encodeURIComponent(searchTerm)}`);
+    }
   };
 
 
@@ -35,14 +36,23 @@ export default function Home() {
           <p className="mt-4 text-lg md:text-xl max-w-2xl mx-auto font-bold [text-shadow:_2px_2px_0_rgb(0_0_0_/_0.8)]">
             Hospedagem domiciliar com amor, segurança e fotos todo dia.
           </p>
-          <form onSubmit={handleSearchSubmit} className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-2 max-w-xl mx-auto">
-            <Input
-              type="text"
-              placeholder="Qual cidade?"
-              className="bg-white/90 text-black placeholder:text-gray-600 w-full sm:flex-1 py-6 text-lg"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+          <form 
+            onSubmit={handleSearchSubmit}
+            className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-2 max-w-xl mx-auto"
+          >
+             <select
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full p-3 bg-gray-50 border-2 border-black rounded-lg font-bold text-black py-6 text-lg sm:flex-1"
+              >
+                <option value="">Selecione uma cidade</option>
+                <option value="São Paulo">São Paulo</option>
+                <option value="Rio de Janeiro">Rio de Janeiro</option>
+                <option value="Belo Horizonte">Belo Horizonte</option>
+                <option value="Curitiba">Curitiba</option>
+                <option value="Brasília">Brasília</option>
+                <option value="Salvador">Salvador</option>
+              </select>
             <Button type="submit" size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground text-lg w-full sm:w-auto py-6">
               <Search className="mr-2 h-5 w-5" />
               Encontrar um Anfitrião

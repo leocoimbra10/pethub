@@ -63,13 +63,19 @@ export default function SearchPage() {
           <form onSubmit={handleSearch} className="flex gap-2">
             <div className="relative flex-1">
               <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
+              <select
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Em qual cidade você precisa de um herói?"
                 className="w-full pl-10 p-3 border-2 border-black rounded-lg text-lg font-bold shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:translate-x-[2px] focus:translate-y-[2px] focus:shadow-none transition-all"
-              />
+              >
+                <option value="">Selecione uma cidade</option>
+                <option value="São Paulo">São Paulo</option>
+                <option value="Rio de Janeiro">Rio de Janeiro</option>
+                <option value="Belo Horizonte">Belo Horizonte</option>
+                <option value="Curitiba">Curitiba</option>
+                <option value="Brasília">Brasília</option>
+                <option value="Salvador">Salvador</option>
+              </select>
             </div>
             <button 
               type="submit"

@@ -7,7 +7,8 @@ import {
   LogOut,
   Sun,
   Moon,
-  LayoutDashboard
+  LayoutDashboard,
+  User
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
@@ -93,6 +94,12 @@ const UserActions = () => {
           <DropdownMenuItem>
             <LayoutDashboard className="mr-2 h-4 w-4" />
             <span>Meu Painel</span>
+          </DropdownMenuItem>
+        </Link>
+        <Link href="/perfil">
+          <DropdownMenuItem>
+            <User className="mr-2 h-4 w-4" />
+            <span>Meu Perfil</span>
           </DropdownMenuItem>
         </Link>
         <DropdownMenuItem>
