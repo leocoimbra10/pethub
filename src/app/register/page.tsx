@@ -27,6 +27,7 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const [user, loading] = useAuthState(auth);
+  const [isRegistering, setIsRegistering] = useState(false);
 
   useEffect(() => {
     if (user && !loading) {
@@ -36,14 +37,11 @@ export default function RegisterPage() {
 
   const handleRegister = async () => {
     setError(null);
-    if (password.length < 6) {
-      setError("A senha deve ter pelo menos 6 caracteres.");
-      return;
-    }
     if (!nome) {
       setError("Por favor, insira seu nome.");
       return;
     }
+    setIsRegistering(true);
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(userCredential.user, { displayName: nome });
@@ -51,9 +49,13 @@ export default function RegisterPage() {
     } catch (err: any) {
        if (err.code === 'auth/email-already-in-use') {
         setError('Este email já está em uso.');
-      } else {
-        setError(err.message);
+       } else if (err.code === 'auth/weak-password') {
+        setError("A senha deve ter pelo menos 6 caracteres.");
+       } else {
+        setError("Ocorreu um erro. Tente novamente.");
       }
+    } finally {
+        setIsRegistering(false);
     }
   };
   
@@ -63,10 +65,11 @@ export default function RegisterPage() {
     }
   };
 
-  if (loading) {
+  if (loading || isRegistering) {
     return (
       <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">
         <Loader className="h-16 w-16 animate-spin text-primary" />
+        <p className="font-bold text-lg ml-4">Criando conta...</p>
       </div>
     );
   }
@@ -118,7 +121,9 @@ export default function RegisterPage() {
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
-          <Button className="w-full" onClick={handleRegister}>Criar minha conta</Button>
+          <Button className="w-full" onClick={handleRegister} disabled={isRegistering}>
+            {isRegistering ? 'Criando...' : 'Criar minha conta'}
+          </Button>
           <div className="text-center text-sm font-bold pt-2">
             Já tem uma conta?{' '}
             <Link href="/login" className="underline hover:text-primary">
