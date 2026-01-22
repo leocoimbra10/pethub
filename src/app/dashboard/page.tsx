@@ -194,7 +194,9 @@ export default function DashboardPage() {
                             <p className="font-headline text-xl">{hostProfile.nome}</p>
                         </div>
                         <div className="flex gap-2">
-                            <Button variant="outline" onClick={() => alert("Funcionalidade de Edição em breve!")}>Editar</Button>
+                            <Link href="/editar-anuncio">
+                                <Button variant="outline">Editar</Button>
+                            </Link>
                              {hostProfile.id ? (
                                 <Link href={`/cuidadores/${hostProfile.id}`}>
                                     <Button className='bg-primary text-primary-foreground'>Ver meu Anúncio</Button>
