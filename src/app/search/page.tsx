@@ -1,3 +1,4 @@
+// FORCAR ATUALIZACAO AGORA VAI
 import { db } from "@/lib/firebase";
 import { collection, query, getDocs } from "firebase/firestore";
 import type { Host } from '@/lib/types';
