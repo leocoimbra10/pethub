@@ -35,6 +35,7 @@ export default function QueroCuidarPage() {
   const [descricao, setDescricao] = useState("");
   const [houseImages, setHouseImages] = useState<string[]>([]);
   const [homeType, setHomeType] = useState("Casa");
+  const [customHomeType, setCustomHomeType] = useState("");
   const [hasPets, setHasPets] = useState(false);
 
   // Logic states
@@ -68,8 +69,16 @@ export default function QueroCuidarPage() {
         setCidade(data.cidade || "");
         setDescricao(data.descricao || "");
         setHouseImages(data.houseImages || []);
-        setHomeType(data.homeType || "Casa");
         setHasPets(data.hasPets || false);
+        
+        const dbHomeType = data.homeType || "Casa";
+        const standardHomeTypes = ["Casa", "Apartamento"];
+        if (standardHomeTypes.includes(dbHomeType)) {
+          setHomeType(dbHomeType);
+        } else {
+          setHomeType("Outros");
+          setCustomHomeType(dbHomeType);
+        }
       }
       setPageLoading(false);
     };
@@ -100,6 +109,17 @@ export default function QueroCuidarPage() {
       return;
     }
     setIsSubmitting(true);
+    
+    const finalHomeType = homeType === 'Outros' ? customHomeType : homeType;
+    if (homeType === 'Outros' && !customHomeType) {
+        toast({
+            variant: "destructive",
+            title: "Campo obrigatório",
+            description: "Por favor, especifique o tipo de residência.",
+        });
+        setIsSubmitting(false);
+        return;
+    }
 
     const hostData = {
       ownerId: user.uid,
@@ -108,7 +128,7 @@ export default function QueroCuidarPage() {
       cidade,
       descricao,
       houseImages: houseImages.length > 0 ? houseImages : ['https://picsum.photos/seed/default/400/300'],
-      homeType,
+      homeType: finalHomeType,
       hasPets,
       updatedAt: serverTimestamp(),
     };
@@ -146,78 +166,93 @@ export default function QueroCuidarPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 md:py-12">
-      <div className="max-w-2xl mx-auto">
-        <div className='text-center mb-8'>
-            <h1 className="text-4xl md:text-5xl font-bold font-headline">{isEditing ? "Editar Perfil" : "Seja um Anfitrião"}</h1>
-            <p className="text-lg font-medium text-muted-foreground mt-2">
-                {isEditing ? "Ajuste os detalhes do seu espaço." : "Complete seu perfil para começar a receber hóspedes."}
+    <div className="min-h-screen bg-white text-black">
+      <div className="max-w-3xl mx-auto px-4 py-12">
+        <div className='text-center mb-10'>
+            <h1 className="text-5xl md:text-6xl font-black uppercase tracking-tighter">{isEditing ? "AJUSTAR CADASTRO" : "SEJA UM HERÓI"}</h1>
+            <p className="text-lg font-bold text-gray-600 mt-3 max-w-xl mx-auto uppercase">
+                {isEditing ? "Atualize os dados do seu espaço." : "Preencha o formulário e comece a faturar com o que você ama."}
             </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6 bg-card border-2 border-black rounded-2xl p-6 md:p-8 shadow-neo">
+        <form onSubmit={handleSubmit} className="space-y-6 border-4 border-black p-8 shadow-[10px_10px_0px_#8b5cf6]">
+          
           <div className="space-y-2">
-            <Label htmlFor="nome" className="text-lg font-bold">Nome do seu Espaço</Label>
-            <Input id="nome" value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Ex: Cantinho da Tia Juju" className="p-3 text-base"/>
+            <Label htmlFor="nome" className="block font-black text-sm uppercase">Nome do Anfitrião / Espaço</Label>
+            <Input id="nome" value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Ex: Cantinho Feliz da Tia Maria" className="w-full p-4 border-4 border-black font-black bg-white outline-none"/>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label htmlFor="preco" className="text-lg font-bold">Preço por Noite (R$)</Label>
-              <Input id="preco" type="number" value={preco} onChange={(e) => setPreco(e.target.value)} placeholder="Ex: 120" className="p-3 text-base"/>
+              <Label htmlFor="preco" className="block font-black text-sm uppercase">Preço da Diária (R$)</Label>
+              <Input id="preco" type="number" value={preco} onChange={(e) => setPreco(e.target.value)} placeholder="Ex: 99" className="w-full p-4 border-4 border-black font-black bg-white outline-none"/>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="cidade" className="text-lg font-bold">Sua Cidade</Label>
-              <Input id="cidade" value={cidade} onChange={(e) => setCidade(e.target.value)} placeholder="Ex: São Paulo" className="p-3 text-base"/>
+              <Label htmlFor="cidade" className="block font-black text-sm uppercase">Sua Cidade</Label>
+              <Input id="cidade" value={cidade} onChange={(e) => setCidade(e.target.value)} placeholder="Ex: Curitiba" className="w-full p-4 border-4 border-black font-black bg-white outline-none"/>
             </div>
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="descricao" className="text-lg font-bold">Descreva seu espaço e amor por pets</Label>
-            <Textarea id="descricao" value={descricao} onChange={(e) => setDescricao(e.target.value)} placeholder="Fale sobre o ambiente, sua experiência, rotina de passeios, etc." className="p-3 text-base min-h-[120px]"/>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-                <Label htmlFor="homeType" className="text-lg font-bold">Tipo de Residência</Label>
-                <select id="homeType" value={homeType} onChange={(e) => setHomeType(e.target.value)} className="w-full p-3 border-2 border-black rounded-lg font-bold bg-card text-base">
-                  <option value="Casa">Casa</option>
-                  <option value="Apartamento">Apartamento</option>
-                </select>
-            </div>
-            <div className="space-y-2 flex flex-col justify-end">
-                 <label className="flex items-center gap-3 cursor-pointer p-3 border-2 border-black bg-muted/50 rounded-lg">
-                    <input type="checkbox" checked={hasPets} onChange={(e) => setHasPets(e.target.checked)} className="w-5 h-5 border-2 border-black text-primary focus:ring-primary"/>
-                    <span className="font-bold text-sm">Eu já tenho pets</span>
-                </label>
-            </div>
+            <Label htmlFor="descricao" className="block font-black text-sm uppercase">Bio: Descreva seu espaço e amor por pets</Label>
+            <Textarea id="descricao" value={descricao} onChange={(e) => setDescricao(e.target.value)} placeholder="Fale sobre o ambiente, sua experiência, rotina de passeios, etc." className="w-full p-4 border-4 border-black font-black bg-white outline-none min-h-[150px]"/>
           </div>
 
           <div className="space-y-4">
-            <Label className="text-lg font-bold">Fotos do seu Espaço</Label>
-            <div className="p-4 border-2 border-dashed border-black rounded-lg text-center">
+              <Label className="block font-black text-sm uppercase">Tipo de Residência</Label>
+              <select 
+                value={homeType} 
+                onChange={(e) => setHomeType(e.target.value)}
+                className="w-full p-4 border-4 border-black font-black bg-white outline-none"
+              >
+                <option value="Casa">CASA</option>
+                <option value="Apartamento">APARTAMENTO</option>
+                <option value="Outros">OUTROS (ESPECIFICAR)</option>
+              </select>
+
+              {homeType === "Outros" && (
+                <input 
+                  type="text" 
+                  placeholder="DIGITE O TIPO (Ex: SÍTIO, CHÁCARA, ETC)"
+                  value={customHomeType}
+                  onChange={(e) => setCustomHomeType(e.target.value)}
+                  className="w-full p-4 border-4 border-black font-black bg-yellow-50 outline-none animate-in fade-in slide-in-from-top-2"
+                  required
+                />
+              )}
+            </div>
+
+            <label className="flex items-center gap-4 cursor-pointer p-4 border-4 border-black bg-gray-50 hover:bg-yellow-100">
+                <input type="checkbox" checked={hasPets} onChange={(e) => setHasPets(e.target.checked)} className="w-6 h-6 border-4 border-black text-purple-600 focus:ring-purple-500"/>
+                <span className="font-black text-base uppercase">Eu já tenho outros pets em casa</span>
+            </label>
+
+
+          <div className="space-y-4">
+            <Label className="block font-black text-sm uppercase">Fotos do seu Espaço (Opcional)</Label>
+            <div className="p-4 border-4 border-dashed border-black rounded-none text-center bg-gray-50">
               {houseImages.length > 0 ? (
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {houseImages.map((img, i) => (
-                    <div key={i} className="relative aspect-video rounded-md overflow-hidden border-2 border-black shadow-neo-sm">
+                    <div key={i} className="relative aspect-video rounded-none overflow-hidden border-4 border-black">
                       <Image src={img} alt={`Foto ${i + 1}`} fill style={{objectFit: 'cover'}} />
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-muted-foreground font-medium">Use o botão para gerar fotos de exemplo!</p>
+                <p className="font-bold text-gray-500 p-4">Use o botão abaixo para gerar fotos de exemplo!</p>
               )}
             </div>
-             <Button type="button" variant="secondary" onClick={handleGenerateImages} className="w-full">
-              <Dice5 className="mr-2" /> Gerar Fotos de Exemplo
-            </Button>
+             <button type="button" onClick={handleGenerateImages} className="w-full bg-black text-white font-black p-4 border-4 border-black uppercase hover:bg-purple-600">
+              <Dice5 className="mr-2 inline" /> Gerar Fotos Aleatórias
+            </button>
           </div>
 
           <div className="pt-4">
-            <Button type="submit" size="lg" className="w-full bg-primary hover:bg-primary/90" disabled={isSubmitting}>
-              {isSubmitting ? <Loader className="mr-2 h-5 w-5 animate-spin" /> : <CheckCircle className="mr-2 h-5 w-5" />}
-              {isEditing ? "Atualizar Perfil" : "Ativar Perfil de Cuidador"}
-            </Button>
+            <button type="submit" className="w-full bg-purple-600 text-white font-black text-xl py-5 border-4 border-black shadow-[6px_6px_0px_#000] hover:bg-purple-700 active:shadow-none active:translate-y-1 transition-all" disabled={isSubmitting}>
+              {isSubmitting ? <Loader className="mr-2 h-5 w-5 animate-spin inline" /> : <CheckCircle className="mr-2 h-5 w-5 inline" />}
+              {isEditing ? "ATUALIZAR PERFIL" : "ATIVAR PERFIL DE ANFITRIÃO"}
+            </button>
           </div>
         </form>
       </div>
