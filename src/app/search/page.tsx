@@ -49,6 +49,8 @@ export default function BuscaPage() {
     try {
       let q = query(collection(db, "hosts"));
       
+      // NOTA: A busca por estado e bairro depende desses campos existirem no Firestore.
+      // A query atual busca apenas por cidade.
       if (selectedCity) {
         q = query(q, where("cidade", "==", selectedCity));
       }
@@ -58,7 +60,8 @@ export default function BuscaPage() {
       querySnapshot.forEach((doc) => {
         results.push({ id: doc.id, ...doc.data() } as Host);
       });
-
+      
+      // Filtro de bairro feito no lado do cliente
       if (searchNeighborhood) {
         results = results.filter(h => 
           h.neighborhood?.toLowerCase().includes(searchNeighborhood.toLowerCase())
@@ -77,7 +80,6 @@ export default function BuscaPage() {
     <div className="min-h-screen bg-white p-6 text-black font-sans selection:bg-purple-300">
       <div className="max-w-7xl mx-auto">
         
-        {/* CABEÇALHO EXCLUSIVO PETHUB */}
         <div className="mb-12 border-b-[10px] border-black pb-6">
           <h1 className="text-7xl font-black uppercase tracking-tighter leading-none">
             ENCONTRAR <br />
@@ -88,7 +90,6 @@ export default function BuscaPage() {
           </p>
         </div>
 
-        {/* BARRA DE FILTROS NEO-BRUTALISTA */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-0 border-[6px] border-black shadow-[15px_15px_0px_0px_rgba(0,0,0,1)] bg-white mb-20 overflow-hidden">
           <div className="p-5 border-b-4 md:border-b-0 md:border-r-4 border-black">
             <label className="block font-black text-xs uppercase mb-2 text-gray-400">01. ESTADO</label>
@@ -134,7 +135,6 @@ export default function BuscaPage() {
           </button>
         </div>
 
-        {/* GRID DE RESULTADOS */}
         {loading ? (
           <div className="flex flex-col items-center justify-center p-20">
             <div className="w-20 h-20 border-[10px] border-black border-t-purple-600 animate-spin mb-4"></div>
@@ -181,3 +181,4 @@ export default function BuscaPage() {
     </div>
   );
 }
+    

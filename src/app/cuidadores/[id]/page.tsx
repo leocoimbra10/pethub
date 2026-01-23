@@ -11,15 +11,18 @@ import {
   serverTimestamp,
   orderBy,
   onSnapshot,
+  where,
+  getDocs,
 } from "firebase/firestore";
 import { useRouter, notFound } from "next/navigation";
 import {
   MapPin,
   Star,
-  ShieldCheck,
   MessageCircle,
   Camera,
   Loader,
+  Home,
+  Dog,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { Host } from "@/lib/types";
@@ -54,6 +57,7 @@ export default function CuidadorDetailPage({
   
   const today = new Date().toISOString().split("T")[0];
 
+  // Calculate total price based on dates
   useEffect(() => {
     if (checkIn && checkOut && host?.preco) {
       const d1 = new Date(checkIn);
@@ -76,6 +80,7 @@ export default function CuidadorDetailPage({
     }
   }, [checkIn, checkOut, host]);
 
+  // Fetch host and reviews data
   useEffect(() => {
     if (!params.id) {
       setLoading(false);
@@ -135,15 +140,33 @@ export default function CuidadorDetailPage({
       unsubscribeHost();
       unsubscribeReviews();
     };
-  }, [params.id, router, toast]);
+  }, [params.id, toast]);
 
+  // Function to start a chat/booking
   const handleStartChat = async () => {
     if (!user || !host) {
       router.push("/login");
       return;
     }
-    setLoadingChat(true);
 
+    // Check if a chat already exists
+    setLoadingChat(true);
+    const chatsRef = collection(db, "chats");
+    const q = query(
+      chatsRef,
+      where("participants", "array-contains", user.uid)
+    );
+    const querySnapshot = await getDocs(q);
+    const existingChat = querySnapshot.docs
+      .map(doc => ({ id: doc.id, ...doc.data() }))
+      .find(chat => chat.participants.includes(host.ownerId));
+
+    if (existingChat) {
+      router.push(`/chat/${existingChat.id}`);
+      return;
+    }
+    
+    // Create new chat
     let firstMessage = "Olá! Tenho interesse na hospedagem.";
     if (totalNights > 0 && checkIn && checkOut) {
       const dateFmt = (d: string) => {
@@ -183,7 +206,8 @@ export default function CuidadorDetailPage({
       setLoadingChat(false);
     }
   };
-
+  
+  // Function to add a review
   const handleAddReview = async () => {
     if (!user) {
       toast({
@@ -250,6 +274,8 @@ export default function CuidadorDetailPage({
     <div className="min-h-screen bg-white pb-20">
       <div className="container mx-auto px-0 md:px-4 max-w-5xl pt-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+          
+          {/* Coluna da Esquerda: Imagens e Detalhes */}
           <div className="space-y-4">
             <div className="w-full h-[400px] bg-gray-100 md:rounded-2xl border-b-4 md:border-4 border-black overflow-hidden relative shadow-neo-sm">
               {activeImage ? (
@@ -289,10 +315,11 @@ export default function CuidadorDetailPage({
             )}
           </div>
 
+          {/* Coluna da Direita: Info do Host e Card de Reserva */}
           <div className="px-4 md:px-0 pt-4">
             <div className="flex justify-between items-start mb-4">
               <div>
-                <h1 className="text-4xl font-black mb-2 leading-tight">
+                <h1 className="text-4xl font-black mb-2 leading-tight uppercase">
                   {host.nome}
                 </h1>
                 <p className="text-xl font-bold text-gray-500 flex items-center gap-2">
@@ -302,9 +329,12 @@ export default function CuidadorDetailPage({
 
               <div className="flex flex-col items-center text-center">
                 <div className="w-16 h-16 rounded-full border-2 border-black bg-gray-200 overflow-hidden mb-1">
-                  <div className="w-full h-full flex items-center justify-center bg-[#FACC15] font-black text-xl">
-                    {host.nome?.charAt(0).toUpperCase()}
-                  </div>
+                  { host.photo ? 
+                   <img src={host.photo} alt={host.nome} className="w-full h-full object-cover"/> :
+                    <div className="w-full h-full flex items-center justify-center bg-[#FACC15] font-black text-xl">
+                      {host.nome?.charAt(0).toUpperCase()}
+                    </div>
+                  }
                 </div>
                 <span className="text-xs font-bold text-gray-500 w-20 truncate">
                   {host.nome}
@@ -314,28 +344,26 @@ export default function CuidadorDetailPage({
 
             <hr className="border-t-2 border-muted my-6" />
 
-            <div className="flex gap-4 mb-6">
-              <div className="flex-1 bg-muted/50 p-4 rounded-xl border-2 border-transparent">
-                <ShieldCheck className="w-8 h-8 mb-2 text-primary" />
-                <h3 className="font-bold">Identidade Verificada</h3>
-                <p className="text-xs text-muted-foreground">
-                  Documentação checada.
-                </p>
-              </div>
-              <div className="flex-1 bg-muted/50 p-4 rounded-xl border-2 border-transparent">
-                <Star className="w-8 h-8 mb-2 text-secondary fill-secondary" />
-                <h3 className="font-bold">Anfitrião Top</h3>
-                <p className="text-xs text-muted-foreground">Bem avaliado.</p>
-              </div>
+            <div className="flex gap-4 mb-6 text-sm font-bold uppercase">
+                <div className="flex-1 bg-muted/50 p-3 rounded-lg border-2 border-black flex items-center gap-2">
+                  <Home className="w-5 h-5 text-primary"/> 
+                  <span>{host.homeType || 'Não informado'}</span>
+                </div>
+                 <div className="flex-1 bg-muted/50 p-3 rounded-lg border-2 border-black flex items-center gap-2">
+                  <Dog className="w-5 h-5 text-secondary"/>
+                  <span>{host.hasPets ? 'Tem pets' : 'Sem pets'}</span>
+                </div>
             </div>
 
-            <h3 className="font-black text-xl mb-3">Sobre o espaço</h3>
+
+            <h3 className="font-black text-xl mb-3 uppercase">Sobre o Anfitrião</h3>
             <p className="text-foreground/80 leading-relaxed mb-8 whitespace-pre-line">
               {host.descricao ||
                 "O anfitrião não adicionou uma descrição detalhada."}
             </p>
-
-            <div className="bg-card border-2 border-black p-6 rounded-2xl shadow-neo sticky top-24">
+            
+            {/* Card de Reserva */}
+            <div className="bg-card border-4 border-black p-6 rounded-2xl shadow-[8px_8px_0px_#000] sticky top-24">
               <div className="flex justify-between items-end mb-6">
                 <div>
                   <span className="text-3xl font-black">R$ {host.preco}</span>
@@ -352,7 +380,7 @@ export default function CuidadorDetailPage({
 
               <div className="grid grid-cols-2 gap-2 mb-4">
                 <div>
-                  <Label htmlFor="checkin" className="block text-xs font-bold mb-1">Check-in</Label>
+                  <Label htmlFor="checkin" className="block text-xs font-bold mb-1 uppercase">Check-in</Label>
                   <Input
                     id="checkin"
                     type="date"
@@ -363,7 +391,7 @@ export default function CuidadorDetailPage({
                   />
                 </div>
                 <div>
-                  <Label htmlFor="checkout" className="block text-xs font-bold mb-1">Check-out</Label>
+                  <Label htmlFor="checkout" className="block text-xs font-bold mb-1 uppercase">Check-out</Label>
                   <Input
                     id="checkout"
                     type="date"
@@ -377,16 +405,12 @@ export default function CuidadorDetailPage({
               </div>
 
               {totalNights > 0 && (
-                <div className="bg-muted/50 p-3 rounded-lg border-2 border-muted mb-4 space-y-2 text-sm">
+                <div className="bg-muted/50 p-3 rounded-lg border-2 border-black mb-4 space-y-2 text-sm">
                   <div className="flex justify-between font-bold">
                     <span>R$ {host.preco} x {totalNights} noites</span>
                     <span>R$ {totalPrice}</span>
                   </div>
-                  <div className="flex justify-between font-bold text-primary">
-                    <span>Taxa PetHub</span>
-                    <span>Grátis</span>
-                  </div>
-                  <div className="border-t-2 border-muted pt-2 flex justify-between text-lg font-black">
+                  <div className="border-t-2 border-black pt-2 mt-2 flex justify-between text-lg font-black">
                     <span>Total</span>
                     <span>R$ {totalPrice}</span>
                   </div>
@@ -397,18 +421,19 @@ export default function CuidadorDetailPage({
                 size="lg"
                 onClick={handleStartChat}
                 disabled={loadingChat}
-                className="w-full bg-accent text-accent-foreground font-black text-lg py-4 rounded-xl"
+                className="w-full bg-accent text-accent-foreground font-black text-lg py-4 rounded-xl uppercase"
               >
                 {loadingChat ? <Loader className="animate-spin" /> : <MessageCircle />}
-                {totalNights > 0 ? "Solicitar Reserva" : "Falar com Anfitrião"}
+                {totalNights > 0 ? "RESERVAR AGORA" : "Falar com Anfitrião"}
               </Button>
                {totalNights > 0 && <p className="text-xs text-center mt-2 font-bold text-muted-foreground">Você não será cobrado ainda.</p>}
             </div>
           </div>
         </div>
 
+        {/* Seção de Avaliações */}
         <div className="mt-12 border-t-4 border-black pt-12 px-4 md:px-0">
-          <h2 className="text-2xl font-black mb-6 flex items-center gap-2">
+          <h2 className="text-2xl font-black mb-6 flex items-center gap-2 uppercase">
             <Star
               className="fill-secondary text-black w-8 h-8"
               strokeWidth={2.5}
@@ -417,7 +442,7 @@ export default function CuidadorDetailPage({
           </h2>
 
           <div className="bg-muted/50 border-2 border-black p-4 rounded-xl mb-8 shadow-neo-sm">
-            <h3 className="font-bold mb-3">Avalie sua estadia:</h3>
+            <h3 className="font-bold mb-3 uppercase">Deixe sua avaliação:</h3>
             <div className="flex gap-2 mb-3">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
@@ -443,10 +468,10 @@ export default function CuidadorDetailPage({
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
               placeholder="Conte como foi a sua experiência..."
-              className="w-full p-3 border-2 border-black rounded-lg mb-3 h-20 bg-background"
+              className="w-full p-3 border-2 border-black rounded-lg mb-3 h-20 bg-background font-bold"
             />
-            <Button onClick={handleAddReview} className="bg-black text-white font-bold">
-              Enviar
+            <Button onClick={handleAddReview} className="bg-black text-white font-bold uppercase">
+              Enviar Avaliação
             </Button>
           </div>
 
@@ -484,3 +509,5 @@ export default function CuidadorDetailPage({
     </div>
   );
 }
+
+    
