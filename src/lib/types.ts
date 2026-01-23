@@ -61,11 +61,14 @@ export type Chat = {
 
 export type Pet = {
   id: string;
-  ownerId: string;
-  nome: string;
-  tipo: 'Cachorro' | 'Gato' | 'Outro';
-  raca: string;
-  idade?: number;
-  observacoes?: string;
+  ownerUid: string; // Corrigido para ownerUid
+  name: string;
+  type: 'Cachorro' | 'Gato' | 'Outro';
+  breed: string;
+  age?: string; // Idade pode ser string
+  healthConditions?: string;
+  medications?: string;
+  vaccinated?: boolean;
   createdAt: Date;
+  updatedAt?: Date;
 };
