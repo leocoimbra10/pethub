@@ -29,6 +29,8 @@ export type Host = {
   photo: string;
   houseImages: string[];
   rating: number;
+  homeType?: 'Casa' | 'Apartamento';
+  hasPets?: boolean;
 };
 
 export type Booking = {
