@@ -29,6 +29,7 @@ export default function OnboardingHost() {
     neighborhood: "",
     facilities: [] as string[],
   });
+  const [customFacility, setCustomFacility] = useState("");
 
   const facilitiesList = ["Quintal Cercado", "Ar-Condicionado", "Monitoramento 24h", "Medicamentos", "Primeiros Socorros", "Sem outros pets", "Perto de Parques"];
 
@@ -40,7 +41,18 @@ export default function OnboardingHost() {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!user) return router.push("/login");
       const snap = await getDoc(doc(db, "hosts", user.uid));
-      if (snap.exists()) setFormData({ ...formData, ...snap.data(), name: user.displayName || "" });
+      if (snap.exists()) {
+        const data = snap.data();
+        // Separate custom facility from the main list for editing
+        const existingFacilities = data.facilities || [];
+        const predefined = existingFacilities.filter((f: string) => facilitiesList.includes(f) || f === "Outros");
+        const custom = existingFacilities.find((f: string) => !facilitiesList.includes(f) && f !== "Outros");
+        
+        setFormData({ ...formData, ...data, facilities: predefined, name: user.displayName || "" });
+        if(custom) {
+            setCustomFacility(custom);
+        }
+      }
       setLoading(false);
     });
     return () => unsubscribe();
@@ -64,9 +76,19 @@ export default function OnboardingHost() {
   const save = async () => {
     if (!auth.currentUser) return;
     setIsSubmitting(true);
+
+    let finalFacilities = [...formData.facilities];
+    if (finalFacilities.includes("Outros")) {
+      finalFacilities = finalFacilities.filter(f => f !== "Outros");
+      if (customFacility.trim() !== "") {
+        finalFacilities.push(customFacility.trim());
+      }
+    }
+
     try {
       await setDoc(doc(db, "hosts", auth.currentUser.uid), {
         ...formData,
+        facilities: finalFacilities,
         uid: auth.currentUser.uid,
         updatedAt: serverTimestamp(),
         active: true,
@@ -140,7 +162,25 @@ export default function OnboardingHost() {
                         {formData.facilities.includes(f) ? '✓ ' : '+ '} {f}
                       </button>
                     ))}
+                     <button 
+                        onClick={() => toggleFacility("Outros")} 
+                        className={`p-4 border-4 border-black font-black text-left transition-all ${formData.facilities.includes("Outros") ? 'bg-purple-400 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]' : 'bg-white'}`}
+                      >
+                        {formData.facilities.includes("Outros") ? '✓ ' : '+ '} OUTROS...
+                      </button>
                   </div>
+                   {formData.facilities.includes("Outros") && (
+                      <div className="mt-4 animate-in fade-in slide-in-from-top-2">
+                        <label className="font-black uppercase text-xs">Qual o seu diferencial extra?</label>
+                        <input 
+                          type="text" 
+                          value={customFacility}
+                          onChange={(e) => setCustomFacility(e.target.value)}
+                          placeholder="EX: SOU VETERINÁRIO, TENHO CÂMERAS 24H..."
+                          className="w-full p-4 border-4 border-black font-black bg-purple-50 outline-none mt-2"
+                        />
+                      </div>
+                    )}
                 </div>
               </div>
               <div className="flex gap-4">
