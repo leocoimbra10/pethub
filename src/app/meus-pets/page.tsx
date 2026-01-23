@@ -49,7 +49,7 @@ export default function MyPetsPage() {
 
   const fetchPets = async (userId: string) => {
     try {
-      const q = query(collection(db, "users", userId, "pets"), where("ownerUid", "==", userId));
+      const q = query(collection(db, "pets"), where("ownerUid", "==", userId));
       const querySnapshot = await getDocs(q);
       const petsList: Pet[] = [];
       querySnapshot.forEach((doc) => {
@@ -102,9 +102,9 @@ export default function MyPetsPage() {
 
     try {
       if (editingId) {
-        await updateDoc(doc(db, "users", user.uid, "pets", editingId), { ...petData, updatedAt: serverTimestamp() });
+        await updateDoc(doc(db, "pets", editingId), { ...petData, updatedAt: serverTimestamp() });
       } else {
-        await addDoc(collection(db, "users", user.uid, "pets"), { ...petData, createdAt: serverTimestamp() });
+        await addDoc(collection(db, "pets"), { ...petData, createdAt: serverTimestamp() });
       }
       handleCancelEdit();
       await fetchPets(user.uid);
@@ -117,9 +117,8 @@ export default function MyPetsPage() {
 
   const handleDeletePet = async (petId: string) => {
     if (!confirm("Remover esse amigão da lista?")) return;
-    if(!user) return;
     try {
-      await deleteDoc(doc(db, "users", user.uid, "pets", petId));
+      await deleteDoc(doc(db, "pets", petId));
       setPets(pets.filter(pet => pet.id !== petId));
     } catch (error) {
       console.error("Erro ao deletar pet:", error);
