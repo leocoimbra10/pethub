@@ -42,7 +42,7 @@ export default function Header() {
             <Link href="/search" className="text-base font-bold text-gray-700 hover:text-black hover:underline decoration-2 underline-offset-4 transition">
               Buscar cuidador
             </Link>
-            <Link href="/#como-funciona" className="text-base font-bold text-gray-700 hover:text-black hover:underline decoration-2 underline-offset-4 transition">
+            <Link href="/como-funciona" className="text-base font-bold text-gray-700 hover:text-black hover:underline decoration-2 underline-offset-4 transition">
               Como funciona
             </Link>
           </div>
