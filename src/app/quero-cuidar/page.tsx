@@ -2,259 +2,176 @@
 
 import { useEffect, useState } from "react";
 import { auth, db } from "@/lib/firebase";
-import { useAuthState } from "react-firebase-hooks/auth";
 import { useRouter } from "next/navigation";
-import {
-  collection,
-  query,
-  where,
-  getDocs,
-  doc,
-  updateDoc,
-  addDoc,
-  serverTimestamp,
-} from "firebase/firestore";
-import { useToast } from "@/hooks/use-toast";
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Loader, Dice5, CheckCircle } from "lucide-react";
+import { onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import Link from "next/link";
 
-export default function QueroCuidarPage() {
-  const [user, authLoading] = useAuthState(auth);
-  const router = useRouter();
-  const { toast } = useToast();
-
-  // Form states
-  const [nome, setNome] = useState("");
-  const [preco, setPreco] = useState("");
-  const [cidade, setCidade] = useState("");
-  const [descricao, setDescricao] = useState("");
-  const [houseImages, setHouseImages] = useState<string[]>([]);
-  const [homeType, setHomeType] = useState("Casa");
-  const [customHomeType, setCustomHomeType] = useState("");
-  const [hasPets, setHasPets] = useState(false);
-
-  // Logic states
-  const [pageLoading, setPageLoading] = useState(true);
+export default function OnboardingHost() {
+  const [step, setStep] = useState(1);
+  const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [hostId, setHostId] = useState<string | null>(null);
+  const router = useRouter();
 
-  // Fetch existing host data on load
+  // Estados de Localização
+  const [estados, setEstados] = useState<{ sigla: string; nome: string }[]>([]);
+  const [cidades, setCidades] = useState<string[]>([]);
+
+  // Estados do Formulário
+  const [formData, setFormData] = useState({
+    name: "",
+    bio: "",
+    price: "",
+    homeType: "Casa",
+    customHomeType: "",
+    state: "",
+    city: "",
+    neighborhood: "",
+    facilities: [] as string[],
+  });
+
+  const facilitiesList = ["Quintal Cercado", "Ar-Condicionado", "Monitoramento 24h", "Medicamentos", "Primeiros Socorros", "Sem outros pets", "Perto de Parques"];
+
   useEffect(() => {
-    if (authLoading) return;
-    if (!user) {
-      router.push("/login");
-      return;
-    }
+    fetch("https://servicodados.ibge.gov.br/api/v1/localidades/estados?orderBy=nome")
+      .then(res => res.json())
+      .then(data => setEstados(data.map((e: any) => ({ sigla: e.sigla, nome: e.nome }))));
 
-    const fetchHostData = async () => {
-      const q = query(collection(db, "hosts"), where("ownerId", "==", user.uid));
-      const querySnapshot = await getDocs(q);
-
-      if (!querySnapshot.empty) {
-        const hostDoc = querySnapshot.docs[0];
-        const data = hostDoc.data();
-
-        setHostId(hostDoc.id);
-        setIsEditing(true);
-
-        // Populate form with existing data
-        setNome(data.nome || "");
-        setPreco(data.preco || "");
-        setCidade(data.cidade || "");
-        setDescricao(data.descricao || "");
-        setHouseImages(data.houseImages || []);
-        setHasPets(data.hasPets || false);
-        
-        const dbHomeType = data.homeType || "Casa";
-        const standardHomeTypes = ["Casa", "Apartamento"];
-        if (standardHomeTypes.includes(dbHomeType)) {
-          setHomeType(dbHomeType);
-        } else {
-          setHomeType("Outros");
-          setCustomHomeType(dbHomeType);
-        }
-      }
-      setPageLoading(false);
-    };
-
-    fetchHostData();
-  }, [user, authLoading, router]);
-  
-  const handleGenerateImages = () => {
-    const keywords = ['living-room', 'backyard', 'cozy-corner'];
-    const newImages = keywords.map(
-      (kw) => `https://picsum.photos/seed/${kw}-${Math.random()}/400/300`
-    );
-    setHouseImages(newImages);
-    toast({
-      title: 'Fotos geradas!',
-      description: 'Novas imagens de exemplo foram carregadas.',
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (!user) return router.push("/login");
+      const snap = await getDoc(doc(db, "hosts", user.uid));
+      if (snap.exists()) setFormData({ ...formData, ...snap.data(), name: user.displayName || "" });
+      setLoading(false);
     });
+    return () => unsubscribe();
+  }, [router]);
+
+  useEffect(() => {
+    if (formData.state) {
+      fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${formData.state}/municipios`)
+        .then(res => res.json())
+        .then(data => setCidades(data.map((c: any) => c.nome)));
+    }
+  }, [formData.state]);
+
+  const toggleFacility = (fac: string) => {
+    setFormData(prev => ({
+      ...prev,
+      facilities: prev.facilities.includes(fac) ? prev.facilities.filter(f => f !== fac) : [...prev.facilities, fac]
+    }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user || !nome || !preco || !cidade || !descricao) {
-      toast({
-        variant: "destructive",
-        title: "Campos obrigatórios",
-        description: "Por favor, preencha nome, preço, cidade e descrição.",
-      });
-      return;
-    }
+  const save = async () => {
+    if (!auth.currentUser) return;
     setIsSubmitting(true);
-    
-    const finalHomeType = homeType === 'Outros' ? customHomeType : homeType;
-    if (homeType === 'Outros' && !customHomeType) {
-        toast({
-            variant: "destructive",
-            title: "Campo obrigatório",
-            description: "Por favor, especifique o tipo de residência.",
-        });
-        setIsSubmitting(false);
-        return;
-    }
-
-    const hostData = {
-      ownerId: user.uid,
-      nome,
-      preco: Number(preco),
-      cidade,
-      descricao,
-      houseImages: houseImages.length > 0 ? houseImages : ['https://picsum.photos/seed/default/400/300'],
-      homeType: finalHomeType,
-      hasPets,
-      updatedAt: serverTimestamp(),
-    };
-
     try {
-      if (isEditing && hostId) {
-        const hostRef = doc(db, "hosts", hostId);
-        await updateDoc(hostRef, hostData);
-        toast({ title: "Perfil de cuidador atualizado!" });
-      } else {
-        const newHostData = {
-            ...hostData,
-            createdAt: serverTimestamp(),
-            rating: 5.0,
-            photo: `https://picsum.photos/seed/${user.uid}/200/200`
-        }
-        await addDoc(collection(db, "hosts"), newHostData);
-        toast({ title: "Parabéns! Você agora é um anfitrião PetHub." });
-      }
+      await setDoc(doc(db, "hosts", auth.currentUser.uid), {
+        ...formData,
+        uid: auth.currentUser.uid,
+        updatedAt: serverTimestamp(),
+        active: true,
+        homeType: formData.homeType === "Outros" ? formData.customHomeType : formData.homeType
+      }, { merge: true });
+      alert("PERFIL PUBLICADO COM SUCESSO! 🚀");
       router.push("/dashboard");
-    } catch (error) {
-        console.error("Erro ao salvar perfil:", error);
-        toast({ variant: "destructive", title: "Erro ao salvar", description: "Ocorreu um erro. Tente novamente." });
-    } finally {
-      setIsSubmitting(false);
-    }
+    } catch (e) { console.error(e); } finally { setIsSubmitting(false); }
   };
 
-  if (pageLoading || authLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">
-        <Loader className="h-16 w-16 animate-spin text-primary" />
-      </div>
-    );
-  }
+  if (loading) return <div className="min-h-screen bg-white flex items-center justify-center font-black text-4xl italic animate-pulse">CARREGANDO...</div>;
 
   return (
-    <div className="min-h-screen bg-white text-black">
-      <div className="max-w-3xl mx-auto px-4 py-12">
-        <div className='text-center mb-10'>
-            <h1 className="text-5xl md:text-6xl font-black uppercase tracking-tighter">{isEditing ? "AJUSTAR CADASTRO" : "SEJA UM HERÓI"}</h1>
-            <p className="text-lg font-bold text-gray-600 mt-3 max-w-xl mx-auto uppercase">
-                {isEditing ? "Atualize os dados do seu espaço." : "Preencha o formulário e comece a faturar com o que você ama."}
-            </p>
+    <div className="min-h-screen bg-white text-black p-6 md:p-12 font-sans selection:bg-purple-300">
+      <div className="max-w-4xl mx-auto">
+        {/* PROGRESS BAR */}
+        <div className="flex gap-2 mb-12">
+          {[1, 2, 3].map(i => (
+            <div key={i} className={`h-4 flex-1 border-4 border-black transition-all ${step >= i ? 'bg-purple-600 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]' : 'bg-gray-100'}`} />
+          ))}
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6 border-4 border-black p-8 shadow-[10px_10px_0px_#8b5cf6]">
-          
-          <div className="space-y-2">
-            <Label htmlFor="nome" className="block font-black text-sm uppercase">Nome do Anfitrião / Espaço</Label>
-            <Input id="nome" value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Ex: Cantinho Feliz da Tia Maria" className="w-full p-4 border-4 border-black font-black bg-white outline-none"/>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="preco" className="block font-black text-sm uppercase">Preço da Diária (R$)</Label>
-              <Input id="preco" type="number" value={preco} onChange={(e) => setPreco(e.target.value)} placeholder="Ex: 99" className="w-full p-4 border-4 border-black font-black bg-white outline-none"/>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="cidade" className="block font-black text-sm uppercase">Sua Cidade</Label>
-              <Input id="cidade" value={cidade} onChange={(e) => setCidade(e.target.value)} placeholder="Ex: Curitiba" className="w-full p-4 border-4 border-black font-black bg-white outline-none"/>
-            </div>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="descricao" className="block font-black text-sm uppercase">Bio: Descreva seu espaço e amor por pets</Label>
-            <Textarea id="descricao" value={descricao} onChange={(e) => setDescricao(e.target.value)} placeholder="Fale sobre o ambiente, sua experiência, rotina de passeios, etc." className="w-full p-4 border-4 border-black font-black bg-white outline-none min-h-[150px]"/>
-          </div>
-
-          <div className="space-y-4">
-              <Label className="block font-black text-sm uppercase">Tipo de Residência</Label>
-              <select 
-                value={homeType} 
-                onChange={(e) => setHomeType(e.target.value)}
-                className="w-full p-4 border-4 border-black font-black bg-white outline-none"
-              >
-                <option value="Casa">CASA</option>
-                <option value="Apartamento">APARTAMENTO</option>
-                <option value="Outros">OUTROS (ESPECIFICAR)</option>
-              </select>
-
-              {homeType === "Outros" && (
-                <input 
-                  type="text" 
-                  placeholder="DIGITE O TIPO (Ex: SÍTIO, CHÁCARA, ETC)"
-                  value={customHomeType}
-                  onChange={(e) => setCustomHomeType(e.target.value)}
-                  className="w-full p-4 border-4 border-black font-black bg-yellow-50 outline-none animate-in fade-in slide-in-from-top-2"
-                  required
-                />
-              )}
-            </div>
-
-            <label className="flex items-center gap-4 cursor-pointer p-4 border-4 border-black bg-gray-50 hover:bg-yellow-100">
-                <input type="checkbox" checked={hasPets} onChange={(e) => setHasPets(e.target.checked)} className="w-6 h-6 border-4 border-black text-purple-600 focus:ring-purple-500"/>
-                <span className="font-black text-base uppercase">Eu já tenho outros pets em casa</span>
-            </label>
-
-
-          <div className="space-y-4">
-            <Label className="block font-black text-sm uppercase">Fotos do seu Espaço (Opcional)</Label>
-            <div className="p-4 border-4 border-dashed border-black rounded-none text-center bg-gray-50">
-              {houseImages.length > 0 ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {houseImages.map((img, i) => (
-                    <div key={i} className="relative aspect-video rounded-none overflow-hidden border-4 border-black">
-                      <Image src={img} alt={`Foto ${i + 1}`} fill style={{objectFit: 'cover'}} />
-                    </div>
-                  ))}
+        <div className="border-[6px] border-black p-8 md:p-12 shadow-[15px_15px_0px_0px_rgba(0,0,0,1)] bg-white">
+          {step === 1 && (
+            <div className="space-y-8 animate-in fade-in slide-in-from-right-4">
+              <h2 className="text-5xl font-black uppercase italic leading-none border-b-8 border-black pb-4">📍 ONDE VOCÊ ESTÁ?</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="font-black uppercase text-xs">Estado</label>
+                  <select value={formData.state} onChange={e => setFormData({...formData, state: e.target.value})} className="w-full p-4 border-4 border-black font-black bg-white outline-none">
+                    <option value="">Selecione...</option>
+                    {estados.map(e => <option key={e.sigla} value={e.sigla}>{e.nome}</option>)}
+                  </select>
                 </div>
-              ) : (
-                <p className="font-bold text-gray-500 p-4">Use o botão abaixo para gerar fotos de exemplo!</p>
-              )}
+                <div className="space-y-2">
+                  <label className="font-black uppercase text-xs">Cidade</label>
+                  <select disabled={!formData.state} value={formData.city} onChange={e => setFormData({...formData, city: e.target.value})} className="w-full p-4 border-4 border-black font-black bg-white outline-none disabled:opacity-30">
+                    <option value="">Selecione...</option>
+                    {cidades.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="font-black uppercase text-xs">Bairro</label>
+                <input type="text" value={formData.neighborhood} onChange={e => setFormData({...formData, neighborhood: e.target.value})} className="w-full p-4 border-4 border-black font-black outline-none placeholder:text-gray-300" placeholder="EX: CENTRO" />
+              </div>
+              <button onClick={() => setStep(2)} className="w-full bg-black text-white font-black py-6 text-2xl uppercase hover:bg-purple-600 transition-all">PRÓXIMO PASSO →</button>
             </div>
-             <button type="button" onClick={handleGenerateImages} className="w-full bg-black text-white font-black p-4 border-4 border-black uppercase hover:bg-purple-600">
-              <Dice5 className="mr-2 inline" /> Gerar Fotos Aleatórias
-            </button>
-          </div>
+          )}
 
-          <div className="pt-4">
-            <button type="submit" className="w-full bg-purple-600 text-white font-black text-xl py-5 border-4 border-black shadow-[6px_6px_0px_#000] hover:bg-purple-700 active:shadow-none active:translate-y-1 transition-all" disabled={isSubmitting}>
-              {isSubmitting ? <Loader className="mr-2 h-5 w-5 animate-spin inline" /> : <CheckCircle className="mr-2 h-5 w-5 inline" />}
-              {isEditing ? "ATUALIZAR PERFIL" : "ATIVAR PERFIL DE ANFITRIÃO"}
-            </button>
-          </div>
-        </form>
+          {step === 2 && (
+            <div className="space-y-8 animate-in fade-in slide-in-from-right-4">
+              <h2 className="text-5xl font-black uppercase italic leading-none border-b-8 border-black pb-4">🏠 SEU ESPAÇO</h2>
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <label className="font-black uppercase text-xs">Tipo de Residência</label>
+                  <select value={formData.homeType} onChange={e => setFormData({...formData, homeType: e.target.value})} className="w-full p-4 border-4 border-black font-black bg-white">
+                    <option value="Casa">CASA</option>
+                    <option value="Apartamento">APARTAMENTO</option>
+                    <option value="Outros">OUTROS (SÍTIO, HOTEL, ETC)</option>
+                  </select>
+                  {formData.homeType === "Outros" && (
+                    <input type="text" value={formData.customHomeType} onChange={e => setFormData({...formData, customHomeType: e.target.value})} placeholder="DIGITE O TIPO..." className="w-full p-4 border-4 border-black font-black bg-purple-50 mt-2" />
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <label className="font-black uppercase text-xs">O que você oferece?</label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {facilitiesList.map(f => (
+                      <button key={f} onClick={() => toggleFacility(f)} className={`p-4 border-4 border-black font-black text-left transition-all ${formData.facilities.includes(f) ? 'bg-green-400 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]' : 'bg-white'}`}>
+                        {formData.facilities.includes(f) ? '✓ ' : '+ '} {f}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <button onClick={() => setStep(1)} className="w-1/3 border-4 border-black font-black uppercase">Voltar</button>
+                <button onClick={() => setStep(3)} className="w-2/3 bg-black text-white font-black py-6 text-2xl uppercase hover:bg-purple-600 transition-all">ÚLTIMO PASSO →</button>
+              </div>
+            </div>
+          )}
+
+          {step === 3 && (
+            <div className="space-y-8 animate-in fade-in slide-in-from-right-4">
+              <h2 className="text-5xl font-black uppercase italic leading-none border-b-8 border-black pb-4">💰 VALORES & BIO</h2>
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <label className="font-black uppercase text-xs">Preço da Diária (R$)</label>
+                  <input type="number" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} className="w-full p-4 border-4 border-black font-black text-4xl outline-none" placeholder="00" />
+                </div>
+                <div className="space-y-2">
+                  <label className="font-black uppercase text-xs">Sua Bio Profissional</label>
+                  <textarea value={formData.bio} onChange={e => setFormData({...formData, bio: e.target.value})} className="w-full p-4 border-4 border-black font-bold h-40 resize-none" placeholder="CONTE SUA EXPERIÊNCIA COM ANIMAIS..." />
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <button onClick={() => setStep(2)} className="w-1/3 border-4 border-black font-black uppercase">Voltar</button>
+                <button onClick={save} disabled={isSubmitting} className="w-2/3 bg-green-500 text-black font-black py-6 text-2xl uppercase border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all">
+                  {isSubmitting ? "PUBLICANDO..." : "PUBLICAR PERFIL 🚀"}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
