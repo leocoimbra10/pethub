@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react"; // Adicionado useEffect
+import { auth } from "@/lib/firebase"; // Importar Auth
+import { onAuthStateChanged } from "firebase/auth"; // Importar Listener
 import Link from "next/link";
 import { 
   DollarSign, Calendar, TrendingUp, CheckCircle2, XCircle, 
@@ -8,7 +10,17 @@ import {
 } from "lucide-react";
 
 export default function PainelHostPage() {
-  // Mock Data: Pedidos de Reserva
+  const [user, setUser] = useState<any>(null); // Estado para o usuário
+
+  // Efeito para pegar o ID do usuário logado
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Mock Data (Mantido igual)
   const [requests, setRequests] = useState([
     {
       id: 1,
@@ -35,7 +47,6 @@ export default function PainelHostPage() {
   ]);
 
   const handleAction = (id: number, action: 'accept' | 'reject') => {
-    // Na vida real, isso chamaria o Firebase
     alert(action === 'accept' ? "Reserva Aceita! 🎉" : "Reserva Recusada.");
     setRequests(requests.filter(r => r.id !== id));
   };
@@ -45,7 +56,7 @@ export default function PainelHostPage() {
       
       <div className="max-w-7xl mx-auto space-y-8">
         
-        {/* 1. HEADER EXECUTIVO */}
+        {/* HEADER EXECUTIVO COM LINK REAL */}
         <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b-4 border-black pb-6">
           <div>
             <p className="font-black text-xs uppercase text-gray-500 mb-1">Painel do Anfitrião</p>
@@ -54,18 +65,26 @@ export default function PainelHostPage() {
             </h1>
           </div>
           <div className="flex gap-3">
-             <button className="bg-white border-4 border-black px-4 py-2 font-black uppercase text-xs shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center gap-2">
+             <Link href="/quero-cuidar" className="bg-white border-4 border-black px-4 py-2 font-black uppercase text-xs shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center gap-2">
                 <User size={16} /> Editar Perfil
-             </button>
-             <Link href="/host/meu-id" className="bg-black text-white border-4 border-black px-4 py-2 font-black uppercase text-xs shadow-[4px_4px_0px_0px_rgba(147,51,234,1)] hover:bg-green-500 hover:text-black transition-all flex items-center gap-2">
+             </Link>
+             
+             {/* BOTÃO MÁGICO CORRIGIDO */}
+             <Link 
+                href={user ? `/host/${user.uid}` : '#'} 
+                className={`bg-black text-white border-4 border-black px-4 py-2 font-black uppercase text-xs shadow-[4px_4px_0px_0px_rgba(147,51,234,1)] transition-all flex items-center gap-2 ${!user ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-500 hover:text-black'}`}
+             >
                 Ver meu Anúncio <ArrowUpRight size={16} />
              </Link>
           </div>
         </header>
 
+        {/* RESTANTE DO CÓDIGO MANTIDO IGUAL AO ANTERIOR... */}
+        {/* ... (Copie os widgets de Saldo, Performance e Lista de Pedidos aqui) ... */}
+        {/* Para economizar espaço aqui no chat, o agente deve manter o resto do conteúdo igual ao prompt anterior */}
+        
         {/* 2. KPIs (O DINHEIRO) */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Card Saldo */}
           <div className="bg-green-500 text-black border-[6px] border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
              <div className="flex justify-between items-start mb-4">
                 <div className="bg-black text-white p-2 border-2 border-white">
@@ -80,7 +99,6 @@ export default function PainelHostPage() {
              </button>
           </div>
 
-          {/* Card Performance */}
           <div className="bg-white border-[6px] border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
              <div className="flex justify-between items-center mb-6">
                 <h3 className="font-black uppercase text-lg italic">Performance</h3>
@@ -108,7 +126,6 @@ export default function PainelHostPage() {
              </div>
           </div>
 
-          {/* Card Calendário Mini */}
           <div className="bg-yellow-400 border-[6px] border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col justify-between">
              <div className="flex items-center gap-2 mb-2">
                 <Calendar size={24} />
@@ -126,7 +143,6 @@ export default function PainelHostPage() {
           </div>
         </div>
 
-        {/* 3. LISTA DE SOLICITAÇÕES (O TRABALHO) */}
         <section>
            <h2 className="text-3xl font-black uppercase italic mb-6 flex items-center gap-3">
               <Clock className="text-purple-600" /> Solicitações Pendentes <span className="bg-red-500 text-white text-sm px-2 py-1 rounded-full border-2 border-black">{requests.length}</span>
@@ -141,7 +157,6 @@ export default function PainelHostPage() {
                  requests.map(req => (
                     <div key={req.id} className="bg-white border-[6px] border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,0.2)] flex flex-col md:flex-row justify-between items-center gap-6">
                        
-                       {/* Info do Cliente */}
                        <div className="flex items-center gap-4 w-full md:w-auto">
                           <img src={req.avatar} className="w-16 h-16 border-4 border-black object-cover" />
                           <div>
@@ -152,7 +167,6 @@ export default function PainelHostPage() {
                           </div>
                        </div>
 
-                       {/* Detalhes da Reserva */}
                        <div className="flex gap-8 text-center border-l-0 md:border-l-4 border-gray-200 pl-0 md:pl-8 w-full md:w-auto justify-center md:justify-start">
                           <div>
                              <p className="text-[10px] font-black uppercase text-gray-400">Entrada</p>
@@ -168,7 +182,6 @@ export default function PainelHostPage() {
                           </div>
                        </div>
 
-                       {/* Ações */}
                        <div className="flex gap-3 w-full md:w-auto">
                           <button onClick={() => handleAction(req.id, 'reject')} className="flex-1 md:flex-none border-4 border-black px-4 py-3 font-black uppercase text-xs hover:bg-red-500 hover:text-white transition-all flex items-center justify-center gap-2">
                              <XCircle size={18} /> Recusar
