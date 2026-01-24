@@ -65,7 +65,7 @@ export default function PainelHostPage() {
             </h1>
           </div>
           <div className="flex gap-3">
-             <Link href="/quero-cuidar" className="bg-white border-4 border-black px-4 py-2 font-black uppercase text-xs shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center gap-2">
+             <Link href="/host/editar" className="bg-white border-4 border-black px-4 py-2 font-black uppercase text-xs shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center gap-2">
                 <User size={16} /> Editar Perfil
              </Link>
              
