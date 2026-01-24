@@ -8,11 +8,11 @@ import { useRouter } from "next/navigation";
 import { 
   Save, ArrowLeft, Loader2, Plus, X, CheckCircle2, 
   Settings, Sparkles, MapPin, Dog, Cat, Bird, ShieldAlert, Scale,
-  Clock, Moon, Footprints, Syringe, Ambulance, Pill, Zap, DollarSign, Calculator
+  Clock, Moon, Footprints, Syringe, Ambulance, Pill, Zap, DollarSign, Calculator, Home
 } from "lucide-react";
 import Link from "next/link";
 
-export default function EditarHostUltimatePage() {
+export default function EditarHostPixelPerfectPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -26,7 +26,7 @@ export default function EditarHostUltimatePage() {
     name: "",
     bio: "",
     city: "São Paulo",
-    neighborhood: "",
+    neighborhood: "", // Bairro garantido aqui
     photoUrl: "",
     price: "",
     maxDogs: 2,
@@ -50,8 +50,7 @@ export default function EditarHostUltimatePage() {
     services: [] as { name: string, price: number }[]
   });
 
-  // --- Listas Estáticas ---
-  const cities = ["São Paulo", "Rio de Janeiro", "Belo Horizonte", "Curitiba", "Brasília", "Salvador", "Florianópolis"];
+  const cities = ["São Paulo", "Rio de Janeiro", "Belo Horizonte", "Curitiba", "Brasília", "Salvador", "Florianópolis", "Porto Alegre", "Recife", "Fortaleza"];
   const petSizes = ["Pequeno (até 10kg)", "Médio (10-25kg)", "Grande (25-45kg)", "Gigante (+45kg)"];
   const vaccineOptions = ["V10/V8", "Antirrábica", "Giárdia", "Tosse dos Canis", "Leishmaniose"];
   const skillOptions = ["Medicamento Oral", "Injetável (Insulina)", "Curativos", "Banho Terapêutico"];
@@ -71,7 +70,8 @@ export default function EditarHostUltimatePage() {
           setFormData(prev => ({
             ...prev,
             ...data as any,
-            price: data.price || "80", // Default value string
+            price: data.price || "80",
+            neighborhood: data.neighborhood || "",
             checkInStart: data.checkInStart || "08:00",
             services: data.services || [],
             requiredVaccines: data.requiredVaccines || ["V10/V8", "Antirrábica"],
@@ -89,14 +89,11 @@ export default function EditarHostUltimatePage() {
     return () => unsubscribe();
   }, [router]);
 
-  // --- Handlers ---
+  // Handlers
   const toggleList = (key: keyof typeof formData, item: string) => {
     setFormData(prev => {
       const list = prev[key] as string[];
-      return {
-        ...prev,
-        [key]: list.includes(item) ? list.filter(i => i !== item) : [...list, item]
-      };
+      return { ...prev, [key]: list.includes(item) ? list.filter(i => i !== item) : [...list, item] };
     });
   };
 
@@ -111,10 +108,7 @@ export default function EditarHostUltimatePage() {
   const addService = (e: React.MouseEvent) => {
     e.preventDefault();
     if (newServiceName && newServicePrice) {
-      setFormData(prev => ({
-        ...prev,
-        services: [...prev.services, { name: newServiceName, price: Number(newServicePrice) }]
-      }));
+      setFormData(prev => ({ ...prev, services: [...prev.services, { name: newServiceName, price: Number(newServicePrice) }] }));
       setNewServiceName("");
       setNewServicePrice("");
     }
@@ -139,7 +133,7 @@ export default function EditarHostUltimatePage() {
         maxPets: Number(formData.maxDogs) + Number(formData.maxCats),
         acceptsMultiPetDiscount: Number(formData.extraPetDiscount) > 0
       });
-      alert("✅ Perfil Atualizado com Sucesso!");
+      alert("✅ Perfil Atualizado!");
       router.push("/painel-host");
     } catch (error) {
       console.error(error);
@@ -149,7 +143,7 @@ export default function EditarHostUltimatePage() {
     }
   };
 
-  // --- LÓGICA DO SIMULADOR (MATH ENGINE) ---
+  // Math Engine
   const basePrice = Number(formData.price) || 0;
   const discount = Number(formData.extraPetDiscount) || 0;
   const extraPetPrice = basePrice * (1 - discount / 100);
@@ -161,11 +155,9 @@ export default function EditarHostUltimatePage() {
     <div className="min-h-screen bg-white text-black p-4 md:p-10 font-sans selection:bg-purple-200">
       <div className="max-w-6xl mx-auto space-y-8">
         
-        <div className="flex justify-between items-center">
-            <Link href="/painel-host" className="flex items-center gap-2 font-black text-xs uppercase hover:underline">
-            <ArrowLeft size={16} /> Voltar ao Painel
-            </Link>
-        </div>
+        <Link href="/painel-host" className="flex items-center gap-2 font-black text-xs uppercase hover:underline">
+           <ArrowLeft size={16} /> Voltar ao Painel
+        </Link>
 
         <header className="border-b-[8px] border-black pb-6">
             <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter italic">
@@ -175,67 +167,82 @@ export default function EditarHostUltimatePage() {
 
         <form onSubmit={handleSubmit} className="space-y-12">
           
-          {/* 1. IDENTIDADE */}
+          {/* 1. IDENTIDADE E LOCALIZAÇÃO (CORRIGIDO) */}
           <section className="border-[6px] border-black p-6 md:p-8 bg-white shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] relative">
             <div className="absolute -top-5 -left-2 bg-black text-white px-4 py-1 font-black text-xs uppercase -rotate-2">Identidade</div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-              <div className="space-y-2">
-                <label className="font-black uppercase text-xs">Nome do Espaço</label>
-                <input required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full p-3 border-4 border-black font-bold outline-none bg-gray-50" />
-              </div>
-              <div className="space-y-2">
-                <label className="font-black uppercase text-xs">Cidade</label>
-                <select required value={formData.city} onChange={e => setFormData({...formData, city: e.target.value})} className="w-full p-3 border-4 border-black font-bold outline-none bg-gray-50 cursor-pointer">
-                    {cities.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
-              </div>
-            </div>
-            <div className="space-y-2 mt-4">
-               <label className="font-black uppercase text-xs">Bio</label>
-               <textarea required value={formData.bio} onChange={e => setFormData({...formData, bio: e.target.value})} className="w-full p-3 border-4 border-black font-bold h-24 resize-none outline-none bg-gray-50" />
+            
+            <div className="space-y-6 mt-4">
+               {/* Linha 1: Nome */}
+               <div className="space-y-2">
+                  <label className="font-black uppercase text-xs">Nome do Espaço</label>
+                  <input required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full p-3 border-4 border-black font-bold outline-none bg-gray-50 uppercase" placeholder="EX: VILA DOS PETS" />
+               </div>
+
+               {/* Linha 2: Cidade e Bairro (Lado a Lado) */}
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                     <label className="font-black uppercase text-xs flex items-center gap-1"><MapPin size={12}/> Cidade</label>
+                     <select required value={formData.city} onChange={e => setFormData({...formData, city: e.target.value})} className="w-full p-3 border-4 border-black font-bold outline-none bg-gray-50 cursor-pointer h-[54px]">
+                        {cities.map(c => <option key={c} value={c}>{c}</option>)}
+                     </select>
+                  </div>
+                  <div className="space-y-2">
+                     <label className="font-black uppercase text-xs flex items-center gap-1"><Home size={12}/> Bairro</label>
+                     <input required value={formData.neighborhood} onChange={e => setFormData({...formData, neighborhood: e.target.value})} className="w-full p-3 border-4 border-black font-bold outline-none bg-gray-50 h-[54px]" placeholder="EX: CENTRO" />
+                  </div>
+               </div>
+
+               {/* Linha 3: Bio */}
+               <div className="space-y-2">
+                  <label className="font-black uppercase text-xs">Bio</label>
+                  <textarea required value={formData.bio} onChange={e => setFormData({...formData, bio: e.target.value})} className="w-full p-3 border-4 border-black font-bold h-24 resize-none outline-none bg-gray-50" />
+               </div>
             </div>
           </section>
 
-          {/* =======================
-              BLOCO 2: REGRAS & CALCULADORA (O PULO DO GATO)
-             ======================= */}
+          {/* 2. REGRAS & VALORES (ALINHAMENTO RIGOROSO) */}
           <section className="border-[6px] border-black p-6 md:p-8 bg-yellow-400 shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] relative">
              <div className="absolute -top-5 -left-2 bg-black text-white px-4 py-1 font-black text-xs uppercase rotate-1">Regras & Valores</div>
              
-             {/* INPUTS PRINCIPAIS */}
+             {/* GRID PRINCIPAL */}
              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
-                <div className="space-y-1">
-                   <label className="font-black uppercase text-[10px]">Diária Base (1 Pet)</label>
-                   <div className="flex items-center border-4 border-black bg-white h-[56px]">
+                
+                {/* 1. Diária */}
+                <div className="flex flex-col gap-1">
+                   <label className="font-black uppercase text-[10px] h-4">Diária Base (1 Pet)</label>
+                   <div className="flex items-center border-4 border-black bg-white h-[60px]">
                       <span className="pl-3 font-bold text-xs">R$</span>
                       <input required type="number" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} className="w-full h-full p-2 font-black text-xl bg-transparent outline-none" />
                    </div>
                 </div>
                 
-                {/* Desconto Extra */}
-                <div className="space-y-1">
-                   <label className="font-black uppercase text-[10px] text-purple-800 flex items-center gap-1"><Sparkles size={10}/> Desconto 2º Pet+</label>
-                   <div className="flex items-center border-4 border-black bg-purple-100 h-[56px]">
+                {/* 2. Desconto */}
+                <div className="flex flex-col gap-1">
+                   <label className="font-black uppercase text-[10px] text-purple-800 flex items-center gap-1 h-4"><Sparkles size={10}/> Desconto 2º Pet+</label>
+                   <div className="flex items-center border-4 border-black bg-purple-100 h-[60px]">
                       <input required type="number" min="0" max="100" value={formData.extraPetDiscount} onChange={e => setFormData({...formData, extraPetDiscount: Number(e.target.value)})} className="w-full h-full p-2 font-black text-xl bg-transparent text-purple-800 text-center outline-none" />
                       <span className="pr-3 font-bold text-[10px] uppercase opacity-50">%OFF</span>
                    </div>
                 </div>
 
-                <div className="space-y-1">
-                   <label className="font-black uppercase text-[10px]">Máx. Cães</label>
-                   <select value={formData.maxDogs} onChange={e => setFormData({...formData, maxDogs: Number(e.target.value)})} className="w-full h-[56px] border-4 border-black font-black text-xl bg-white cursor-pointer text-center">
+                {/* 3. Máx Cães */}
+                <div className="flex flex-col gap-1">
+                   <label className="font-black uppercase text-[10px] h-4">Máx. Cães</label>
+                   <select value={formData.maxDogs} onChange={e => setFormData({...formData, maxDogs: Number(e.target.value)})} className="w-full h-[60px] border-4 border-black font-black text-xl bg-white cursor-pointer text-center appearance-none">
                       {[0,1,2,3,4,5,6,7,8,9,10].map(n => <option key={n} value={n}>{n}</option>)}
                    </select>
                 </div>
-                <div className="space-y-1">
-                   <label className="font-black uppercase text-[10px]">Máx. Gatos</label>
-                   <select value={formData.maxCats} onChange={e => setFormData({...formData, maxCats: Number(e.target.value)})} className="w-full h-[56px] border-4 border-black font-black text-xl bg-white cursor-pointer text-center">
+
+                {/* 4. Máx Gatos */}
+                <div className="flex flex-col gap-1">
+                   <label className="font-black uppercase text-[10px] h-4">Máx. Gatos</label>
+                   <select value={formData.maxCats} onChange={e => setFormData({...formData, maxCats: Number(e.target.value)})} className="w-full h-[60px] border-4 border-black font-black text-xl bg-white cursor-pointer text-center appearance-none">
                       {[0,1,2,3,4,5,6,7,8,9,10].map(n => <option key={n} value={n}>{n}</option>)}
                    </select>
                 </div>
              </div>
 
-             {/* SIMULADOR DE GANHOS (VISUAL FEEDBACK) */}
+             {/* SIMULADOR */}
              <div className="mt-6 bg-white border-4 border-black p-4 relative">
                 <div className="absolute -top-3 left-4 bg-black text-white px-2 py-0.5 text-[10px] font-black uppercase flex items-center gap-1">
                    <Calculator size={10} /> Simulador de Ganhos
@@ -243,26 +250,25 @@ export default function EditarHostUltimatePage() {
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
                    <div className="text-sm font-bold border-r-0 md:border-r-2 border-dashed border-gray-300 pr-4">
-                      <p className="mb-2 uppercase text-[10px] text-gray-500 font-black">Como funciona o cálculo:</p>
-                      <ul className="space-y-1 list-disc list-inside">
+                      <p className="mb-2 uppercase text-[10px] text-gray-500 font-black">Entenda o cálculo:</p>
+                      <ul className="space-y-1 list-disc list-inside text-xs">
                          <li>1º Pet paga <strong className="text-black">100%</strong> (R$ {basePrice})</li>
                          <li>2º Pet em diante paga <strong className="text-purple-600">{100 - discount}%</strong> (R$ {extraPetPrice.toFixed(0)})</li>
-                         <li className="text-[10px] italic opacity-70">Válido para cães e gatos misturados.</li>
                       </ul>
                    </div>
                    
                    <div className="bg-gray-50 p-3 border-2 border-black border-dashed text-center">
                       <p className="text-[10px] font-black uppercase mb-1">Exemplo: Hospedando 2 Pets</p>
-                      <div className="flex justify-center items-center gap-2 text-2xl font-black">
+                      <div className="flex justify-center items-center gap-2 text-3xl font-black">
                          <span>R$ {twoPetsTotal.toFixed(0)}</span>
-                         <span className="text-[10px] bg-green-200 text-green-800 px-1 border border-green-800 rounded">DIÁRIA TOTAL</span>
+                         <span className="text-[9px] bg-green-200 text-green-800 px-1 border border-green-800 rounded self-start mt-1">TOTAL DIA</span>
                       </div>
-                      <p className="text-[10px] text-gray-400 font-bold mt-1">(Ao invés de R$ {(basePrice * 2).toFixed(0)})</p>
+                      <p className="text-[10px] text-gray-400 font-bold mt-1">(Sem desconto seria R$ {(basePrice * 2).toFixed(0)})</p>
                    </div>
                 </div>
              </div>
 
-             {/* Restrições */}
+             {/* Outras configs */}
              <div className="mt-6 pt-4 border-t-4 border-black border-dashed flex flex-wrap gap-2">
                 <label className="font-black uppercase text-xs flex items-center gap-2 mr-4"><Scale size={14}/> Portes Aceitos:</label>
                 {petSizes.map(size => {
@@ -274,9 +280,21 @@ export default function EditarHostUltimatePage() {
                    )
                 })}
              </div>
+             <div className="mt-4 flex flex-wrap items-center gap-2">
+                <span className="font-black uppercase text-xs flex items-center gap-1"><Bird size={14}/> Exóticos:</span>
+                {formData.acceptedExotics.map(exo => (
+                   <span key={exo} className="px-2 py-1 bg-purple-600 text-white border-2 border-black font-bold text-[10px] uppercase flex items-center gap-1">
+                      {exo} <button type="button" onClick={() => setFormData(prev => ({...prev, acceptedExotics: prev.acceptedExotics.filter(i => i !== exo)}))}><X size={10}/></button>
+                   </span>
+                ))}
+                <div className="flex gap-1 h-8">
+                   <input placeholder="Ex: Hamster" value={customExotic} onChange={e => setCustomExotic(e.target.value)} className="w-24 px-2 border-2 border-black font-bold text-[10px] uppercase bg-white outline-none" />
+                   <button onClick={addExotic} className="bg-black text-white px-2 border-2 border-black hover:bg-green-500"><Plus size={14}/></button>
+                </div>
+             </div>
           </section>
 
-          {/* 3. LOGÍSTICA & SAÚDE (Mantidos iguais para economizar espaço, mas incluídos) */}
+          {/* 3. LOGÍSTICA & SAÚDE (Mantidos) */}
           <section className="border-[6px] border-black p-6 md:p-8 bg-blue-50 shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] relative">
             <div className="absolute -top-5 -left-2 bg-black text-white px-4 py-1 font-black text-xs uppercase -rotate-2">Logística</div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
@@ -300,7 +318,6 @@ export default function EditarHostUltimatePage() {
             </div>
           </section>
 
-          {/* BOTÃO SALVAR */}
           <div className="sticky bottom-4 z-50">
              <button disabled={saving} type="submit" className="w-full bg-black text-white border-[6px] border-white ring-4 ring-black p-6 font-black uppercase text-2xl shadow-[15px_15px_0px_0px_rgba(0,0,0,0.3)] hover:translate-y-1 hover:shadow-none hover:bg-green-500 hover:text-black transition-all flex items-center justify-center gap-3">
                 {saving ? <Loader2 className="animate-spin" /> : <Save size={32} />} 
