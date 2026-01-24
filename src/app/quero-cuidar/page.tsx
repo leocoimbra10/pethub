@@ -1,217 +1,186 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { auth, db } from "@/lib/firebase";
-import { useRouter } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
-import Link from "next/link";
+import { collection, addDoc, query, where, getDocs, serverTimestamp } from "firebase/firestore";
+import { useRouter } from "next/navigation";
+import { DollarSign, Heart, MapPin, Camera, CheckCircle2, ArrowRight } from "lucide-react";
 
-export default function OnboardingHost() {
-  const [step, setStep] = useState(1);
-  const [loading, setLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+export default function QueroCuidarPage() {
   const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [user, setUser] = useState<any>(null);
 
-  // Estados de Localização
-  const [estados, setEstados] = useState<{ sigla: string; nome: string }[]>([]);
-  const [cidades, setCidades] = useState<string[]>([]);
-
-  // Estados do Formulário
   const [formData, setFormData] = useState({
     name: "",
     bio: "",
     price: "",
-    homeType: "Casa",
-    customHomeType: "",
-    state: "",
     city: "",
     neighborhood: "",
-    facilities: [] as string[],
+    photoUrl: "",
+    facilities: [] as string[]
   });
-  const [customFacility, setCustomFacility] = useState("");
 
-  const facilitiesList = ["Quintal Cercado", "Ar-Condicionado", "Monitoramento 24h", "Medicamentos", "Primeiros Socorros", "Sem outros pets", "Perto de Parques"];
+  // Lista de facilidades para marcar
+  const facilitiesOptions = [
+    "Quintal Gramado", "Apartamento Telado", "Veterinária", 
+    "Passeios Inclusos", "Câmeras 24h", "Aceita Gatos"
+  ];
 
   useEffect(() => {
-    fetch("https://servicodados.ibge.gov.br/api/v1/localidades/estados?orderBy=nome")
-      .then(res => res.json())
-      .then(data => setEstados(data.map((e: any) => ({ sigla: e.sigla, nome: e.nome }))));
-
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) return router.push("/login");
-      const snap = await getDoc(doc(db, "hosts", user.uid));
-      if (snap.exists()) {
-        const data = snap.data();
-        // Separate custom facility from the main list for editing
-        const existingFacilities = data.facilities || [];
-        const predefined = existingFacilities.filter((f: string) => facilitiesList.includes(f) || f === "Outros");
-        const custom = existingFacilities.find((f: string) => !facilitiesList.includes(f) && f !== "Outros");
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (currentUser) {
+        setUser(currentUser);
         
-        setFormData({ ...formData, ...data, facilities: predefined, name: user.displayName || "" });
-        if(custom) {
-            setCustomFacility(custom);
+        // VERIFICAÇÃO DE SEGURANÇA: O usuário já é host?
+        // Se sim, não deixa criar outro, manda pro painel.
+        const q = query(collection(db, "hosts"), where("ownerId", "==", currentUser.uid));
+        const snapshot = await getDocs(q);
+        
+        if (!snapshot.empty) {
+          router.push("/painel-host");
+        } else {
+          setLoading(false); // Libera o formulário
         }
+      } else {
+        router.push("/login");
       }
-      setLoading(false);
     });
     return () => unsubscribe();
   }, [router]);
 
-  useEffect(() => {
-    if (formData.state) {
-      fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${formData.state}/municipios`)
-        .then(res => res.json())
-        .then(data => setCidades(data.map((c: any) => c.nome)));
-    }
-  }, [formData.state]);
-
-  const toggleFacility = (fac: string) => {
+  const toggleFacility = (item: string) => {
     setFormData(prev => ({
       ...prev,
-      facilities: prev.facilities.includes(fac) ? prev.facilities.filter(f => f !== fac) : [...prev.facilities, fac]
+      facilities: prev.facilities.includes(item)
+        ? prev.facilities.filter(i => i !== item)
+        : [...prev.facilities, item]
     }));
   };
 
-  const save = async () => {
-    if (!auth.currentUser) return;
-    setIsSubmitting(true);
-
-    let finalFacilities = [...formData.facilities];
-    if (finalFacilities.includes("Outros")) {
-      finalFacilities = finalFacilities.filter(f => f !== "Outros");
-      if (customFacility.trim() !== "") {
-        finalFacilities.push(customFacility.trim());
-      }
-    }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+    setSubmitting(true);
 
     try {
-      await setDoc(doc(db, "hosts", auth.currentUser.uid), {
+      // O PULO DO GATO: Salvando com o ID correto
+      await addDoc(collection(db, "hosts"), {
         ...formData,
-        facilities: finalFacilities,
-        uid: auth.currentUser.uid,
-        updatedAt: serverTimestamp(),
-        active: true,
-        homeType: formData.homeType === "Outros" ? formData.customHomeType : formData.homeType
-      }, { merge: true });
-      alert("PERFIL PUBLICADO COM SUCESSO! 🚀");
-      router.push("/dashboard");
-    } catch (e) { console.error(e); } finally { setIsSubmitting(false); }
+        ownerId: user.uid, // VÍNCULO CRÍTICO
+        email: user.email,
+        price: String(formData.price),
+        maxPets: 2, // Default
+        acceptsMultiPetDiscount: false, // Default
+        rating: 5.0, // Começa bem
+        reviews: 0,
+        createdAt: serverTimestamp()
+      });
+
+      // Redireciona para o painel de sucesso
+      router.push("/painel-host");
+    } catch (error) {
+      console.error("Erro ao criar perfil:", error);
+      alert("Erro ao salvar. Tente novamente.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  if (loading) return <div className="min-h-screen bg-white flex items-center justify-center font-black text-4xl italic animate-pulse">CARREGANDO...</div>;
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center font-black bg-white uppercase">
+      Verificando Elegibilidade...
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-white text-black p-6 md:p-12 font-sans selection:bg-purple-300">
-      <div className="max-w-4xl mx-auto">
-        {/* PROGRESS BAR */}
-        <div className="flex gap-2 mb-12">
-          {[1, 2, 3].map(i => (
-            <div key={i} className={`h-4 flex-1 border-4 border-black transition-all ${step >= i ? 'bg-purple-600 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]' : 'bg-gray-100'}`} />
-          ))}
+    <div className="min-h-screen bg-white text-black font-sans selection:bg-green-200">
+      <div className="max-w-4xl mx-auto p-6 md:p-12">
+        
+        {/* HEADER */}
+        <div className="text-center mb-12 space-y-4">
+           <div className="inline-block bg-green-500 text-black border-4 border-black px-4 py-1 font-black text-xs uppercase transform -rotate-2">
+              Renda Extra
+           </div>
+           <h1 className="text-5xl md:text-7xl font-black uppercase italic leading-none">
+              Ganhe Dinheiro <br/> <span className="text-purple-600">Amando Pets.</span>
+           </h1>
+           <p className="font-bold text-gray-500 max-w-xl mx-auto">
+              Transforme seu espaço em um hotel 5 estrelas. Defina suas regras, seus preços e receba hóspedes peludos.
+           </p>
         </div>
 
-        <div className="border-[6px] border-black p-8 md:p-12 shadow-[15px_15px_0px_0px_rgba(0,0,0,1)] bg-white">
-          {step === 1 && (
-            <div className="space-y-8 animate-in fade-in slide-in-from-right-4">
-              <h2 className="text-5xl font-black uppercase italic leading-none border-b-8 border-black pb-4">📍 ONDE VOCÊ ESTÁ?</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="font-black uppercase text-xs">Estado</label>
-                  <select value={formData.state} onChange={e => setFormData({...formData, state: e.target.value})} className="w-full p-4 border-4 border-black font-black bg-white outline-none">
-                    <option value="">Selecione...</option>
-                    {estados.map(e => <option key={e.sigla} value={e.sigla}>{e.nome}</option>)}
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <label className="font-black uppercase text-xs">Cidade</label>
-                  <select disabled={!formData.state} value={formData.city} onChange={e => setFormData({...formData, city: e.target.value})} className="w-full p-4 border-4 border-black font-black bg-white outline-none disabled:opacity-30">
-                    <option value="">Selecione...</option>
-                    {cidades.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <label className="font-black uppercase text-xs">Bairro</label>
-                <input type="text" value={formData.neighborhood} onChange={e => setFormData({...formData, neighborhood: e.target.value})} className="w-full p-4 border-4 border-black font-black outline-none placeholder:text-gray-300" placeholder="EX: CENTRO" />
-              </div>
-              <button onClick={() => setStep(2)} className="w-full bg-black text-white font-black py-6 text-2xl uppercase hover:bg-purple-600 transition-all">PRÓXIMO PASSO →</button>
-            </div>
-          )}
+        <form onSubmit={handleSubmit} className="space-y-8 border-[6px] border-black p-8 bg-white shadow-[15px_15px_0px_0px_rgba(0,0,0,1)]">
+          
+          {/* 1. O BÁSICO */}
+          <section className="space-y-6">
+             <h3 className="text-2xl font-black uppercase flex items-center gap-2">
+                <span className="bg-black text-white w-8 h-8 flex items-center justify-center rounded-full text-sm">1</span>
+                Seu Espaço
+             </h3>
+             
+             <div className="space-y-2">
+                <label className="font-black uppercase text-xs">Nome do seu "Hotel"</label>
+                <input required placeholder="Ex: Cantinho da Alegria" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full p-4 border-4 border-black font-bold outline-none bg-gray-50 focus:bg-white transition-all" />
+             </div>
 
-          {step === 2 && (
-            <div className="space-y-8 animate-in fade-in slide-in-from-right-4">
-              <h2 className="text-5xl font-black uppercase italic leading-none border-b-8 border-black pb-4">🏠 SEU ESPAÇO</h2>
-              <div className="space-y-6">
-                <div className="space-y-2">
-                  <label className="font-black uppercase text-xs">Tipo de Residência</label>
-                  <select value={formData.homeType} onChange={e => setFormData({...formData, homeType: e.target.value})} className="w-full p-4 border-4 border-black font-black bg-white">
-                    <option value="Casa">CASA</option>
-                    <option value="Apartamento">APARTAMENTO</option>
-                    <option value="Outros">OUTROS (SÍTIO, HOTEL, ETC)</option>
-                  </select>
-                  {formData.homeType === "Outros" && (
-                    <input type="text" value={formData.customHomeType} onChange={e => setFormData({...formData, customHomeType: e.target.value})} placeholder="DIGITE O TIPO..." className="w-full p-4 border-4 border-black font-black bg-purple-50 mt-2" />
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <label className="font-black uppercase text-xs">O que você oferece?</label>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {facilitiesList.map(f => (
-                      <button key={f} onClick={() => toggleFacility(f)} className={`p-4 border-4 border-black font-black text-left transition-all ${formData.facilities.includes(f) ? 'bg-green-400 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]' : 'bg-white'}`}>
-                        {formData.facilities.includes(f) ? '✓ ' : '+ '} {f}
-                      </button>
-                    ))}
-                     <button 
-                        onClick={() => toggleFacility("Outros")} 
-                        className={`p-4 border-4 border-black font-black text-left transition-all ${formData.facilities.includes("Outros") ? 'bg-purple-400 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]' : 'bg-white'}`}
-                      >
-                        {formData.facilities.includes("Outros") ? '✓ ' : '+ '} OUTROS...
-                      </button>
-                  </div>
-                   {formData.facilities.includes("Outros") && (
-                      <div className="mt-4 animate-in fade-in slide-in-from-top-2">
-                        <label className="font-black uppercase text-xs">Qual o seu diferencial extra?</label>
-                        <input 
-                          type="text" 
-                          value={customFacility}
-                          onChange={(e) => setCustomFacility(e.target.value)}
-                          placeholder="EX: SOU VETERINÁRIO, TENHO CÂMERAS 24H..."
-                          className="w-full p-4 border-4 border-black font-black bg-purple-50 outline-none mt-2"
-                        />
-                      </div>
-                    )}
-                </div>
-              </div>
-              <div className="flex gap-4">
-                <button onClick={() => setStep(1)} className="w-1/3 border-4 border-black font-black uppercase">Voltar</button>
-                <button onClick={() => setStep(3)} className="w-2/3 bg-black text-white font-black py-6 text-2xl uppercase hover:bg-purple-600 transition-all">ÚLTIMO PASSO →</button>
-              </div>
-            </div>
-          )}
+             <div className="space-y-2">
+                <label className="font-black uppercase text-xs">Descreva sua experiência</label>
+                <textarea required placeholder="Tenho quintal grande, amo cachorros..." value={formData.bio} onChange={e => setFormData({...formData, bio: e.target.value})} className="w-full p-4 border-4 border-black font-bold h-32 resize-none outline-none bg-gray-50 focus:bg-white transition-all" />
+             </div>
+          </section>
 
-          {step === 3 && (
-            <div className="space-y-8 animate-in fade-in slide-in-from-right-4">
-              <h2 className="text-5xl font-black uppercase italic leading-none border-b-8 border-black pb-4">💰 VALORES & BIO</h2>
-              <div className="space-y-6">
+          {/* 2. LOCAL E PREÇO */}
+          <section className="space-y-6">
+             <h3 className="text-2xl font-black uppercase flex items-center gap-2">
+                <span className="bg-black text-white w-8 h-8 flex items-center justify-center rounded-full text-sm">2</span>
+                Local & Valor
+             </h3>
+             
+             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-2">
-                  <label className="font-black uppercase text-xs">Preço da Diária (R$)</label>
-                  <input type="number" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} className="w-full p-4 border-4 border-black font-black text-4xl outline-none" placeholder="00" />
+                   <label className="font-black uppercase text-xs flex items-center gap-1"><MapPin size={12}/> Cidade</label>
+                   <input required placeholder="São Paulo" value={formData.city} onChange={e => setFormData({...formData, city: e.target.value})} className="w-full p-4 border-4 border-black font-bold outline-none bg-gray-50" />
                 </div>
                 <div className="space-y-2">
-                  <label className="font-black uppercase text-xs">Sua Bio Profissional</label>
-                  <textarea value={formData.bio} onChange={e => setFormData({...formData, bio: e.target.value})} className="w-full p-4 border-4 border-black font-bold h-40 resize-none" placeholder="CONTE SUA EXPERIÊNCIA COM ANIMAIS..." />
+                   <label className="font-black uppercase text-xs">Bairro</label>
+                   <input required placeholder="Vila Madalena" value={formData.neighborhood} onChange={e => setFormData({...formData, neighborhood: e.target.value})} className="w-full p-4 border-4 border-black font-bold outline-none bg-gray-50" />
                 </div>
-              </div>
-              <div className="flex gap-4">
-                <button onClick={() => setStep(2)} className="w-1/3 border-4 border-black font-black uppercase">Voltar</button>
-                <button onClick={save} disabled={isSubmitting} className="w-2/3 bg-green-500 text-black font-black py-6 text-2xl uppercase border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all">
-                  {isSubmitting ? "PUBLICANDO..." : "PUBLICAR PERFIL 🚀"}
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
+                <div className="space-y-2">
+                   <label className="font-black uppercase text-xs flex items-center gap-1"><DollarSign size={12}/> Preço Diária</label>
+                   <input required type="number" placeholder="80" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} className="w-full p-4 border-4 border-black font-black text-xl outline-none bg-green-50 text-green-700" />
+                </div>
+             </div>
+          </section>
+
+          {/* 3. FOTO E DETALHES */}
+          <section className="space-y-6">
+             <h3 className="text-2xl font-black uppercase flex items-center gap-2">
+                <span className="bg-black text-white w-8 h-8 flex items-center justify-center rounded-full text-sm">3</span>
+                Foto & Diferenciais
+             </h3>
+
+             <div className="space-y-2">
+                <label className="font-black uppercase text-xs flex items-center gap-1"><Camera size={12}/> Foto de Capa (URL)</label>
+                <input required placeholder="https://..." value={formData.photoUrl} onChange={e => setFormData({...formData, photoUrl: e.target.value})} className="w-full p-4 border-4 border-black font-bold outline-none bg-gray-50" />
+             </div>
+
+             <div className="grid grid-cols-2 md:grid-cols-3 gap-3 pt-2">
+                {facilitiesOptions.map(item => (
+                   <button key={item} type="button" onClick={() => toggleFacility(item)} className={`p-3 border-4 border-black font-black text-[10px] uppercase transition-all flex items-center justify-center gap-2 ${formData.facilities.includes(item) ? 'bg-black text-white' : 'bg-white hover:bg-gray-100'}`}>
+                      {formData.facilities.includes(item) && <CheckCircle2 size={12} className="text-green-500" />} {item}
+                   </button>
+                ))}
+             </div>
+          </section>
+
+          <button disabled={submitting} type="submit" className="w-full bg-yellow-400 text-black border-[6px] border-black p-6 font-black uppercase text-2xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center justify-center gap-3">
+             {submitting ? "CRIANDO PERFIL..." : "PUBLICAR MEU PERFIL"} <ArrowRight strokeWidth={3} />
+          </button>
+
+        </form>
       </div>
     </div>
   );
