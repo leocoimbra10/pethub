@@ -1,14 +1,13 @@
-import type { Metadata } from 'next';
-import './globals.css';
-import { Toaster } from '@/components/ui/toaster';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
-import { ThemeProvider } from '@/components/ThemeProvider';
-import GlobalBackButton from '@/components/GlobalBackButton';
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+import Navbar from "@/components/Navbar"; // <--- Importe aqui
+
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'PetHub | Cuidadores de Confiança para seu Pet',
-  description: 'Conectamos tutores a cuidadores confiáveis. Sem improviso.',
+  title: "PetHub - Viaje sem Culpa",
+  description: "O Airbnb para pets.",
 };
 
 export default function RootLayout({
@@ -17,31 +16,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" suppressHydrationWarning>
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Nunito:wght@400;700;900&display=swap"
-          rel="stylesheet"
-        />
-        {/* SCRIPT DO CLOUDINARY */}
-        <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
-      </head>
-      <body className="font-body antialiased bg-white">
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <div className="flex min-h-screen flex-col">
-            <Header />
-            <div className="relative z-50 pt-6">
-              <GlobalBackButton />
-            </div>
-            <main className="flex-grow">
-              {children}
-            </main>
-            <Footer />
-          </div>
-          <Toaster />
-        </ThemeProvider>
+    <html lang="pt-BR">
+      <body className={inter.className}>
+        <Navbar /> {/* <--- Adicione aqui no topo */}
+        <div className="pt-20"> {/* Padding top para o conteúdo não ficar escondido atrás da navbar fixa */}
+          {children}
+        </div>
       </body>
     </html>
   );
