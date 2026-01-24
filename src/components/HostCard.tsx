@@ -1,53 +1,56 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import type { Listing, User } from '@/lib/types';
-import { Star, Verified } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 
-interface HostCardProps {
-  listing: Listing;
-  host: User;
+// The data structure from the search result.
+interface Host {
+  id: string;
+  name: string; // This is the listing title, e.g., "Cantinho Aconchegante no Leblon"
+  city: string;
+  neighborhood: string;
+  price: string; // Price is a string in Firestore
+  photoUrl: string; // The main photo for the listing/host
 }
 
-export default function HostCard({ listing, host }: HostCardProps) {
+interface HostCardProps {
+  host: Host;
+}
+
+export default function HostCard({ host }: HostCardProps) {
+  // Convert price to number for formatting. Handle potential errors.
+  const price = Number(host.price) || 0;
+
   return (
-    <Link href={`/cuidadores/${listing.id}`}>
-      <Card className="w-full overflow-hidden transition-all duration-300 group bg-card hover:shadow-[8px_8px_0px_#8B5CF6] active:shadow-neo-sm">
+    // The link now correctly points to the detailed host page
+    <Link href={`/cuidadores/${host.id}`}>
+      <Card className="w-full h-full flex flex-col overflow-hidden transition-all duration-300 group bg-white hover:shadow-[8px_8px_0px_#8B5CF6] active:shadow-none border-4 border-black rounded-lg hover:-translate-y-1 hover:-translate-x-1">
         <CardHeader className="p-0">
-          <div className="relative aspect-square w-full">
+          <div className="relative aspect-[4/3] w-full">
             <Image
-              src={host.photo}
+              src={host.photoUrl || '/default-image.jpg'} // Use a fallback image if photoUrl is missing
               alt={host.name}
               fill
               style={{ objectFit: 'cover' }}
-              className="border-b-2 border-black"
-              data-ai-hint="person portrait"
+              className="border-b-4 border-black"
             />
           </div>
         </CardHeader>
-        <CardContent className="p-4">
-          <CardTitle className="text-lg font-headline truncate group-hover:text-primary transition-colors">
-            {listing.title}
+        <CardContent className="p-4 flex-grow">
+          <CardTitle className="text-lg font-black uppercase truncate group-hover:text-purple-600 transition-colors">
+            {host.name}
           </CardTitle>
-          <p className="text-sm font-bold mt-1">{listing.city}</p>
+          <p className="text-sm font-bold mt-1 flex items-center gap-1 text-gray-600">
+             <MapPin size={14}/> {host.neighborhood}, {host.city}
+          </p>
         </CardContent>
-        <CardFooter className="p-4 pt-0 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <Avatar className="h-8 w-8 border-2 border-black">
-              <AvatarImage src={host.photo} alt={host.name} data-ai-hint="person pet" />
-              <AvatarFallback>{host.name.charAt(0)}</AvatarFallback>
-            </Avatar>
-            <div className="flex items-center">
-              <span className="text-sm font-bold">{host.name}</span>
-              {host.isVerified && <Verified className="h-4 w-4 ml-1 text-primary" />}
+        <CardFooter className="p-4 pt-0 flex justify-between items-center mt-auto">
+            <span className="text-xs font-bold text-gray-500">DIÁRIA DESDE</span>
+            <div className="bg-yellow-400 border-2 border-black rounded-md px-3 py-1 shadow-[3px_3px_0px_#000]">
+                <span className="font-black text-black text-lg">
+                R${price.toFixed(0)}
+                </span>
             </div>
-          </div>
-          <div className="bg-lime-400 border-2 border-black rounded-md px-2 py-1 shadow-neo-sm">
-            <span className="font-bold text-black text-sm">
-              R${listing.price.toFixed(0)}
-            </span>
-          </div>
         </CardFooter>
       </Card>
     </Link>
