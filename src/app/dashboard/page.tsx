@@ -1,205 +1,261 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { auth, db } from '@/lib/firebase';
-import { onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
-import Link from 'next/link';
-import {
-  Bell,
-  Wallet,
-  ShieldCheck,
-  HeartPulse,
-  MessageSquare,
-  PawPrint,
-  Home,
-  ArrowUpRight,
-  History,
-  CheckSquare,
-  QrCode,
-  ThermometerSun,
-  LogOut,
-  PhoneCall,
-  Star,
-} from 'lucide-react';
+import { useState, useEffect } from "react";
+import { auth, db } from "@/lib/firebase";
+import { onAuthStateChanged } from "firebase/auth";
+import { useRouter } from "next/navigation";
+import { 
+  Plane, Calendar, MapPin, MessageCircle, Heart, Plus, 
+  Settings, ShieldCheck, Clock, AlertCircle, Star, History, LogOut
+} from "lucide-react";
+import Link from "next/link";
 
-export default function DashboardElite() {
+export default function DashboardTutorPage() {
+  const router = useRouter();
   const [user, setUser] = useState<any>(null);
-  const [hostData, setHostData] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState<'trips' | 'pets' | 'favorites'>('trips');
   const [loading, setLoading] = useState(true);
 
+  // MOCK DATA (Enquanto não conectamos o backend de pedidos)
+  const stats = {
+    level: "Tutor Elite",
+    nights: 12,
+    spent: "1.450",
+    points: 850
+  };
+
+  const trips = [
+    {
+      id: "TRIP-992",
+      hostName: "Lar da Tia Juju",
+      hostPhoto: "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?q=80&w=2669&auto=format&fit=crop",
+      dates: "Hoje - 18 Out",
+      status: "live", // ACONTECENDO AGORA
+      address: "Rua Harmonia, 123 - Vila Madalena",
+      price: 240
+    },
+    {
+      id: "TRIP-881",
+      hostName: "Resort do Totó",
+      hostPhoto: "https://images.unsplash.com/photo-1596230529625-7ee541366115?q=80&w=2670&auto=format&fit=crop",
+      dates: "20 Dez - 27 Dez",
+      status: "confirmed",
+      address: "Av. Paulista, 2000 - Bela Vista",
+      price: 890
+    },
+    {
+      id: "TRIP-102",
+      hostName: "Casa da Ana",
+      hostPhoto: "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=80&w=2688&auto=format&fit=crop",
+      dates: "10 Jan - 12 Jan",
+      status: "completed",
+      address: "Rua Augusta, 500",
+      price: 180
+    }
+  ];
+
+  const myPets = [
+    { id: 1, name: "Paçoca", breed: "Golden Retriever", age: "3 anos", vaccines: "Em dia", photo: "https://images.unsplash.com/photo-1552053831-71594a27632d?q=80&w=2824&auto=format&fit=crop" },
+    { id: 2, name: "Luna", breed: "SRD", age: "1 ano", vaccines: "Pendente", photo: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=2874&auto=format&fit=crop" }
+  ];
+
+  const favorites = [
+    { id: 1, name: "DogHero Pro", rating: 5.0, price: 90, photo: "https://images.unsplash.com/photo-1534361960057-19889db9621e?q=80&w=200" }
+  ];
+
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (currentUser) {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (!currentUser) {
+        router.push("/login");
+      } else {
         setUser(currentUser);
-        const hostSnap = await getDoc(doc(db, 'hosts', currentUser.uid));
-        if (hostSnap.exists()) setHostData(hostSnap.data());
+        setLoading(false);
       }
-      setLoading(false);
     });
     return () => unsubscribe();
-  }, []);
+  }, [router]);
 
-  if (loading)
-    return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center font-black">
-        <div className="w-16 h-16 border-[8px] border-black border-t-purple-600 animate-spin mb-4"></div>
-        <p className="text-2xl uppercase tracking-widest">Sincronizando Dashboard...</p>
-      </div>
-    );
+  if (loading) return <div className="min-h-screen flex items-center justify-center font-black uppercase">Carregando Painel...</div>;
 
   return (
-    <div className="min-h-screen bg-white text-black p-4 md:p-8 font-sans selection:bg-yellow-200 overflow-x-hidden">
-      <div className="max-w-[1440px] mx-auto space-y-8">
-        {/* HEADER AJUSTADO - EQUILÍBRIO VISUAL */}
-        <header className="border-b-[8px] border-black pb-6 flex flex-col md:flex-row justify-between items-end gap-6">
-          <div>
-            <div className="flex gap-2 mb-2">
-              <span className="bg-purple-600 text-white border-2 border-black px-2 py-0.5 font-black uppercase text-[10px]">
-                PetHub v4.0
-              </span>
-              <span className="bg-green-400 border-2 border-black px-2 py-0.5 font-black uppercase text-[10px]">
-                Sistema Ativo
-              </span>
-            </div>
-            <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter italic leading-none">
-              E AÍ, <span className="text-purple-600">{user?.displayName?.split(' ')[0] || 'USUÁRIO'}!</span>
-            </h1>
-          </div>
-          <button
-            onClick={() => auth.signOut()}
-            className="bg-white border-4 border-black p-3 font-black uppercase shadow-[5px_5px_0px_0px_rgba(239,68,68,1)] md:shadow-[4px_4px_0px_0px_rgba(239,68,68,1)] hover:bg-red-500 hover:text-white transition-all flex items-center gap-2 text-sm"
-          >
-            <LogOut size={18} /> Sair da Conta
-          </button>
-        </header>
-
-        {/* GRID PRINCIPAL - DIAGRAMAÇÃO DE ELITE */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-8">
-          {/* COLUNA ESQUERDA: FINANCEIRO & CLIMA (3 COLUNAS) */}
-          <div className="lg:col-span-3 space-y-4 md:space-y-8">
-            {/* WALLET MELHORADA */}
-            <div className="border-4 border-black p-6 bg-yellow-400 shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] md:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
-              <div className="flex justify-between items-start mb-4">
-                <Wallet size={32} />
-                <p className="font-black uppercase text-[10px] bg-black text-white px-2">Finanças</p>
-              </div>
-              <h2 className="text-4xl font-black leading-none">R$ 0,00</h2>
-              <p className="text-[10px] font-bold uppercase mt-1 opacity-70">Saldo disponível</p>
-              <button className="w-full mt-6 bg-black text-white py-3 font-black uppercase text-xs border-2 border-black hover:bg-white hover:text-black transition-all">
-                Relatório
-              </button>
-            </div>
-
-            {/* ASSISTENTE DE CLIMA COMPACTO */}
-            <div className="border-4 border-black p-6 bg-blue-50 shadow-[5px_5px_0px_0px_rgba(59,130,246,1)] md:shadow-[8px_8px_0px_0px_rgba(59,130,246,1)]">
-              <div className="flex items-center gap-2 mb-3">
-                <ThermometerSun size={20} className="text-orange-500" />
-                <h3 className="font-black uppercase italic text-sm">Clima Pet</h3>
-              </div>
-              <p className="font-bold text-[11px] leading-tight border-l-2 border-black pl-3">
-                Tempo seco detectado. Hidrate seus pets com frequência hoje.
-              </p>
-            </div>
-
-            {/* CONTATOS DE EMERGÊNCIA */}
-            <div className="border-4 border-black p-6 bg-white shadow-[5px_5px_0px_0px_rgba(239,68,68,1)] md:shadow-[8px_8px_0px_0px_rgba(239,68,68,1)]">
-              <div className="flex items-center gap-2 mb-4">
-                <PhoneCall size={20} className="text-red-600" />
-                <h3 className="font-black uppercase text-sm">Emergência</h3>
-              </div>
-              <button className="w-full border-2 border-black p-2 font-black text-[10px] uppercase hover:bg-black hover:text-white transition-all">
-                + Add Contato SOS
-              </button>
-            </div>
-          </div>
-
-          {/* COLUNA CENTRAL: CORE & MALA (6 COLUNAS) */}
-          <div className="lg:col-span-6 space-y-4 md:space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-              <Link
-                href="/meus-pets"
-                className="border-4 border-black p-6 bg-white shadow-[5px_5px_0px_0px_rgba(168,85,247,1)] md:shadow-[8px_8px_0px_0px_rgba(168,85,247,1)] group hover:-translate-y-1 transition-all"
-              >
-                <PawPrint size={40} className="text-purple-600 mb-4" />
-                <h4 className="text-2xl font-black uppercase italic leading-none">Meus Pets</h4>
-                <p className="font-bold text-[11px] text-gray-500 mt-2 italic">Acesse fichas médicas e vacinas.</p>
-              </Link>
-              <Link
-                href="/quero-cuidar"
-                className="border-4 border-black p-6 bg-white shadow-[5px_5px_0px_0px_rgba(250,204,21,1)] md:shadow-[8px_8px_0px_0px_rgba(250,204,21,1)] group hover:-translate-y-1 transition-all"
-              >
-                <Home size={40} className="text-yellow-500 mb-4" />
-                <h4 className="text-2xl font-black uppercase italic leading-none">Anfitrião</h4>
-                <p className="font-bold text-[11px] text-gray-500 mt-2 italic">Gerencie seu espaço e agenda.</p>
-              </Link>
-            </div>
-
-            {/* MALA DO PET DIAGRAMADA */}
-            <div className="border-4 border-black p-8 bg-white shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] md:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]">
-              <div className="flex items-center gap-3 mb-6 border-b-2 border-black pb-3">
-                <CheckSquare size={28} />
-                <h3 className="text-2xl font-black uppercase italic">Mala de Viagem</h3>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                {['Ração', 'Caminha', 'Brinquedos', 'Coleira'].map((item) => (
-                  <div key={item} className="flex items-center gap-3 p-3 border-2 border-black font-black uppercase text-[10px] bg-gray-50">
-                    <input type="checkbox" className="w-4 h-4 border-2 border-black accent-purple-600" /> {item}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* PET ID DIGITAL - GRID INTEGRADO */}
-            <div className="border-4 border-black p-6 bg-purple-600 text-white shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] md:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex justify-between items-center">
-              <div>
-                <h3 className="text-2xl font-black uppercase italic leading-none">Pet ID Digital</h3>
-                <p className="font-bold text-[10px] mt-1 text-purple-200">Gere o QR Code de emergência.</p>
-              </div>
-              <QrCode size={50} />
-            </div>
-          </div>
-
-          {/* COLUNA DIREITA: FEED & STATUS (3 COLUNAS) */}
-          <div className="lg:col-span-3 space-y-4 md:space-y-8">
-            {/* STATUS DE CONFIANÇA */}
-            <div className="border-4 border-black p-5 bg-white shadow-[5px_5px_0px_0px_rgba(34,197,94,1)] md:shadow-[6px_6px_0px_0px_rgba(34,197,94,1)]">
-              <h3 className="font-black uppercase text-[10px] mb-4 flex justify-between">
-                Confiança <span className="text-green-600 flex items-center gap-1"><Star size={10} fill="currentColor" /> 4.9</span>
-              </h3>
-              <div className="w-full h-4 border-2 border-black bg-gray-100 mb-2 p-0.5">
-                <div className="h-full bg-green-500" style={{ width: '85%' }}></div>
-              </div>
-              <p className="text-[9px] font-bold uppercase italic text-gray-400 text-center">Perfil altamente confiável</p>
-            </div>
-
-            {/* FEED RECENTE COMPACTO */}
-            <div className="border-4 border-black p-5 bg-black text-white shadow-[5px_5px_0px_0px_rgba(147,51,234,1)] md:shadow-[6px_6px_0px_0px_rgba(147,51,234,1)] h-[300px] flex flex-col">
-              <div className="flex items-center gap-2 mb-4 border-b border-gray-700 pb-2">
-                <History size={16} />
-                <h3 className="font-black uppercase italic text-sm">Timeline</h3>
-              </div>
-              <div className="space-y-4 flex-1 overflow-y-auto pr-2 scrollbar-hide text-[10px]">
-                <div className="border-l-2 border-purple-500 pl-3">
-                  <p className="font-black text-purple-400 uppercase leading-none mb-1">Agora</p>
-                  <p className="font-bold opacity-80 italic">Painel Elite v4 ativado com sucesso.</p>
+    <div className="min-h-screen bg-gray-50 text-black font-sans selection:bg-yellow-200">
+      
+      {/* HEADER DE ELITE */}
+      <header className="bg-black text-white pt-12 pb-24 px-6 relative overflow-hidden">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-end gap-6 relative z-10">
+          <div className="flex items-center gap-6">
+             <div className="w-24 h-24 border-4 border-white bg-gray-800 rounded-full flex items-center justify-center text-4xl font-black">
+                {user?.email?.[0].toUpperCase()}
+             </div>
+             <div>
+                <div className="flex items-center gap-2 mb-2">
+                   <h1 className="text-3xl font-black uppercase italic">Olá, {user?.displayName || "Tutor"}</h1>
+                   <span className="bg-yellow-400 text-black px-2 py-0.5 text-[10px] font-black uppercase border-2 border-white transform -rotate-3 shadow-[4px_4px_0px_0px_rgba(255,255,255,0.3)]">
+                      {stats.level}
+                   </span>
                 </div>
-                <div className="border-l-2 border-gray-600 pl-3">
-                  <p className="font-black text-gray-500 uppercase leading-none mb-1">Ontem</p>
-                  <p className="font-bold opacity-50 italic">Perfil de anfitrião sincronizado.</p>
-                </div>
-              </div>
-            </div>
-
-            <Link
-              href="/search"
-              className="block text-center p-4 border-4 border-black bg-purple-600 text-white font-black uppercase italic text-xl shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] md:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all"
-            >
-              BUSCAR ANFITRIÃO
-            </Link>
+                <p className="text-gray-400 text-sm font-bold">Gerencie as férias do seu melhor amigo.</p>
+             </div>
+          </div>
+          
+          {/* STATS WIDGETS */}
+          <div className="flex gap-4">
+             <div className="bg-white/10 border-2 border-white/20 p-4 text-center backdrop-blur-sm">
+                <span className="block text-2xl font-black">{stats.nights}</span>
+                <span className="text-[10px] font-bold uppercase opacity-60">Noites</span>
+             </div>
+             <div className="bg-white/10 border-2 border-white/20 p-4 text-center backdrop-blur-sm">
+                <span className="block text-2xl font-black">R${stats.spent}</span>
+                <span className="text-[10px] font-bold uppercase opacity-60">Investidos</span>
+             </div>
           </div>
         </div>
-      </div>
+        
+        {/* Background Pattern */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-purple-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
+      </header>
+
+      <main className="max-w-6xl mx-auto px-6 -mt-12 relative z-20 pb-20">
+        
+        {/* NAVEGAÇÃO DE ABAS */}
+        <div className="flex overflow-x-auto gap-2 border-b-4 border-black bg-white p-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,0.1)] mb-8">
+           <button onClick={() => setActiveTab('trips')} className={`flex-1 py-4 px-6 font-black uppercase flex items-center justify-center gap-2 transition-all ${activeTab === 'trips' ? 'bg-black text-white' : 'hover:bg-gray-100 text-gray-400'}`}>
+              <Plane size={20}/> Minhas Viagens
+           </button>
+           <button onClick={() => setActiveTab('pets')} className={`flex-1 py-4 px-6 font-black uppercase flex items-center justify-center gap-2 transition-all ${activeTab === 'pets' ? 'bg-black text-white' : 'hover:bg-gray-100 text-gray-400'}`}>
+              <Settings size={20}/> Meus Pets
+           </button>
+           <button onClick={() => setActiveTab('favorites')} className={`flex-1 py-4 px-6 font-black uppercase flex items-center justify-center gap-2 transition-all ${activeTab === 'favorites' ? 'bg-black text-white' : 'hover:bg-gray-100 text-gray-400'}`}>
+              <Heart size={20}/> Favoritos
+           </button>
+        </div>
+
+        {/* CONTEÚDO DAS ABAS */}
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+           
+           {/* === ABA VIAGENS === */}
+           {activeTab === 'trips' && (
+             <div className="space-y-8">
+                
+                {/* Destaque LIVE */}
+                {trips.filter(t => t.status === 'live').map(trip => (
+                   <div key={trip.id} className="border-[6px] border-black bg-green-400 p-6 md:p-8 shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] relative overflow-hidden">
+                      <div className="absolute top-4 right-4 flex gap-2">
+                         <span className="bg-red-600 text-white px-3 py-1 font-black text-xs uppercase animate-pulse border-2 border-black">Ao Vivo</span>
+                      </div>
+                      <h3 className="font-black text-sm uppercase mb-4 flex items-center gap-2"><Clock size={16}/> Acontecendo Agora</h3>
+                      
+                      <div className="flex flex-col md:flex-row gap-6 items-center">
+                         <img src={trip.hostPhoto} className="w-24 h-24 border-4 border-black object-cover rounded-full bg-white" />
+                         <div className="flex-1 text-center md:text-left">
+                            <h2 className="text-3xl font-black uppercase italic leading-none">{trip.hostName}</h2>
+                            <p className="font-bold text-sm mt-1">{trip.dates} • <span className="underline">{trip.address}</span></p>
+                         </div>
+                         <div className="flex flex-col gap-2 w-full md:w-auto">
+                            <button className="bg-white text-black border-4 border-black px-6 py-3 font-black uppercase text-xs hover:bg-black hover:text-white transition-all flex items-center justify-center gap-2">
+                               <MessageCircle size={16} /> Chat
+                            </button>
+                            <button className="bg-black text-white border-4 border-black px-6 py-3 font-black uppercase text-xs hover:bg-red-600 hover:border-red-600 transition-all flex items-center justify-center gap-2">
+                               <ShieldCheck size={16} /> SOS / Suporte
+                            </button>
+                         </div>
+                      </div>
+                   </div>
+                ))}
+
+                <h3 className="text-2xl font-black uppercase italic border-l-8 border-purple-600 pl-4">Próximas & Passadas</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                   {trips.filter(t => t.status !== 'live').map(trip => (
+                      <div key={trip.id} className={`border-[4px] border-black p-6 bg-white shadow-[6px_6px_0px_0px_rgba(0,0,0,0.1)] flex flex-col justify-between ${trip.status === 'completed' ? 'opacity-60 grayscale hover:grayscale-0 transition-all' : ''}`}>
+                         <div>
+                            <div className="flex justify-between items-start mb-4">
+                               <span className={`px-2 py-1 font-black text-[10px] uppercase border-2 border-black ${trip.status === 'confirmed' ? 'bg-yellow-400' : 'bg-gray-200'}`}>
+                                  {trip.status === 'confirmed' ? 'Confirmado' : 'Finalizado'}
+                               </span>
+                               <span className="font-black text-sm">R$ {trip.price}</span>
+                            </div>
+                            <h4 className="text-xl font-black uppercase">{trip.hostName}</h4>
+                            <p className="text-xs font-bold text-gray-500 mt-1 flex items-center gap-1"><Calendar size={12}/> {trip.dates}</p>
+                         </div>
+                         <div className="mt-6 flex gap-2">
+                            {trip.status === 'confirmed' ? (
+                               <button className="flex-1 bg-black text-white py-2 font-black uppercase text-xs border-2 border-black hover:bg-white hover:text-black">Ver Detalhes</button>
+                            ) : (
+                               <button className="flex-1 bg-white text-black py-2 font-black uppercase text-xs border-2 border-black hover:bg-gray-100 flex items-center justify-center gap-2"><History size={12}/> Reservar Novamente</button>
+                            )}
+                         </div>
+                      </div>
+                   ))}
+                </div>
+             </div>
+           )}
+
+           {/* === ABA PETS === */}
+           {activeTab === 'pets' && (
+             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Card Adicionar */}
+                <Link href="/meus-pets/novo" className="border-[4px] border-black border-dashed p-8 flex flex-col items-center justify-center gap-4 text-gray-400 hover:text-black hover:bg-white hover:border-solid transition-all group min-h-[250px]">
+                   <div className="w-16 h-16 rounded-full border-4 border-gray-300 group-hover:border-black flex items-center justify-center group-hover:bg-yellow-400 transition-all">
+                      <Plus size={32} />
+                   </div>
+                   <span className="font-black uppercase">Adicionar Novo Pet</span>
+                </Link>
+
+                {/* Cards Pets */}
+                {myPets.map(pet => (
+                   <div key={pet.id} className="border-[4px] border-black bg-white p-0 overflow-hidden shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col">
+                      <div className="h-32 bg-gray-200 border-b-4 border-black relative">
+                         <img src={pet.photo} className="w-full h-full object-cover" />
+                         <div className="absolute top-2 right-2 bg-white px-2 py-1 border-2 border-black text-[10px] font-black uppercase">
+                            {pet.id === 1 ? '🐶' : '🐶'} ID #{pet.id}09
+                         </div>
+                      </div>
+                      <div className="p-6 flex-1 flex flex-col justify-between">
+                         <div>
+                            <h3 className="text-2xl font-black uppercase leading-none">{pet.name}</h3>
+                            <p className="text-sm font-bold text-gray-500 uppercase">{pet.breed}, {pet.age}</p>
+                         </div>
+                         
+                         <div className="mt-4 pt-4 border-t-2 border-black border-dashed">
+                            <div className="flex justify-between items-center">
+                               <span className="text-[10px] font-black uppercase">Vacinação</span>
+                               <span className={`text-[10px] font-black uppercase px-2 py-0.5 border-2 border-black ${pet.vaccines === 'Em dia' ? 'bg-green-400' : 'bg-red-400 text-white'}`}>
+                                  {pet.vaccines}
+                               </span>
+                            </div>
+                         </div>
+                         
+                         <Link href={`/meus-pets/${pet.id}`} className="mt-4 block text-center w-full bg-black text-white py-2 font-black uppercase text-xs border-2 border-black hover:bg-purple-600 transition-all">
+                            Abrir Carteirinha
+                         </Link>
+                      </div>
+                   </div>
+                ))}
+             </div>
+           )}
+
+           {/* === ABA FAVORITOS === */}
+           {activeTab === 'favorites' && (
+             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {favorites.map(fav => (
+                   <Link href={`/host/${fav.id}`} key={fav.id} className="border-[4px] border-black bg-white p-4 shadow-[6px_6px_0px_0px_rgba(255,0,0,1)] hover:-translate-y-1 transition-all group">
+                      <div className="flex gap-4 items-center">
+                         <img src={fav.photo} className="w-16 h-16 border-2 border-black object-cover" />
+                         <div>
+                            <h4 className="font-black uppercase group-hover:underline">{fav.name}</h4>
+                            <div className="flex items-center gap-1 text-xs font-bold text-yellow-500">
+                               <Star size={12} fill="currentColor"/> {fav.rating}
+                            </div>
+                            <p className="text-xs font-bold mt-1">A partir de R${fav.price}</p>
+                         </div>
+                      </div>
+                   </Link>
+                ))}
+             </div>
+           )}
+
+        </div>
+      </main>
     </div>
   );
 }
